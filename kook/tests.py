@@ -6,7 +6,7 @@ import transaction
 from pyramid import testing
 from pyramid.testing import DummyRequest
 
-from kook.models import Recipe, Step, Action, Product, Ingredient, metadata, DBSession
+from kook.models import Recipe, Step, Product, Ingredient, metadata, DBSession
 
 class TestMyViews(unittest.TestCase):
     def setUp(self):
@@ -30,14 +30,11 @@ class TestMyViews(unittest.TestCase):
                 Ingredient(onion, amount=75),
                 Ingredient(egg, amount=172)
             ]
-            boil = Action(u'отварить')
-            mix = Action(u'перемешать')
             recipe.steps = [
-                Step(1, recipe.ingredients[0], boil, time_value=30),
-                Step(1, recipe.ingredients[1], boil),
-                Step(2, recipe.ingredients[0], Action(u'нарезать'), note=u'cut to little pieces'),
-                Step(3, recipe.ingredients[0], mix),
-                Step(3, recipe.ingredients[1], mix, time_value=10)
+                Step(1, u'все овощи отварить', time_value=30),
+                Step(2, u'картофель и морковь очистить от кожицы', time_value=5),
+                Step(3, u'овощи и колбасу нарезать и перемешать, заправляя майонезом', time_value=1),
+                Step(4, u'салат украсить веткой петрушки', time_value=0)
             ]
             recipe.save()
             recipe2 = recipe
@@ -53,15 +50,14 @@ class TestMyViews(unittest.TestCase):
         request = DummyRequest()
         request.matchdict['title'] = u'оливье'
         response = recipe_view(request)
-        self.assertEqual(response['recipe'].title, u'оливье')
-        self.assertEqual(response['recipe'].total_amount, 997)
-        self.assertEqual(response['recipe'].ingredients[0].product.title, u'картофель')
-        self.assertEqual(response['recipe'].ingredients[0].amount, 400)
-        self.assertEqual(response['recipe'].ingredients[4].amount, 172)
-        self.assertEqual(len(response['recipe'].steps), 5)
-        self.assertEqual(len(response['recipe'].phases), 3)
-        self.assertEqual(len(response['recipe'].phases[1].ingredients), 2)
-        self.assertEqual(response['recipe'].phases[1].ingredients[0].__str__(), u'картофель 400 г')
+        recipe = response['recipe']
+        potato = Product(title=u'картофель')
+        garnishing = Step(4, u'салат украсить веткой петрушки', time_value=0)
+        self.assertEqual(recipe.title, u'оливье')
+        self.assertEqual(recipe.total_amount, 997)
+        assert potato in recipe.products
+        self.assertEqual(len(recipe.steps), 4)
+        assert garnishing in recipe.steps
 
     def test_add_recipe_view(self):
         from kook.views import add_recipe_view
@@ -79,16 +75,12 @@ class TestMyViews(unittest.TestCase):
             ('amount', '200'),
             ('product', u'лук репчатый'),
             ('amount', '150'),
-            ('phase_no', '1'),
-            ('ingredients', u'свекла, морковь, картофель'),
-            ('action', u'отварить'),
-            ('time_value', '60'),
-            ('note', u'Пока овощи не станут мягкими'),
-            ('phase_no', '2'),
-            ('ingredients', u'свекла, морковь, картофель'),
-            ('action', u'нарезать'),
-            ('time_value', ''),
-            ('note', u'Мелкими кубиками'),
+            ('step_number', '1'),
+            ('step_text', u'свеклу, морковь и картофель отварить, пока овощи не станут мягкими'),
+            ('time_value', 60),
+            ('step_number', 2),
+            ('step_text', u'Нарезать свеклу, морковь и картофель мелкими кубиками'),
+            ('time_value', 2),
         ))
         request = DummyRequest(POST=POST)
         response = add_recipe_view(request)
@@ -100,10 +92,8 @@ class TestMyViews(unittest.TestCase):
         potato_400g = Ingredient(potato, 400)
         assert potato in recipe.products
         assert potato_400g in recipe.ingredients
-        self.assertEqual(len(recipe.phases), 2)
-        self.assertEqual(len(recipe.phases[1].ingredients), 3)
-        assert potato_400g in recipe.phases[1].ingredients
-        assert potato_400g in recipe.phases[2].ingredients
+        self.assertEqual(len(recipe.steps), 2)
+        self.assertEqual(recipe.ordered_steps[1].time_value, 60)
 
     def test_recipe_index_view(self):
         from kook.views import recipe_index_view

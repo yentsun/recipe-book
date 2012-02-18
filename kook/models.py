@@ -5,13 +5,11 @@ from sqlalchemy import (Column,
                         Unicode,
                         Integer,
                         ForeignKey,
-                        ForeignKeyConstraint,
                         MetaData)
 
 from sqlalchemy.orm import (scoped_session,
                             sessionmaker,
                             relationship,
-                            joinedload,
                             mapper)
 
 from zope.sqlalchemy import ZopeTransactionExtension
@@ -22,6 +20,9 @@ metadata = MetaData()
 class Entity(object):
     u"""Модель сущности"""
 
+    def __eq__(self, other) :
+        return self.__str__() == other.__str__()
+
     def save(self):
         DBSession.merge(self)
 
@@ -31,6 +32,7 @@ class Recipe(Entity):
     def __init__(self, title, description, products_amounts=None):
         self.title = title
         self.description = description
+        self.steps = []
         if products_amounts is not None:
             self.ingredients = []
             for product_title, amount in products_amounts:
@@ -57,6 +59,13 @@ class Recipe(Entity):
                 total += ingredient.amount
         return total
 
+    @property
+    def ordered_steps(self):
+        ordered_steps = dict()
+        for step in self.steps:
+            ordered_steps[step.number] = step
+        return ordered_steps
+
     @classmethod
     def fetch(cls, title):
         return DBSession.query(Recipe).filter(Recipe.title==title).first()
@@ -68,10 +77,13 @@ class Recipe(Entity):
 class Step(Entity):
     u"""Модель шага приготовления"""
 
-    def __init__(self, step_no, text=None, time_value=None):
-        self.step_no = step_no
+    def __init__(self, number, text=None, time_value=None):
+        self.number = number
         self.text = text
         self.time_value = time_value
+
+    def __str__(self) :
+        return u'Шаг %s: %s (%s мин)' % (self.number, self.text, self.time_value)
 
 class Action(Entity):
     u"""Модель действия"""
@@ -88,9 +100,6 @@ class Product(Entity):
     def __str__(self) :
         return self.title
 
-    def __eq__(self, other) :
-        return self.__str__() == other.__str__()
-
     @classmethod
     def fetch(cls, title):
         return DBSession.query(Product).filter(Product.title==title).first()
@@ -104,9 +113,6 @@ class Ingredient(Entity):
 
     def __str__(self) :
         return u'%s %s г' % (self.product.title, self.amount)
-
-    def __eq__(self, other) :
-        return self.__str__() == other.__str__()
 
 
 #DB Tables & mappings
@@ -129,14 +135,15 @@ actions = Table('actions', metadata,
 
 steps = Table('steps', metadata,
     Column('recipe_title', Unicode, ForeignKey('recipes.title'), primary_key=True),
-    Column('phase_no', Integer, nullable=False),
-    Column('time_value', Integer),
-    Column('note', Unicode))
+    Column('number', Integer, nullable=False, primary_key=True),
+    Column('time_value', Integer, nullable=False),
+    Column('text', Unicode))
 
-mapper(Recipe, recipes, properties={'ingredients': relationship(Ingredient),
+mapper(Recipe, recipes, properties={'ingredients': relationship(
+                                                        Ingredient,
+                                                        order_by=ingredients.c.amount.desc()),
                                     'steps': relationship(Step)})
 mapper(Product, products)
 mapper(Action, actions)
 mapper(Ingredient, ingredients, properties={'product':relationship(Product, uselist=False, lazy='joined')})
-mapper(Step, steps, properties={'ingredient':relationship(Ingredient, uselist=False),
-                               'action':relationship(Action, uselist=False, lazy='joined')})
+mapper(Step, steps)

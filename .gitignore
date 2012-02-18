@@ -1,1 +1,6 @@
 kook.egg-info/*
+*.pyc
+.coverage
+.idea/
+CHANGES.txt
+kook.db

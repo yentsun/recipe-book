@@ -2,7 +2,7 @@
 
 from pyramid.httpexceptions import HTTPFound
 
-from .models import Recipe, Step, Action
+from .models import Recipe, Step
 
 def recipe_view(request):
     title = request.matchdict['title']
@@ -20,28 +20,21 @@ def add_recipe_view(request):
         data = request.POST
         products = data.getall('product')
         amounts = data.getall('amount')
-        phase_nos = data.getall('phase_no')
-        ingredients = data.getall('ingredients')
-        actions = data.getall('action')
+        steps_numbers = data.getall('step_number')
         time_values = data.getall('time_value')
-        notes = data.getall('note')
-        recipe = Recipe(data.getone('title'), data.getone('description'), products_amounts=zip(products, amounts))
+        steps_texts = data.getall('step_text')
+        recipe = Recipe(data.getone('title'),
+                        data.getone('description'),
+                        products_amounts=zip(products, amounts))
         recipe.steps = []
-        for phase_no, \
-            ingredients_,\
-            action_title,\
+        for number, \
+            text,\
             time_value,\
-            note \
-        in zip(phase_nos,
-            ingredients,
-            actions,
-            time_values,
-            notes):
-            for product_title in ingredients_.split(u', '):
-                ingredient = recipe.get_ingredient_by_product_title(product_title)
-                action = Action(action_title)
-                step = Step(phase_no, ingredient, action, time_value, note)
-                recipe.steps.append(step)
+        in zip(steps_numbers,
+               steps_texts,
+               time_values):
+            step = Step(number, text, time_value)
+            recipe.steps.append(step)
         recipe.save()
         request.session.flash(u'<div class="ok">Страница обновлена!</div>')
         return HTTPFound(add_recipe_path)

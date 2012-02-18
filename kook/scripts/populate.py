@@ -18,7 +18,6 @@ from ..models import (
     Product,
     Ingredient,
     Step,
-    Action
     )
 
 def usage(argv):
@@ -33,7 +32,7 @@ def main(argv=sys.argv):
     config_uri = argv[1]
     setup_logging(config_uri)
     settings = get_appsettings(config_uri)
-    engine = engine_from_config(settings, 'sqlalchemy.')
+    engine = engine_from_config(settings)
     DBSession.configure(bind=engine)
     metadata.create_all(engine)
     with transaction.manager:
@@ -51,14 +50,11 @@ def main(argv=sys.argv):
             Ingredient(onion, amount=75),
             Ingredient(egg, amount=172)
         ]
-        boil = Action(u'отварить')
-        mix = Action(u'перемешать')
         recipe.steps = [
-            Step(1, recipe.ingredients[0], boil, time_value=30),
-            Step(1, recipe.ingredients[1], boil),
-            Step(2, recipe.ingredients[0], Action(u'нарезать'), note=u'cut to little pieces'),
-            Step(3, recipe.ingredients[0], mix),
-            Step(3, recipe.ingredients[1], mix, time_value=10)
+            Step(1, u'все овощи отварить', time_value=30),
+            Step(2, u'картофель и морковь очистить от кожицы', time_value=5),
+            Step(3, u'овощи и колбасу нарезать и перемешать, заправляя майонезом', time_value=1),
+            Step(4, u'салат украсить веткой петрушки', time_value=0)
         ]
         recipe.save()
         recipe2 = recipe

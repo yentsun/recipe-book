@@ -13,12 +13,9 @@ ${recipe.description}
 </div>
 <div id="steps">
     <ol>
-        % for phase_no, phase in recipe.phases.items():
+        % for step in recipe.steps:
         <li>
-            % for ingredient in phase.ingredients:
-            ${ingredient.product.title},
-            % endfor
-             ${phase.action.title}
+             ${step.text}
         </li>
         % endfor
     </ol>

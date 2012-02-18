@@ -16,26 +16,23 @@
         <legend>Ингредиенты</legend>
         <p class="product_amount">
             <label for="product1">Продукт, количество в г</label>
-            <input id="product1" type="text" name="product" class="product_name" data-no="1">
+            <input id="product1" type="text" name="product" class="product_name" data-id="1">
             <input type="text" name="amount">
         </p>
-        <button type="button" id="add_ingredient_fields">Добавить ингредиент</button>
+        <button type="button" id="add_ingredient_fields">Следующий ингредиент</button>
     </fieldset>
     <fieldset>
         <legend>Приготовление</legend>
-        <div class="phase">
-            <label for="phase1">Фаза №<span>1</span></label>
-            <input id="phase1" type="hidden" name="phase_no" value="1">
-            <ul class="ingredients_list"></ul>
-            <input type="hidden" name="ingredients">
-            <input type="text" name="action">
+        <div class="step">
+            <label for="step1">Шаг №<span>1</span></label>
+            <input id="step1" type="hidden" name="step_number" value="1">
+            <input type="text" name="step_text">
             <input type="text" name="time_value">
-            <input type="text" name="note">
         </div>
-        <button type="button" id="add_phase_fields">Добавить фазу</button>
+        <button type="button" id="add_step_fields">Следующий шаг</button>
     </fieldset>
     <fieldset>
-        <button type="submit">Добавить</button>
+        <button type="submit">Готово</button>
     </fieldset>
 </form>
 <%def name="js()">

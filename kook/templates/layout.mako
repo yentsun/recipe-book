@@ -13,7 +13,7 @@
 	</head>
 	<body>
         <div id="header">
-            <img width="140" height="125" id="logo" src="/static/logo.png" alt="Логотип">
+            <img width="108" height="150" id="logo" src="/static/img/logo.png" alt="Логотип">
             <h1>
                 база кулинарных рецептов
             </h1>
