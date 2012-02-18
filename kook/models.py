@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
+import transaction
 from sqlalchemy import (Column,
                         Table,
                         Unicode,
                         Integer,
                         ForeignKey,
                         MetaData)
-
 from sqlalchemy.orm import (scoped_session,
                             sessionmaker,
                             relationship,
                             mapper)
-
 from zope.sqlalchemy import ZopeTransactionExtension
 
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
@@ -65,6 +64,11 @@ class Recipe(Entity):
         for step in self.steps:
             ordered_steps[step.number] = step
         return ordered_steps
+
+    def update(self):
+        old = DBSession.query(Recipe).get(self.title)
+        DBSession.delete(old)
+        DBSession.merge(self)
 
     @classmethod
     def fetch(cls, title):
@@ -141,9 +145,16 @@ steps = Table('steps', metadata,
 
 mapper(Recipe, recipes, properties={'ingredients': relationship(
                                                         Ingredient,
+                                                        backref='recipe',
+                                                        cascade='all, delete-orphan',
                                                         order_by=ingredients.c.amount.desc()),
-                                    'steps': relationship(Step)})
+                                    'steps': relationship(
+                                                        Step,
+                                                        cascade='all, delete-orphan')})
 mapper(Product, products)
 mapper(Action, actions)
-mapper(Ingredient, ingredients, properties={'product':relationship(Product, uselist=False, lazy='joined')})
+mapper(Ingredient, ingredients, properties={'product':relationship(
+                                                        Product,
+                                                        uselist=False,
+                                                        lazy='joined')})
 mapper(Step, steps)

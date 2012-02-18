@@ -5,8 +5,11 @@ import transaction
 
 from pyramid import testing
 from pyramid.testing import DummyRequest
+from webob.multidict import MultiDict
 
 from kook.models import Recipe, Step, Product, Ingredient, metadata, DBSession
+
+sausage = Product(title=u'колбаса вареная')
 
 class TestMyViews(unittest.TestCase):
     def setUp(self):
@@ -20,7 +23,6 @@ class TestMyViews(unittest.TestCase):
                             description=u'Один из самых популярных салатов')
             potato = Product(title=u'картофель')
             carrot = Product(title=u'морковь')
-            sausage = Product(title=u'колбаса вареная')
             onion = Product(title=u'лук репчатый')
             egg = Product(title=u'яйцо куриное')
             recipe.ingredients = [
@@ -46,10 +48,10 @@ class TestMyViews(unittest.TestCase):
         testing.tearDown()
 
     def test_recipe_view(self):
-        from kook.views import recipe_view
+        from kook.views import read_recipe_view
         request = DummyRequest()
         request.matchdict['title'] = u'оливье'
-        response = recipe_view(request)
+        response = read_recipe_view(request)
         recipe = response['recipe']
         potato = Product(title=u'картофель')
         garnishing = Step(4, u'салат украсить веткой петрушки', time_value=0)
@@ -59,9 +61,8 @@ class TestMyViews(unittest.TestCase):
         self.assertEqual(len(recipe.steps), 4)
         assert garnishing in recipe.steps
 
-    def test_add_recipe_view(self):
-        from kook.views import add_recipe_view
-        from webob.multidict import MultiDict
+    def test_create_recipe_view(self):
+        from kook.views import create_recipe_view
         POST = MultiDict((
             ('title', u'Винегрет'),
             ('description', u'Салат винегрет'),
@@ -83,7 +84,7 @@ class TestMyViews(unittest.TestCase):
             ('time_value', 2),
         ))
         request = DummyRequest(POST=POST)
-        response = add_recipe_view(request)
+        create_recipe_view(request)
         recipe = Recipe.fetch(u'Винегрет')
         assert recipe is not None
         self.assertEqual(recipe.title, u'Винегрет')
@@ -93,7 +94,37 @@ class TestMyViews(unittest.TestCase):
         assert potato in recipe.products
         assert potato_400g in recipe.ingredients
         self.assertEqual(len(recipe.steps), 2)
-        self.assertEqual(recipe.ordered_steps[1].time_value, 60)
+        self.assertEqual(recipe.ordered_steps['1'].time_value, 60)
+
+    def test_update_recipe_view(self):
+        from kook.views import update_recipe_view
+        POST = MultiDict((
+            ('title', u'оливье'),
+            ('description', u'Салат винегрет'),
+            ('product', u'свекла'),
+            ('amount', '400'),
+            ('product', u'морковь'),
+            ('amount', '300'),
+            ('product', u'картофель'),
+            ('amount', '400'),
+            ('product', u'квашеная капуста'),
+            ('amount', '200'),
+            ('product', u'лук репчатый'),
+            ('amount', '150'),
+            ('step_number', '1'),
+            ('step_text', u'свеклу, морковь и картофель отварить, пока овощи не станут мягкими'),
+            ('time_value', 60),
+            ('step_number', 2),
+            ('step_text', u'Нарезать свеклу, морковь и картофель мелкими кубиками'),
+            ('time_value', 2),
+        ))
+        request = DummyRequest(POST=POST)
+        update_recipe_view(request)
+        recipe = Recipe.fetch(u'оливье')
+        assert recipe is not None
+        assert sausage not in recipe.products
+        self.assertEqual(recipe.description, u'Салат винегрет')
+        self.assertEqual(len(recipe.steps), 2)
 
     def test_recipe_index_view(self):
         from kook.views import recipe_index_view
