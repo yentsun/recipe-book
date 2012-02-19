@@ -38,6 +38,29 @@ class Recipe(Entity):
                 product = Product(product_title)
                 self.ingredients.append(Ingredient(product, amount))
 
+    @classmethod
+    def construct_from_multidict(cls, multidict):
+        recipe = cls(multidict.getone('title'), multidict.getone('description'))
+        products = multidict.getall('product')
+        amounts = multidict.getall('amount')
+        recipe.ingredients = []
+        for product_title, amount in zip(products, amounts):
+            product = Product(product_title)
+            recipe.ingredients.append(Ingredient(product, amount))
+        steps_numbers = multidict.getall('step_number')
+        time_values = multidict.getall('time_value')
+        steps_texts = multidict.getall('step_text')
+        recipe.steps = []
+        for number,\
+            text,\
+            time_value,\
+        in zip(steps_numbers,
+               steps_texts,
+               time_values):
+            step = Step(number, text, time_value)
+            recipe.steps.append(step)
+        return recipe
+
     def get_ingredient_by_product_title(self, product_title):
         for ingredient in self.ingredients:
             if ingredient.product.title == product_title:

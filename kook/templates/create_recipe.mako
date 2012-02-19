@@ -1,6 +1,6 @@
 <%inherit file="layout.mako"/>
 <h1><%block name="title">Добавить рецепт</%block></h1>
-<form action="${add_recipe_path}" method="post">
+<form action="${create_recipe_path}" method="post">
     <fieldset>
         <legend>Общая информация</legend>
         <p>

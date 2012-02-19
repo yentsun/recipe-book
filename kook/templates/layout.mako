@@ -1,3 +1,4 @@
+## -*- coding: utf-8 -*-
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 	<head>
@@ -23,7 +24,7 @@
                 <%
                     nav = {
                         u'список рецептов': '/',
-                        u'добавить рецепт': '/add_recipe'
+                        u'добавить рецепт': request.route_url('create_recipe')
                           }
                 %>
                 % for item in nav:
