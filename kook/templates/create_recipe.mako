@@ -24,9 +24,9 @@
     <fieldset>
         <legend>Приготовление</legend>
         <div class="step">
-            <label for="step1">Шаг №<span>1</span></label>
+            <label class="step_title" for="steptext_1">Шаг №<span>1</span></label>
             <input id="step1" type="hidden" name="step_number" value="1">
-            <input type="text" name="step_text">
+            <textarea name="step_text" id="steptext_1" cols="30" rows="10"></textarea>
             <input type="text" name="time_value">
         </div>
         <button type="button" id="add_step_fields">Следующий шаг</button>
@@ -36,5 +36,8 @@
     </fieldset>
 </form>
 <%def name="js()">
+    <script type="text/javascript" src="/static/js/ckeditor/ckeditor.js"></script>
+    <script type="text/javascript" src="/static/js/ckeditor/adapters/jquery.js"></script>
+    <script type="text/javascript" src="/static/js/form_fields.js"></script>
     <script type="text/javascript" src="/static/js/add_recipe.js"></script>
 </%def>

@@ -15,7 +15,7 @@ ${recipe.description}
     <ol>
         % for step in recipe.steps:
         <li>
-             ${step.text}
+             ${step.text | n}
         </li>
         % endfor
     </ol>
