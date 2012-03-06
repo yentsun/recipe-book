@@ -2,5 +2,6 @@ kook.egg-info/*
 *.pyc
 .coverage
 .idea/
+cache/*
 CHANGES.txt
 kook.db
