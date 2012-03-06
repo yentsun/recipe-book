@@ -35,12 +35,15 @@
     </fieldset>
     <fieldset>
         <legend>Приготовление</legend>
+##        TODO добавить пустую форму шага, если нет шагов
         % for step in recipe.steps:
         <div class="step">
             <label for="step${step.number}">Шаг №<span>${step.number}</span></label>
             <input id="step${step.number}" type="hidden" name="step_number" value="${step.number}">
-            <input type="text" name="step_text" value="${step.text}">
-            <input type="text" name="time_value" value="${step.time_value}">
+            <textarea name="step_text" id="steptext_${step.number}"
+                                       cols="30" rows="10">
+                ${step.text}
+            </textarea>
         </div>
         % endfor
         <button type="button" id="add_step_fields">Следующий шаг</button>
@@ -50,5 +53,8 @@
     </fieldset>
 </form>
 <%def name="js()">
+    <script type="text/javascript" src="/static/js/ckeditor/ckeditor.js"></script>
+    <script type="text/javascript" src="/static/js/ckeditor/adapters/jquery.js"></script>
+    <script type="text/javascript" src="/static/js/form_fields.js"></script>
     <script type="text/javascript" src="/static/js/add_recipe.js"></script>
 </%def>

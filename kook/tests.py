@@ -8,13 +8,18 @@ from pyramid.testing import DummyRequest
 from webob.multidict import MultiDict
 
 from kook.models import Recipe, Step, Product, Ingredient, metadata, DBSession
+from kook.views.presentation import (read_recipe_view,
+                                     recipe_index_view)
+from kook.views.admin import (create_recipe_view,
+                              update_recipe_view)
+
+from sqlalchemy import create_engine
 
 sausage = Product(title=u'колбаса вареная')
 
 class TestMyViews(unittest.TestCase):
     def setUp(self):
         self.config = testing.setUp()
-        from sqlalchemy import create_engine
         engine = create_engine('sqlite://')
         DBSession.configure(bind=engine)
         metadata.create_all(engine)
@@ -48,7 +53,6 @@ class TestMyViews(unittest.TestCase):
         testing.tearDown()
 
     def test_recipe_view(self):
-        from kook.views import read_recipe_view
         request = DummyRequest()
         request.matchdict['title'] = u'оливье'
         response = read_recipe_view(request)
@@ -62,7 +66,6 @@ class TestMyViews(unittest.TestCase):
         assert garnishing in recipe.steps
 
     def test_create_recipe_view(self):
-        from kook.views import create_recipe_view
         POST = MultiDict((
             ('title', u'Винегрет'),
             ('description', u'Салат винегрет'),
@@ -97,7 +100,6 @@ class TestMyViews(unittest.TestCase):
         self.assertEqual(recipe.ordered_steps['1'].time_value, 60)
 
     def test_update_recipe_view(self):
-        from kook.views import update_recipe_view
         POST = MultiDict((
             ('title', u'оливье'),
             ('description', u'Салат винегрет'),
@@ -119,6 +121,9 @@ class TestMyViews(unittest.TestCase):
             ('time_value', 2),
         ))
         request = DummyRequest(POST=POST)
+        request.matchdict['title'] = u'оливье';
+        request.matchdict['update_path'] = \
+            '/update_recipe/%D0%BE%D0%BB%D0%B8%D0%B2%D1%8C%D0%B5';
         update_recipe_view(request)
         recipe = Recipe.fetch(u'оливье')
         assert recipe is not None
@@ -127,7 +132,6 @@ class TestMyViews(unittest.TestCase):
         self.assertEqual(len(recipe.steps), 2)
 
     def test_recipe_index_view(self):
-        from kook.views import recipe_index_view
         request = DummyRequest()
         response = recipe_index_view(request)
         recipes = response['recipes']

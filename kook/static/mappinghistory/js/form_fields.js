@@ -1,5 +1,5 @@
 $(function() {
-    create_ckeditor($('#steptext_1, #description'));
+    create_ckeditor($('.step textarea, #description'));
 });
 
 function create_ckeditor(element) {
