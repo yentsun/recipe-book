@@ -6,6 +6,9 @@ import transaction
 from pyramid import testing
 from pyramid.testing import DummyRequest
 from webob.multidict import MultiDict
+from sqlalchemy import engine_from_config
+from pyramid_beaker import set_cache_regions_from_settings
+from paste.deploy.loadwsgi import appconfig
 
 from kook.models import Recipe, Step, Product, Ingredient, metadata, DBSession
 from kook.views.presentation import (read_recipe_view,
@@ -13,14 +16,16 @@ from kook.views.presentation import (read_recipe_view,
 from kook.views.admin import (create_recipe_view,
                               update_recipe_view)
 
-from sqlalchemy import create_engine
-
 sausage = Product(title=u'колбаса вареная')
 
 class TestMyViews(unittest.TestCase):
     def setUp(self):
-        self.config = testing.setUp()
-        engine = create_engine('sqlite://')
+        settings = appconfig('config:testing.ini',
+                             'main',
+                             relative_to='/home/yentsun/www/kook')
+        self.config = testing.setUp(settings=settings)
+        engine = engine_from_config(settings)
+        set_cache_regions_from_settings(settings)
         DBSession.configure(bind=engine)
         metadata.create_all(engine)
         with transaction.manager:
