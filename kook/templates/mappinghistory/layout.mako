@@ -10,6 +10,9 @@
     <link rel="stylesheet" type="text/css" href="/static/mappinghistory/print.css"
           media="print" />
     <!--[if IE]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+    % if hasattr(self,'css'):
+        ${self.css()}
+    % endif
 </head>
 <body>
 <div id="wrapper"><!-- #wrapper -->
@@ -44,13 +47,15 @@
 
         <aside id="sidebar"><!-- sidebar -->
             <h3>Недавние рецепты</h3>
-            <ul>
+            <ul class="recipe_list">
                 %for recipe in recipes:
                 <li>
                     <a href="${request.route_url('read_recipe',
                                                  title=recipe.title)}">
-                        ${recipe.title}
-                    </a>
+                        ${recipe.title}</a>
+                    <a class="edit" title="Редактировать рецепт"
+                       href="${request.route_url('update_recipe',
+                                                 title=recipe.title)}"></a>
                 </li>
                 %endfor
             </ul>
@@ -106,6 +111,11 @@
     </footer>
 
 </div><!-- #wrapper -->
+<script type="text/javascript"
+        src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+% if hasattr(self,'js'):
+    ${self.js()}
+% endif
 <!-- Free template created by http://freehtml5templates.com -->
 </body>
 </html>

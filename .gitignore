@@ -5,3 +5,6 @@ kook.egg-info/*
 cache/*
 CHANGES.txt
 kook.db
+*.pid
+*.log
+*.sock

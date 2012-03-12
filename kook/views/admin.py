@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from pyramid.httpexceptions import HTTPFound
+from beaker.cache import cache_region
 from ..models import Recipe
+
+@cache_region('long_term')
+def common():
+    return {'recipes': Recipe.fetch_all()}
 
 def create_recipe_view(request):
     create_recipe_path = '/create_recipe'
@@ -12,7 +17,14 @@ def create_recipe_view(request):
         request.session.flash(u'<div class="ok">Рецепт добавлен!</div>')
         return HTTPFound(create_recipe_path)
     else:
-        return {'create_recipe_path':create_recipe_path}
+        response = common()
+        response['create_recipe_path'] = create_recipe_path
+        return response
+
+def delete_recipe_view(request):
+    title = request.matchdict['title']
+    request.session.flash(u'<div class="notice">Рецепт удален!</div>')
+    return HTTPFound(create_recipe_path)
 
 def update_recipe_view(request):
     title = request.matchdict['title']
@@ -26,6 +38,7 @@ def update_recipe_view(request):
         request.session.flash(u'<div class="ok">Рецепт обновлен!</div>')
         return HTTPFound(update_path)
     else:
-        recipe = Recipe.fetch(title)
-        return {'update_recipe_path': update_path,
-                'recipe': recipe}
+        response = common()
+        response.update({'update_recipe_path': update_path,
+                                'recipe': Recipe.fetch(title)})
+        return response

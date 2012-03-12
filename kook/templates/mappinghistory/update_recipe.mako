@@ -8,9 +8,9 @@
 % endfor
 </div>
 % endif
-<form action="${update_recipe_path}" method="post">
+<form class="common" action="${update_recipe_path}" method="post">
     <fieldset>
-        <legend>Общая информация</legend>
+        <legend></legend>
         <p>
             <label for="title">Название</label>
             <input type="text" id="title" name="title" value="${recipe.title}" disabled>
@@ -24,37 +24,66 @@
     <fieldset>
         <legend>Ингредиенты</legend>
         % for no, ingredient in enumerate(recipe.ingredients):
-        <p class="product_amount">
-            <label for="product${no}">Продукт, количество в г</label>
-            <input id="product${no}" type="text" name="product" class="product_name"
-                                                                value="${ingredient.product.title}">
-            <input type="text" name="amount" value="${ingredient.amount}">
-        </p>
+        <section class="product_amount">
+            <p class="product_name">
+                <label for="product${no}">Продукт</label>
+                <input id="product${no}" type="text" name="product"
+                       data-id="${no}" value="${ingredient.product.title}">
+            </p>
+            <p class="amount">
+                <label for="amount${no}">количество, г</label>
+                <input id="amount${no}" type="text" name="amount"
+                       value="${ingredient.amount}">
+            </p>
+        </section>
         % endfor
-        <button type="button" id="add_ingredient_fields">Добавить ингредиент</button>
+        <button type="button" class="button add" id="add_ingredient_fields">
+            еще ингредиент
+        </button>
     </fieldset>
     <fieldset>
         <legend>Приготовление</legend>
 ##        TODO добавить пустую форму шага, если нет шагов
         % for step in recipe.steps:
-        <div class="step">
-            <label for="step${step.number}">Шаг №<span>${step.number}</span></label>
-            <input id="step${step.number}" type="hidden" name="step_number" value="${step.number}">
+        <section class="step">
+            <label class="step_title"
+                   for="steptext_${step.number}">Шаг №<span>${step.number}</span></label>
+            <input id="step${step.number}" type="hidden" name="step_number"
+                   value="${step.number}">
             <textarea name="step_text" id="steptext_${step.number}"
                                        cols="30" rows="10">
                 ${step.text}
             </textarea>
-        </div>
+            <p class="time_value">
+                <label for="timevalue_${step.number}">время, мин</label>
+                <input type="text" name="time_value"
+                       id="timevalue_${step.number}" value="${step.time_value}">
+            </p>
+            <p class="note">
+                <label for="note_${step.number}">Примечание</label>
+                <input type="text" name="note" id="note_${step.number}"
+                        value="${step.note}">
+            </p>
+        </section>
         % endfor
-        <button type="button" id="add_step_fields">Следующий шаг</button>
+        <button type="button" class="button add" id="add_step_fields">Следующий шаг</button>
     </fieldset>
-    <fieldset>
-        <button type="submit">Обновить рецепт</button>
+    <fieldset class="final_action">
+        <button type="submit" class="button submit"
+                id="submit_recipe">Обновить рецепт</button>
+        <button type="submit" class="button delete"
+                id="delete_recipe">Удалить рецепт</button>
     </fieldset>
 </form>
+<%def name="css()">
+    <link rel="stylesheet" href="/static/flash-messages/main.css"
+          type="text/css" media="screen" />
+</%def>
 <%def name="js()">
-    <script type="text/javascript" src="/static/js/ckeditor/ckeditor.js"></script>
-    <script type="text/javascript" src="/static/js/ckeditor/adapters/jquery.js"></script>
-    <script type="text/javascript" src="/static/js/form_fields.js"></script>
-    <script type="text/javascript" src="/static/js/add_recipe.js"></script>
+    <script type="text/javascript"
+            src="/static/mappinghistory/js/ckeditor/ckeditor.js"></script>
+    <script type="text/javascript"
+            src="/static/mappinghistory/js/ckeditor/adapters/jquery.js"></script>
+    <script type="text/javascript" src="/static/mappinghistory/js/form_fields.js"></script>
+    <script type="text/javascript" src="/static/mappinghistory/js/add_recipe.js"></script>
 </%def>

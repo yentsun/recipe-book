@@ -2,7 +2,7 @@
 <article>
     <h2><%block name="title">${recipe.title}</%block></h2>
     <section id="description">
-        ${recipe.description}
+        ${recipe.description | n}
     </section>
     <section id="ingredients">
         <h3>Ингредиенты:</h3>

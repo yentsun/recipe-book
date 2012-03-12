@@ -16,8 +16,7 @@ $(function() {
         duplicate.find('input:text').val('');
         duplicate.find('label.step_title').text('Шаг №'+step_number);
         duplicate.find('label.step_title').attr('for', 'steptext_'+step_number);
-//        duplicate.find('label.step_title span').text(step_number);
-        duplicate.find('textarea').attr('id', 'steptext_'+step_number);
+        duplicate.find('textarea').attr('id', 'steptext_'+step_number).text('');
         duplicate.find('span').remove();
         duplicate.insertBefore($(this));
         create_ckeditor(duplicate.find('textarea'));

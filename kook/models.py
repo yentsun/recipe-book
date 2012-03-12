@@ -104,10 +104,11 @@ class Recipe(Entity):
 class Step(Entity):
     u"""Модель шага приготовления"""
 
-    def __init__(self, number, text=None, time_value=None):
+    def __init__(self, number, text, time_value=None, note=None):
         self.number = number
         self.text = text
         self.time_value = time_value
+        self.note = note
 
     def __str__(self) :
         return u'Шаг %s: %s (%s мин)' % (self.number, self.text, self.time_value)
@@ -164,7 +165,9 @@ steps = Table('steps', metadata,
     Column('recipe_title', Unicode, ForeignKey('recipes.title'), primary_key=True),
     Column('number', Integer, nullable=False, primary_key=True),
     Column('time_value', Integer, nullable=False),
-    Column('text', Unicode))
+    Column('text', Unicode),
+    Column('note', Unicode)
+    )
 
 mapper(Recipe, recipes, properties={'ingredients': relationship(
                                                         Ingredient,

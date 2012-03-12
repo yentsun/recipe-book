@@ -5,6 +5,8 @@ $(function() {
 function create_ckeditor(element) {
     element.ckeditor({
         height: '100px',
+        removePlugins: 'elementspath',
+        resize_enabled: false,
         toolbar_Full: [
             {name: 'basicstyles', items: ['Bold','Italic',
                                           'Underline','Strike']},
