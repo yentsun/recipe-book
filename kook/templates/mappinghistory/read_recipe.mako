@@ -19,7 +19,11 @@
             <tr>
                 <td>${step.number}</td>
                 <td class="text">${step.text | n}</td>
+                % if step.time_value:
                 <td class="time">${step.time_value}<br><sub>мин</sub></td>
+                % else:
+                <td></td>
+                % endif
             </tr>
             %endfor
         </table>
