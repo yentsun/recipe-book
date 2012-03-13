@@ -98,6 +98,12 @@ class Recipe(Entity):
         return DBSession.query(Recipe).filter(Recipe.title==title).first()
 
     @classmethod
+    def delete(cls, title):
+        victim = cls.fetch(title)
+        DBSession.delete(victim)
+        return victim.title
+
+    @classmethod
     def fetch_all(cls):
         return DBSession.query(Recipe).all()
 

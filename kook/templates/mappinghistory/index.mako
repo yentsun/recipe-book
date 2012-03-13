@@ -1,4 +1,12 @@
 <%inherit file="layout.mako"/>
+% if request.session.peek_flash():
+    <div id="flash">
+    <% flash = request.session.pop_flash() %>
+    % for message in flash:
+        ${message | n}
+    % endfor
+    </div>
+% endif
 <%def name="title()">Список рецептов</%def>
 <div id="text">
 	% for recipe in recipes:
@@ -8,3 +16,7 @@
             </li>
     % endfor
 </div>
+<%def name="css()">
+    <link rel="stylesheet" href="/static/flash-messages/main.css"
+          type="text/css" media="screen" />
+</%def>

@@ -14,7 +14,8 @@ from kook.models import Recipe, Step, Product, Ingredient, metadata, DBSession
 from kook.views.presentation import (read_recipe_view,
                                      recipe_index_view)
 from kook.views.admin import (create_recipe_view,
-                              update_recipe_view)
+                              update_recipe_view,
+                              delete_recipe_view)
 
 sausage = Product(title=u'колбаса вареная')
 
@@ -135,6 +136,13 @@ class TestMyViews(unittest.TestCase):
         assert sausage not in recipe.products
         self.assertEqual(recipe.description, u'Салат винегрет')
         self.assertEqual(len(recipe.steps), 2)
+
+    def test_delete_recipe_view(self):
+        request = DummyRequest()
+        request.matchdict['title'] = u'Оливье 2'
+        response = delete_recipe_view(request)
+        self.assertEqual(len(Recipe.fetch_all()), 1)
+        self.assertEqual(Recipe.fetch(u'Оливье 2'), None)
 
     def test_recipe_index_view(self):
         request = DummyRequest()

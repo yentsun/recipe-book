@@ -71,8 +71,8 @@
     <fieldset class="final_action">
         <button type="submit" class="button submit"
                 id="submit_recipe">Обновить рецепт</button>
-        <button type="submit" class="button delete"
-                id="delete_recipe">Удалить рецепт</button>
+        <button type="button" class="button delete"
+                id="delete_recipe" onclick="deleteRecipe('${recipe.title}');">Удалить рецепт</button>
     </fieldset>
 </form>
 <%def name="css()">
@@ -86,4 +86,5 @@
             src="/static/mappinghistory/js/ckeditor/adapters/jquery.js"></script>
     <script type="text/javascript" src="/static/mappinghistory/js/form_fields.js"></script>
     <script type="text/javascript" src="/static/mappinghistory/js/add_recipe.js"></script>
+    <script type="text/javascript" src="/static/mappinghistory/js/update_recipe.js"></script>
 </%def>

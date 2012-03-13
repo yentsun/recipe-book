@@ -27,6 +27,7 @@ def main(global_settings, **settings):
     config.add_route('read_recipe', '/recipe/{title}')
     config.add_route('create_recipe', '/create_recipe')
     config.add_route('update_recipe', '/update_recipe/{title}')
+    config.add_route('delete_recipe', '/delete_recipe/{title}')
     config.add_view('kook.views.presentation.recipe_index_view',
                     route_name='index',
                     renderer=find_renderer('index.mako'))
@@ -39,6 +40,8 @@ def main(global_settings, **settings):
     config.add_view('kook.views.admin.update_recipe_view',
                     route_name='update_recipe',
                     renderer=find_renderer('update_recipe.mako'))
+    config.add_view('kook.views.admin.delete_recipe_view',
+                    route_name='delete_recipe')
     config.add_subscriber(handle_new_request, NewRequest)
     config.scan()
     return config.make_wsgi_app()

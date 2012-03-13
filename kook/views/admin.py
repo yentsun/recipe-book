@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from pyramid.httpexceptions import HTTPFound
-from beaker.cache import cache_region
+from beaker.cache import cache_region, region_invalidate
 from ..models import Recipe
 
-@cache_region('long_term')
+@cache_region('long_term', 'common')
 def common():
     return {'recipes': Recipe.fetch_all()}
 
@@ -14,8 +14,9 @@ def create_recipe_view(request):
     if request.POST:
         recipe = Recipe.construct_from_multidict(request.POST)
         recipe.save()
+        region_invalidate(common, 'long_term', 'common')
         request.session.flash(u'<div class="ok">Рецепт добавлен!</div>')
-        return HTTPFound(create_recipe_path)
+        return HTTPFound('/?invalidate_cache=true')
     else:
         response = common()
         response['create_recipe_path'] = create_recipe_path
@@ -23,8 +24,10 @@ def create_recipe_view(request):
 
 def delete_recipe_view(request):
     title = request.matchdict['title']
-    request.session.flash(u'<div class="notice">Рецепт удален!</div>')
-    return HTTPFound(create_recipe_path)
+    victim_title = Recipe.delete(title)
+    request.session.flash(u'<div class="notice">Рецепт "%s" удален!</div>' % victim_title)
+    region_invalidate(common, 'long_term', 'common')
+    return HTTPFound('/?invalidate_cache=true')
 
 def update_recipe_view(request):
     title = request.matchdict['title']
