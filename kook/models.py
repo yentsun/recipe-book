@@ -105,7 +105,7 @@ class Recipe(Entity):
 
     @classmethod
     def fetch_all(cls):
-        return DBSession.query(Recipe).all()
+        return DBSession.query(cls).all()
 
 class Step(Entity):
     u"""Модель шага приготовления"""
@@ -137,6 +137,10 @@ class Product(Entity):
     @classmethod
     def fetch(cls, title):
         return DBSession.query(Product).filter(Product.title==title).first()
+
+    @classmethod
+    def fetch_all(cls):
+        return DBSession.query(cls).all()
 
 class Ingredient(Entity):
     u"""Модель ингредиента (продукт+количество)"""

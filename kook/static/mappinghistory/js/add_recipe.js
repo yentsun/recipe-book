@@ -4,8 +4,12 @@ $(function() {
         var ingredient_number = Number(duplicate.find('.product_name').attr('data-id'));
         ingredient_number++;
         duplicate.find('input:text').val('');
-        duplicate.find('.product_name').attr('data-id', ingredient_number);
+        var product_name_input = duplicate.find('.product_name');
+        product_name_input.attr('data-id', ingredient_number);
         duplicate.insertBefore($(this));
+        product_name_input.find('input').focus().autocomplete({
+            source: products
+        });
     });
     $('#add_step_fields').click(function(){
         var duplicate = $(this).siblings('.step:last').clone();
@@ -20,5 +24,8 @@ $(function() {
         duplicate.find('span').remove();
         duplicate.insertBefore($(this));
         create_ckeditor(duplicate.find('textarea'));
+    });
+    $('.product_name input').autocomplete({
+        source: products
     });
 });

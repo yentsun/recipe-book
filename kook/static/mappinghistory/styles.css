@@ -309,6 +309,11 @@ button#add_step_fields{background-image:url(images/direction--plus.png)}
 button#submit_recipe{background-image:url(images/document-task.png)}
 button#delete_recipe{background-image:url(images/document-shred.png); margin-right:1em}
 
+/*autocomplete*/
+.ui-autocomplete{background: rgb(226, 244, 225); width:385px}
+.ui-autocomplete li{list-style:none; border-bottom:1px dotted #6B4A28; padding:.2em}
+a.ui-state-hover{color:green}
+
 /*recipe list*/
 .recipe_list .edit{background:url(images/document--pencil.png) no-repeat;padding-left:18px}
 

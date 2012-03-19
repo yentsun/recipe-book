@@ -72,6 +72,7 @@ class TestMyViews(unittest.TestCase):
         assert garnishing in recipe.steps
 
     def test_create_recipe_view(self):
+        #testing post
         POST = MultiDict((
             ('title', u'Винегрет'),
             ('description', u'Салат винегрет'),
@@ -105,6 +106,11 @@ class TestMyViews(unittest.TestCase):
         self.assertEqual(len(recipe.steps), 2)
         self.assertEqual(recipe.ordered_steps['1'].time_value, 60)
 
+        #testing initial output
+        request = DummyRequest()
+        response = create_recipe_view(request)
+        assert potato in response['products']
+
     def test_update_recipe_view(self):
         POST = MultiDict((
             ('title', u'оливье'),
@@ -136,6 +142,12 @@ class TestMyViews(unittest.TestCase):
         assert sausage not in recipe.products
         self.assertEqual(recipe.description, u'Салат винегрет')
         self.assertEqual(len(recipe.steps), 2)
+
+        #testing initial output
+        request = DummyRequest()
+        response = create_recipe_view(request)
+        potato = Product(u'картофель')
+        assert potato in response['products']
 
     def test_delete_recipe_view(self):
         request = DummyRequest()

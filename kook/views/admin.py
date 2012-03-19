@@ -2,11 +2,12 @@
 
 from pyramid.httpexceptions import HTTPFound
 from beaker.cache import cache_region, region_invalidate
-from ..models import Recipe
+from ..models import Recipe, Product
 
 @cache_region('long_term', 'common')
 def common():
-    return {'recipes': Recipe.fetch_all()}
+    return {'recipes': Recipe.fetch_all(),
+            'products': Product.fetch_all()}
 
 def create_recipe_view(request):
     create_recipe_path = '/create_recipe'
@@ -43,5 +44,5 @@ def update_recipe_view(request):
     else:
         response = common()
         response.update({'update_recipe_path': update_path,
-                                'recipe': Recipe.fetch(title)})
+                         'recipe': Recipe.fetch(title)})
         return response

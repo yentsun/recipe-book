@@ -84,7 +84,16 @@
             src="/static/mappinghistory/js/ckeditor/ckeditor.js"></script>
     <script type="text/javascript"
             src="/static/mappinghistory/js/ckeditor/adapters/jquery.js"></script>
+    <script type="text/javascript"
+            src="/static/mappinghistory/js/jquery-ui-1.8.18.custom.min.js"></script>
     <script type="text/javascript" src="/static/mappinghistory/js/form_fields.js"></script>
     <script type="text/javascript" src="/static/mappinghistory/js/add_recipe.js"></script>
     <script type="text/javascript" src="/static/mappinghistory/js/update_recipe.js"></script>
 </%def>
+<script type="text/javascript">
+    var products = [
+        % for product in products:
+        '${product.title}',
+        % endfor
+    ];
+</script>
