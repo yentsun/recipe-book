@@ -41,6 +41,7 @@ def update_recipe_view(request):
         recipe.update(title)
         if 'update_path' not in request.matchdict: #this check is only for tests
             update_path = request.current_route_url(title=recipe.title)
+        region_invalidate(common, 'long_term', 'common')
         request.session.flash(u'<div class="ok">Рецепт обновлен!</div>')
         return HTTPFound(update_path)
     else:

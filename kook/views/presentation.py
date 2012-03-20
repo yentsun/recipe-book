@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from beaker.cache import cache_region, region_invalidate
+from ..views.admin import common
 from ..models import Recipe
-
-@cache_region('long_term', 'common')
-def common():
-    return {'recipes': Recipe.fetch_all()}
 
 def recipe_index_view(request):
     if 'invalidate_cache' in request.GET:
