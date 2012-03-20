@@ -11,14 +11,7 @@ from pyramid.paster import (
     setup_logging,
     )
 
-from ..models import (
-    DBSession,
-    metadata,
-    Recipe,
-    Product,
-    Ingredient,
-    Step,
-    )
+from ..models import (DBSession, metadata, Recipe, Product, Ingredient, Step, Unit)
 
 def usage(argv):
     cmd = os.path.basename(argv[0])
@@ -39,6 +32,8 @@ def main(argv=sys.argv):
         recipe = Recipe(title=u'оливье',
                         description=u'Один из самых популярных салатов')
         potato = Product(title=u'картофель')
+        piece = Unit(u'шт.', 100, potato)
+        potato.units = [piece]
         carrot = Product(title=u'морковь')
         sausage = Product(title=u'колбаса вареная')
         onion = Product(title=u'лук репчатый')

@@ -10,7 +10,7 @@ from sqlalchemy import engine_from_config
 from pyramid_beaker import set_cache_regions_from_settings
 from paste.deploy.loadwsgi import appconfig
 
-from kook.models import Recipe, Step, Product, Ingredient, metadata, DBSession
+from kook.models import Recipe, Step, Product, Ingredient, metadata, DBSession, Unit
 from kook.views.presentation import (read_recipe_view,
                                      recipe_index_view)
 from kook.views.admin import (create_recipe_view,
@@ -33,6 +33,8 @@ class TestMyViews(unittest.TestCase):
             recipe = Recipe(title=u'оливье',
                             description=u'Один из самых популярных салатов')
             potato = Product(title=u'картофель')
+            piece = Unit(u'шт.', 100, potato)
+            potato.units = [piece]
             carrot = Product(title=u'морковь')
             onion = Product(title=u'лук репчатый')
             egg = Product(title=u'яйцо куриное')
@@ -69,6 +71,9 @@ class TestMyViews(unittest.TestCase):
         self.assertEqual(recipe.total_amount, 997)
         assert potato in recipe.products
         self.assertEqual(len(recipe.steps), 4)
+        potato_400g = Ingredient(potato, amount=400)
+        assert potato_400g in recipe.ingredients
+        self.assertEqual(recipe.ingredients[0].measure(), u'4 шт.')
         assert garnishing in recipe.steps
 
     def test_create_recipe_view(self):

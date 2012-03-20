@@ -142,16 +142,34 @@ class Product(Entity):
     def fetch_all(cls):
         return DBSession.query(cls).all()
 
+class Unit(Entity):
+    u"""Модель единицы меры продукта (штука, ст. ложка и тд)"""
+
+    def __init__(self, title, amount, product):
+        self.title = title
+        self.amount = amount
+        self.product_title = product.title
+
 class Ingredient(Entity):
     u"""Модель ингредиента (продукт+количество)"""
 
-    def __init__(self, product, amount):
+    def __init__(self, product, amount, unit=None):
         self.product = product
         self.amount = amount
+        self.unit = unit
 
     def __str__(self) :
-        return u'%s %s г' % (self.product.title, self.amount)
+        return u'%s %d г' % (self.product.title, self.amount)
 
+    def measure(self, unit_title=None):
+        if len(self.product.units) > 0:
+            for unit in self.product.units:
+                if unit_title is None or \
+                   unit_title == unit.title or \
+                   unit.title == self.unit.title:
+                    return u'%d %s' % ((self.amount / unit.amount), unit.title)
+        else:
+            return u'%d г' % self.amount
 
 #DB Tables & mappings
 
@@ -162,10 +180,18 @@ recipes = Table('recipes', metadata,
 products = Table('products', metadata,
     Column('title', Unicode, primary_key=True, nullable=False))
 
+units = Table('units', metadata,
+    Column('product_title', Unicode, ForeignKey('products.title'),
+            primary_key=True, nullable=False),
+    Column('title', Unicode, primary_key=True, nullable=False),
+    Column('amount', Integer, nullable=False)
+)
+
 ingredients = Table('ingredients', metadata,
     Column('recipe_title', Unicode, ForeignKey('recipes.title'), primary_key=True),
     Column('product_title', Unicode, ForeignKey('products.title'), primary_key=True),
-    Column('amount', Integer, nullable=False)
+    Column('amount', Integer, nullable=False),
+    Column('unit_title', Unicode, ForeignKey('units.title')),
 )
 
 actions = Table('actions', metadata,
@@ -177,21 +203,27 @@ steps = Table('steps', metadata,
     Column('time_value', Integer, nullable=False),
     Column('text', Unicode),
     Column('note', Unicode)
-    )
+)
 
 mapper(Recipe, recipes, properties={'ingredients': relationship(
                                                         Ingredient,
                                                         backref='recipe',
-                                                        cascade='all, delete-orphan',
+                                                        cascade='all, delete, delete-orphan',
                                                         order_by=ingredients.c.amount.desc()),
                                     'steps': relationship(
                                                         Step,
-                                                        cascade='all, delete-orphan',
+                                                        cascade='all, delete, delete-orphan',
                                                         order_by=steps.c.number)})
-mapper(Product, products)
+mapper(Product, products, properties={'units':relationship(
+                                                        Unit,
+                                                        backref='product',
+                                                        cascade='all, delete-orphan')})
+mapper(Unit, units)
 mapper(Action, actions)
 mapper(Ingredient, ingredients, properties={'product':relationship(
                                                         Product,
                                                         uselist=False,
-                                                        lazy='joined')})
+                                                        lazy='joined'),
+                                            'unit':relationship(Unit, uselist=False,
+                                                                lazy='joined')})
 mapper(Step, steps)
