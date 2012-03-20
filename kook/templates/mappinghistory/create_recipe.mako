@@ -20,7 +20,7 @@
             <textarea name="description" id="description" cols="30" rows="10"></textarea>
         </p>
     </fieldset>
-    <fieldset>
+    <fieldset id="ingredients">
         <legend>Ингредиенты</legend>
         <section class="product_amount">
         <p class="product_name">
@@ -31,6 +31,7 @@
             <label for="amount1">количество, г</label>
             <input id="amount1" type="text" name="amount">
         </p>
+            <a class="remove"></a>
         </section>
         <button type="button" class="button add" id="add_ingredient_fields">
             еще ингредиент
