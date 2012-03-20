@@ -41,7 +41,7 @@
             еще ингредиент
         </button>
     </fieldset>
-    <fieldset id="steps">
+    <fieldset id="steps_fields">
         <legend>Приготовление</legend>
 ##        TODO добавить пустую форму шага, если нет шагов
         % for step in recipe.steps:

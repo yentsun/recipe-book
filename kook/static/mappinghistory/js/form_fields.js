@@ -4,6 +4,7 @@ $(function() {
 
 function create_ckeditor(element) {
     element.ckeditor({
+        disableNativeSpellChecker: false,
         height: '100px',
         removePlugins: 'elementspath',
         resize_enabled: false,

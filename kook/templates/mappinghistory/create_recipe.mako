@@ -37,7 +37,7 @@
             еще ингредиент
         </button>
     </fieldset>
-    <fieldset id="steps">
+    <fieldset id="steps_fields">
         <legend>Приготовление</legend>
         <section class="step">
             <label class="step_title" for="steptext_1">Шаг №<span>1</span></label>
