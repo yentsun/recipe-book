@@ -38,7 +38,9 @@ def update_recipe_view(request):
         update_path = request.current_route_url(title=title)
     if request.POST:
         recipe = Recipe.construct_from_multidict(request.POST)
-        recipe.update()
+        recipe.update(title)
+        if 'update_path' not in request.matchdict: #this check is only for tests
+            update_path = request.current_route_url(title=recipe.title)
         request.session.flash(u'<div class="ok">Рецепт обновлен!</div>')
         return HTTPFound(update_path)
     else:

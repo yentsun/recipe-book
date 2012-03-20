@@ -88,8 +88,8 @@ class Recipe(Entity):
             ordered_steps[step.number] = step
         return ordered_steps
 
-    def update(self):
-        old = DBSession.query(Recipe).get(self.title)
+    def update(self, title):
+        old = DBSession.query(Recipe).get(title)
         DBSession.delete(old)
         DBSession.merge(self)
 

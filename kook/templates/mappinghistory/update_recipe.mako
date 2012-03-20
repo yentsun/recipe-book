@@ -13,8 +13,7 @@
         <legend></legend>
         <p>
             <label for="title">Название</label>
-            <input type="text" id="title" name="title" value="${recipe.title}" disabled>
-            <input type="hidden" name="title" value="${recipe.title}">
+            <input type="text" id="title" name="title" value="${recipe.title}">
         </p>
         <p>
             <label for="description">Описание</label>

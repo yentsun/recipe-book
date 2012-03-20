@@ -113,7 +113,7 @@ class TestMyViews(unittest.TestCase):
 
     def test_update_recipe_view(self):
         POST = MultiDict((
-            ('title', u'оливье'),
+            ('title', u'оливье-3'),
             ('description', u'Салат винегрет'),
             ('product', u'свекла'),
             ('amount', '400'),
@@ -133,15 +133,17 @@ class TestMyViews(unittest.TestCase):
             ('time_value', 2),
         ))
         request = DummyRequest(POST=POST)
-        request.matchdict['title'] = u'оливье';
+        request.matchdict['title'] = u'оливье'
         request.matchdict['update_path'] = \
-            '/update_recipe/%D0%BE%D0%BB%D0%B8%D0%B2%D1%8C%D0%B5';
+            '/update_recipe/%D0%BE%D0%BB%D0%B8%D0%B2%D1%8C%D0%B5'
         update_recipe_view(request)
-        recipe = Recipe.fetch(u'оливье')
-        assert recipe is not None
-        assert sausage not in recipe.products
-        self.assertEqual(recipe.description, u'Салат винегрет')
-        self.assertEqual(len(recipe.steps), 2)
+        recipe_old = Recipe.fetch(u'оливье')
+        assert recipe_old is None
+        recipe_new = Recipe.fetch(u'оливье-3')
+        assert recipe_new is not None
+        assert sausage not in recipe_new.products
+        self.assertEqual(recipe_new.description, u'Салат винегрет')
+        self.assertEqual(len(recipe_new.steps), 2)
 
         #testing initial output
         request = DummyRequest()
