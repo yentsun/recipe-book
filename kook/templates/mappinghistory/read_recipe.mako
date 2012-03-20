@@ -8,7 +8,7 @@
         <h3>Ингредиенты:</h3>
         <ul>
             % for ingredient in recipe.ingredients:
-                <li>${ingredient.product.title}, ${ingredient.amount} г</li>
+                <li>${ingredient.product.title}, ${ingredient.measure()}</li>
             % endfor
         </ul>
     </section>
