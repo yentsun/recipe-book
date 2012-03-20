@@ -20,7 +20,7 @@
             <textarea name="description" id="description" cols="30" rows="10">${recipe.description}</textarea>
         </p>
     </fieldset>
-    <fieldset>
+    <fieldset id="ingredients">
         <legend>Ингредиенты</legend>
         % for no, ingredient in enumerate(recipe.ingredients):
         <section class="product_amount">
@@ -34,6 +34,7 @@
                 <input id="amount${no}" type="text" name="amount"
                        value="${ingredient.amount}">
             </p>
+            <a class="remove"></a>
         </section>
         % endfor
         <button type="button" class="button add" id="add_ingredient_fields">
