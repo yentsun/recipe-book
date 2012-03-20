@@ -1,5 +1,6 @@
 kook.egg-info/*
 *.pyc
+kook/*.pyc
 .coverage
 .idea/
 cache/*
