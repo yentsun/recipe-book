@@ -186,7 +186,8 @@ mapper(Recipe, recipes, properties={'ingredients': relationship(
                                                         order_by=ingredients.c.amount.desc()),
                                     'steps': relationship(
                                                         Step,
-                                                        cascade='all, delete-orphan')})
+                                                        cascade='all, delete-orphan',
+                                                        order_by=steps.c.number)})
 mapper(Product, products)
 mapper(Action, actions)
 mapper(Ingredient, ingredients, properties={'product':relationship(

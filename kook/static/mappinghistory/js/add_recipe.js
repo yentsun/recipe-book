@@ -16,9 +16,8 @@ $(function() {
         var step_number_field = duplicate.find('input[name="step_number"]');
         var step_number = Number(step_number_field.val());
         step_number++;
-        step_number_field.val(step_number);
         duplicate.find('input:text').val('');
-        duplicate.find('label.step_title').text('Шаг №'+step_number);
+        step_number_field.val(step_number);
         duplicate.find('label.step_title').attr('for', 'steptext_'+step_number);
         duplicate.find('textarea').attr('id', 'steptext_'+step_number).text('');
         duplicate.find('span').remove();

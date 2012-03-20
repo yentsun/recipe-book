@@ -47,8 +47,8 @@
         % for step in recipe.steps:
         <section class="step">
             <label class="step_title"
-                   for="steptext_${step.number}">Шаг №<span>${step.number}</span></label>
-            <input id="step${step.number}" type="hidden" name="step_number"
+                   for="steptext_${step.number}">Шаг №</label>
+            <input id="step${step.number}" class="step_no" type="text" name="step_number"
                    value="${step.number}">
             <textarea name="step_text" id="steptext_${step.number}"
                                        cols="30" rows="10">

@@ -294,6 +294,8 @@ form.common p.time_value input
      padding-left:1.5em; width:80%}
 form.common p.note{width:74%}
 form.common fieldset.final_action{border:0; padding-top:2em}
+form.common label.step_title{display:inline; line-height:2em}
+form.common input[type=text].step_no{width:3em; padding:.1em; border-radius:5px}
 
 /*buttons*/
 button.button{background-repeat:no-repeat; background-position:5px 6px;

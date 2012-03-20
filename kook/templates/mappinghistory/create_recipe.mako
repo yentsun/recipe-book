@@ -40,8 +40,9 @@
     <fieldset id="steps_fields">
         <legend>Приготовление</legend>
         <section class="step">
-            <label class="step_title" for="steptext_1">Шаг №<span>1</span></label>
-            <input id="step1" type="hidden" name="step_number" value="1">
+            <label class="step_title" for="steptext_1">Шаг №</label>
+            <input id="step1" class="step_no" type="text" name="step_number"
+                   value="1">
             <textarea name="step_text" id="steptext_1" cols="30" rows="10"></textarea>
             <p class="time_value">
                 <label for="timevalue_1">время, мин</label>
