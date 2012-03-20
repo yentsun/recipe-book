@@ -67,9 +67,11 @@
         % endfor
         <button type="button" class="button add" id="add_step_fields">Следующий шаг</button>
     </fieldset>
-    <fieldset class="final_action">
+                                <fieldset class="final_action">
         <button type="submit" class="button submit"
                 id="submit_recipe">Обновить рецепт</button>
+        <button type="button" class="button submit"
+                id="clone_recipe" style="display:none;">Клонировать рецепт</button>
         <button type="button" class="button delete"
                 id="delete_recipe" onclick="deleteRecipe('${recipe.title}');">Удалить рецепт</button>
     </fieldset>

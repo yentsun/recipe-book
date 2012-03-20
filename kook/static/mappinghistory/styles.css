@@ -298,16 +298,18 @@ form.common fieldset.final_action{border:0; padding-top:2em}
 /*buttons*/
 button.button{background-repeat:no-repeat; background-position:5px 6px;
               padding: .5em .5em .5em 25px; font-size:90%; color:#fff;
-              border:0; font-weight:bold; border-radius: 5px}
+              border-width:1px; font-weight:bold; border-radius: 5px}
+.final_action button.button{margin-left:1em}
 button.button.add{background-color: #bbb; text-shadow: 1px 1px 0 #aaa;}
 button.button.submit{background-color: #5cbc59; text-shadow: 1px 1px 0 #52994f;
-                     float:right}
+                     float:right; border-color:#52994f}
 button.button.delete{background-color: #bc404d; text-shadow: 1px 1px 0 #993a46;
-    float:right}
+                     float:right; border-color:#993a46}
 button#add_ingredient_fields{background-image:url(images/flask--plus.png)}
 button#add_step_fields{background-image:url(images/direction--plus.png)}
 button#submit_recipe{background-image:url(images/document-task.png)}
-button#delete_recipe{background-image:url(images/document-shred.png); margin-right:1em}
+button#delete_recipe{background-image:url(images/document-shred.png)}
+button#clone_recipe{background-image:url(images/document-copy.png)}
 
 /*autocomplete*/
 .ui-autocomplete{background: rgb(226, 244, 225); width:385px}
