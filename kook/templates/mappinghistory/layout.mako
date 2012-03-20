@@ -101,8 +101,11 @@
                 </aside><!-- end of #third footer segment -->
 
                 <aside id="fourth" class="footer-segment">
-                    <h3>Recent Testimonial</h3>
-                    <p>Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta.</p>
+                    <h3>Статистика</h3>
+                    <p>
+                        Всего рецептов в базе: ${len(recipes)}<br>
+                        Всего продуктов в базе: ${len(products)}<br>
+                    </p>
                 </aside><!-- end of #fourth footer segment -->
 
             </section><!-- end of #footer-outer-block -->
