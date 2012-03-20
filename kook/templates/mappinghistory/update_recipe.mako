@@ -41,7 +41,7 @@
             еще ингредиент
         </button>
     </fieldset>
-    <fieldset>
+    <fieldset id="steps">
         <legend>Приготовление</legend>
 ##        TODO добавить пустую форму шага, если нет шагов
         % for step in recipe.steps:
@@ -64,6 +64,7 @@
                 <input type="text" name="note" id="note_${step.number}"
                         value="${step.note}">
             </p>
+            <a class="remove"></a>
         </section>
         % endfor
         <button type="button" class="button add" id="add_step_fields">Следующий шаг</button>

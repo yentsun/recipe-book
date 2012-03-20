@@ -279,7 +279,7 @@ form.common label{display:block; font-size:80%; line-height:1.5em; text-transfor
 form.common input[type=text]{font-size:120%; padding:.4em}
 form.common #title{width:97%}
 form.common #description{margin:0}
-form.common .step{margin-bottom:6em}
+form.common .step{margin-bottom:2em}
 form.common .step_title{font-size:130%}
 form.common p.product_name,
 form.common p.amount,
@@ -311,9 +311,10 @@ button#submit_recipe{background-image:url(images/document-task.png)}
 button#delete_recipe{background-image:url(images/document-shred.png)}
 button#clone_recipe{background-image:url(images/document-copy.png)}
 
-section.product_amount{position:relative; overflow:hidden;}
+#ingredients section, #steps section{position:relative; overflow:hidden;}
 a.remove{width:16px; height:16px; background:url(images/cross.png) no-repeat;
-         position:absolute; top:30px; right:10px}
+         position:absolute; top:30px; right:10px; display:none}
+#steps a.remove{top:7px}
 
 /*autocomplete*/
 .ui-autocomplete{background: rgb(226, 244, 225); width:385px}

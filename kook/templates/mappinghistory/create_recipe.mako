@@ -37,7 +37,7 @@
             еще ингредиент
         </button>
     </fieldset>
-    <fieldset>
+    <fieldset id="steps">
         <legend>Приготовление</legend>
         <section class="step">
             <label class="step_title" for="steptext_1">Шаг №<span>1</span></label>
@@ -51,6 +51,7 @@
                 <label for="note_1">Примечание</label>
                 <input type="text" name="note" id="note_1">
             </p>
+            <a class="remove"></a>
         </section>
         <button type="button" class="button add" id="add_step_fields">Следующий шаг</button>
     </fieldset>

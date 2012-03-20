@@ -28,7 +28,13 @@ $(function() {
     $('.product_name input').autocomplete({
         source: products
     });
-    $('#ingredients .remove').live('click', function(){
-        $(this).parents('.product_amount').remove();
+    $('.remove').live('click', function(){
+        $(this).parents('section:first').fadeOut('slow', function(){
+            $(this).remove();
+        });
     });
+    $('.step, .product_amount').live('hover',
+        function(){
+            $(this).find('.remove').toggle();
+        });
 });
