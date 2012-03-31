@@ -1,0 +1,8 @@
+body{background:#f8f3df url('../img/papertop.jpg') repeat-x}
+.step{margin-bottom:4em}
+.step_no{margin-bottom:0; width:20px; font-weight:bold}
+.time_value, .amount input{margin-bottom:0; font-weight:bold}
+.time{margin-left:100px}
+.input-prepend .add-on, .input-prepend.input-append .add-on:first-child{margin-right:-5px}
+.input-prepend.input-append .add-on:last-child,
+.input-append .add-on:last-child{margin-left:-5px}

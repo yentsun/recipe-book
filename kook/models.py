@@ -119,6 +119,10 @@ class Step(Entity):
     def __str__(self) :
         return u'Шаг %s: %s (%s мин)' % (self.number, self.text, self.time_value)
 
+    @classmethod
+    def dummy(cls):
+        return cls(1, '', '')
+
 class Action(Entity):
     u"""Модель действия"""
 
@@ -160,6 +164,12 @@ class Ingredient(Entity):
 
     def __str__(self) :
         return u'%s %d г' % (self.product.title, self.amount)
+
+    @classmethod
+    def dummy(cls):
+        """Create an empty object"""
+        dummy_product = Product('')
+        return cls(dummy_product, '')
 
     def measure(self, unit_title=None):
         if len(self.product.units) > 0:
@@ -208,11 +218,13 @@ steps = Table('steps', metadata,
 mapper(Recipe, recipes, properties={'ingredients': relationship(
                                                         Ingredient,
                                                         backref='recipe',
+                                                        lazy='subquery',
                                                         cascade='all, delete, delete-orphan',
                                                         order_by=ingredients.c.amount.desc()),
                                     'steps': relationship(
                                                         Step,
                                                         cascade='all, delete, delete-orphan',
+                                                        lazy='subquery',
                                                         order_by=steps.c.number)})
 mapper(Product, products, properties={'units':relationship(
                                                         Unit,

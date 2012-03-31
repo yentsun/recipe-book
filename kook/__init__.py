@@ -9,7 +9,7 @@ from pyramid_beaker import set_cache_regions_from_settings
 
 from .models import DBSession
 
-THEME = 'mappinghistory'
+THEME = 'bootstrap'
 
 def find_renderer(template_file, theme=THEME):
     return 'kook:templates/%s/%s' % (theme, template_file)

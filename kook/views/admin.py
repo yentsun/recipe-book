@@ -2,7 +2,7 @@
 
 from pyramid.httpexceptions import HTTPFound
 from beaker.cache import cache_region, region_invalidate
-from ..models import Recipe, Product
+from ..models import Recipe, Product, Step, Ingredient
 
 @cache_region('long_term', 'common')
 def common():
@@ -16,17 +16,20 @@ def create_recipe_view(request):
         recipe = Recipe.construct_from_multidict(request.POST)
         recipe.save()
         region_invalidate(common, 'long_term', 'common')
-        request.session.flash(u'<div class="ok">Рецепт добавлен!</div>')
+        request.session.flash(u'<div class="alert alert-success">Рецепт "%s" добавлен!</div>'
+                              % recipe.title)
         return HTTPFound('/?invalidate_cache=true')
     else:
         response = common()
         response['create_recipe_path'] = create_recipe_path
+        response['step'] = Step.dummy()
+        response['ingredient'] = Ingredient.dummy()
         return response
 
 def delete_recipe_view(request):
     title = request.matchdict['title']
     victim_title = Recipe.delete(title)
-    request.session.flash(u'<div class="notice">Рецепт "%s" удален!</div>' % victim_title)
+    request.session.flash(u'<div class="alert">Рецепт "%s" удален!</div>' % victim_title)
     region_invalidate(common, 'long_term', 'common')
     return HTTPFound('/?invalidate_cache=true')
 
@@ -42,7 +45,7 @@ def update_recipe_view(request):
         if 'update_path' not in request.matchdict: #this check is only for tests
             update_path = request.current_route_url(title=recipe.title)
         region_invalidate(common, 'long_term', 'common')
-        request.session.flash(u'<div class="ok">Рецепт обновлен!</div>')
+        request.session.flash(u'<div class="alert alert-success">Рецепт обновлен!</div>')
         return HTTPFound(update_path)
     else:
         response = common()
