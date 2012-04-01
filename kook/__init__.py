@@ -23,23 +23,23 @@ def main(global_settings, **settings):
     session_factory = UnencryptedCookieSessionFactoryConfig('5I73ZwNTzrF3gRoYmj')
     config = Configurator(settings=settings, session_factory=session_factory)
     config.add_static_view('static', 'static', cache_max_age=3600)
-    config.add_route('index', '/')
+    config.add_route('dashboard', '/')
     config.add_route('read_recipe', '/recipe/{title}')
     config.add_route('create_recipe', '/create_recipe')
     config.add_route('update_recipe', '/update_recipe/{title}')
     config.add_route('delete_recipe', '/delete_recipe/{title}')
     config.add_view('kook.views.presentation.recipe_index_view',
-                    route_name='index',
-                    renderer=find_renderer('index.mako'))
+                    route_name='dashboard',
+                    renderer=find_renderer('read/dashboard.mako'))
     config.add_view('kook.views.presentation.read_recipe_view',
                     route_name='read_recipe',
-                    renderer=find_renderer('read_recipe.mako'))
+                    renderer=find_renderer('read/read_recipe.mako'))
     config.add_view('kook.views.admin.create_recipe_view',
                     route_name='create_recipe',
-                    renderer=find_renderer('create_recipe.mako'))
+                    renderer=find_renderer('create_update/create_recipe.mako'))
     config.add_view('kook.views.admin.update_recipe_view',
                     route_name='update_recipe',
-                    renderer=find_renderer('update_recipe.mako'))
+                    renderer=find_renderer('create_update/update_recipe.mako'))
     config.add_view('kook.views.admin.delete_recipe_view',
                     route_name='delete_recipe')
     config.add_subscriber(handle_new_request, NewRequest)

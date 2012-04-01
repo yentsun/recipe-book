@@ -1,18 +1,17 @@
-<%inherit file="layout.mako"/>
+<%inherit file="../layout.mako"/>
 % if request.session.peek_flash():
     <% flash = request.session.pop_flash() %>
     % for message in flash:
-        ${message | n}
+        <div class="span12">${message | n}</div>
     % endfor
 % endif
 <%def name="title()">Панель управления</%def>
-<div class="row">
   <div class="span6">
     <div class="pull-right">
           <a href="${request.route_path('create_recipe')}" class="btn btn-success btn-mini">
               <i class="icon-plus icon-white"></i> новый рецепт</a></div>
     <h3>Рецепты <span class="badge">${len(recipes)}</span></h3>
-    <table class="table table-striped">
+    <table class="table table-striped" id="recipe-list">
       <thead>
         <tr>
           <th>заголовок</th>
@@ -23,8 +22,12 @@
       % for recipe in recipes:
         <tr>
           <td>
-            <a title="редактировать"
-               href="${request.route_path('update_recipe', title=recipe.title)}">${recipe.title}</a>
+            <a title="открыть рецепт"
+               href="${request.route_path('read_recipe', title=recipe.title)}">${recipe.title}</a>
+              <a title="обновить рецепт" class="btn btn-mini edit"
+               href="${request.route_path('update_recipe', title=recipe.title)}">
+                 <i class="icon-pencil"></i>
+              </a>
           </td>
           <td></td>
         </tr>
@@ -48,4 +51,6 @@
       </tbody>
     </table>
   </div>
-</div>
+<%def name="js()">
+    <script type="text/javascript" src="/static/bootstrap/js/dashboard.js"></script>
+</%def>

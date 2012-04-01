@@ -53,7 +53,7 @@
           <small>${self.sub_title()}</small>
           % endif
       </h1></div>
-      ${next.body()}
+      <div class="row">${next.body()}</div>
     </div> <!-- /container -->
 
     <script type="text/javascript"

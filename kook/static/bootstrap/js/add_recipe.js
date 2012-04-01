@@ -13,16 +13,17 @@ $(function() {
     });
     $('#add_step_fields').click(function(){
         var duplicate = $(this).siblings('.step:last').clone();
+        console.log(duplicate);
         var step_number_field = duplicate.find('input[name="step_number"]');
         var step_number = Number(step_number_field.val());
         step_number++;
         duplicate.find('input:text').val('');
         step_number_field.val(step_number);
-        duplicate.find('label.step_title').attr('for', 'steptext_'+step_number);
         duplicate.find('textarea').attr('id', 'steptext_'+step_number).text('');
         duplicate.find('span').remove();
-        duplicate.insertBefore($(this));
+        duplicate.insertBefore($(this)).hide().fadeIn('slow');
         create_ckeditor(duplicate.find('textarea'));
+        $(window).scrollTop(duplicate.position().top);
     });
     $('.product_name input').attr('autocomplete', 'off').typeahead({source:products});
     $('.remove').live('click', function(){

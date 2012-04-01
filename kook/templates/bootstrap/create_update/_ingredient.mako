@@ -7,7 +7,7 @@
     </td>
     <td class="amount">
         <div class="input-append">
-            <input id="amount${no}" type="text" name="amount" class="span1"
+            <input id="amount${no}" type="text" name="amount" style="width:30px"
                    value="${ingredient.amount}">
             <span class="add-on">г</span>
         </div>
