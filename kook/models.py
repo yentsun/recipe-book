@@ -195,6 +195,13 @@ class Ingredient(Entity):
                 return ''
 
     @property
+    def unit_abbr(self):
+        if self.unit is not None:
+            return self.unit.abbr
+        else:
+            return u'г'
+
+    @property
     def apu(self):
         if self.unit is not None:
             for apu in self.product.APUs:

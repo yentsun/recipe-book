@@ -8,7 +8,8 @@
     <section id="ingredients" class="span8"><h2>Ингредиенты:</h2><br>
             <ul>
                     % for ingredient in recipe.ingredients:
-                        <li>${ingredient.product.title}, ${ingredient.measure()}</li>
+                        <li>${ingredient.product.title},
+                            ${ingredient.measured} ${ingredient.unit_abbr}</li>
                     % endfor
             </ul>
         </section></div>
@@ -19,7 +20,7 @@
             <tr>
                 <td class="no">
                     <button class="btn" data-toggle="button">
-                    <i class="icon-ok" style="display:none"></i> ${step.number}
+                    ${step.number} <i class="icon-ok" style="display:none"></i>
                     </button>
                 </td>
                 <td class="text">
