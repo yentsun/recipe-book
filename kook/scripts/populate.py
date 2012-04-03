@@ -11,7 +11,8 @@ from pyramid.paster import (
     setup_logging,
     )
 
-from ..models import (DBSession, metadata, Recipe, Product, Ingredient, Step, Unit)
+from ..models import (DBSession, metadata, Recipe, Product, Ingredient, Step,
+                      Unit, AmountPerUnit)
 
 def usage(argv):
     cmd = os.path.basename(argv[0])
@@ -29,17 +30,20 @@ def main(argv=sys.argv):
     DBSession.configure(bind=engine)
     metadata.create_all(engine)
     with transaction.manager:
-        recipe = Recipe(title=u'оливье',
-                        description=u'Один из самых популярных салатов')
+        recipe = Recipe(title=u'оливье', description=u'Один из самых популярных салатов')
         potato = Product(title=u'картофель')
-        piece = Unit(u'шт.', 100, potato)
-        potato.units = [piece]
-        carrot = Product(title=u'морковь')
         sausage = Product(title=u'колбаса вареная')
+        piece = Unit(u'штука', u'шт')
+        bucket = Unit(u'ведро', u'вед')
+        onion_piece = Unit(u'луковица')
+        potato.APUs = [AmountPerUnit(100, piece),
+                       AmountPerUnit(8000, bucket)]
+        carrot = Product(title=u'морковь')
         onion = Product(title=u'лук репчатый')
+        onion.APUs = [AmountPerUnit(75, onion_piece)]
         egg = Product(title=u'яйцо куриное')
         recipe.ingredients = [
-            Ingredient(potato, amount=400),
+            Ingredient(potato, amount=400, unit=piece),
             Ingredient(carrot, amount=150),
             Ingredient(sausage, amount=200),
             Ingredient(onion, amount=75),

@@ -48,11 +48,16 @@
     </div>
 
     <div class="container">
-      <div class="page-header"><h1>${self.title()}
+      <div class="page-header">
+        <h1>${self.title()}
           % if hasattr(self,'sub_title'):
-          <small>${self.sub_title()}</small>
+            <small>${self.sub_title()}</small>
           % endif
-      </h1></div>
+        </h1>
+          % if hasattr(self,'additional_buttons'):
+              ${self.additional_buttons()}
+          % endif
+      </div>
       <div class="row">${next.body()}</div>
     </div> <!-- /container -->
 

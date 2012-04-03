@@ -28,6 +28,7 @@ def main(global_settings, **settings):
     config.add_route('create_recipe', '/create_recipe')
     config.add_route('update_recipe', '/update_recipe/{title}')
     config.add_route('delete_recipe', '/delete_recipe/{title}')
+    config.add_route('product_units', '/product_units/{product_title}')
     config.add_view('kook.views.presentation.recipe_index_view',
                     route_name='dashboard',
                     renderer=find_renderer('read/dashboard.mako'))
@@ -42,6 +43,8 @@ def main(global_settings, **settings):
                     renderer=find_renderer('create_update/update_recipe.mako'))
     config.add_view('kook.views.admin.delete_recipe_view',
                     route_name='delete_recipe')
+    config.add_view('kook.views.admin.product_units_view',
+                    route_name='product_units', renderer='json')
     config.add_subscriber(handle_new_request, NewRequest)
     config.scan()
     return config.make_wsgi_app()

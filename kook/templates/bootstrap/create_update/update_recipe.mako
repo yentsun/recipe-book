@@ -7,6 +7,11 @@
     <div class="span12">${message | n}</div>
 % endfor
 % endif
+<%def name="additional_buttons()">
+<a class="btn pull-right" href="${request.route_path('read_recipe', title=recipe.title)}">
+    <i class="icon-eye-open"></i> посмотреть рецепт
+</a>
+</%def>
 <form class="span12" action="${update_recipe_path}" method="post">
     <div class="row">
     <div class="span6">

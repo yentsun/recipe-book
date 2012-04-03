@@ -8,12 +8,13 @@ body{background:#f8f3df url('../img/papertop.jpg') repeat-x}
 .time{margin-left:100px}
 .input-prepend .add-on, .input-prepend.input-append .add-on:first-child{margin-right:-5px}
 .input-prepend.input-append .add-on:last-child,
-.input-append .add-on:last-child{margin-left:-5px}
+.input-append a.add-on{margin-left:-5px}
 .well{background:#e8e3d1}
 blockquote{border-left-color:#6B4A28}
 .time_set, .number_set{float:left}
 .step .topline{overflow:hidden}
-td.amount{width:60px}
+td.amount{width:150px}
+td.amount .dropdown-menu{right:0; left:auto;}
 
 /*recipe-list*/
 #recipe-list .edit{display:none}

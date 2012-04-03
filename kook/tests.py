@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import json
 import unittest
 import transaction
 
@@ -10,12 +10,14 @@ from sqlalchemy import engine_from_config
 from pyramid_beaker import set_cache_regions_from_settings
 from paste.deploy.loadwsgi import appconfig
 
-from kook.models import Recipe, Step, Product, Ingredient, metadata, DBSession, Unit
+from kook.models import (Recipe, Step, Product, Ingredient, metadata, DBSession,
+                         Unit, AmountPerUnit)
 from kook.views.presentation import (read_recipe_view,
                                      recipe_index_view)
 from kook.views.admin import (create_recipe_view,
                               update_recipe_view,
-                              delete_recipe_view)
+                              delete_recipe_view,
+                              product_units_view)
 
 sausage = Product(title=u'колбаса вареная')
 
@@ -33,13 +35,17 @@ class TestMyViews(unittest.TestCase):
             recipe = Recipe(title=u'оливье',
                             description=u'Один из самых популярных салатов')
             potato = Product(title=u'картофель')
-            piece = Unit(u'шт.', 100, potato)
-            potato.units = [piece]
+            piece = Unit(u'piece', u'pcs')
+            bucket = Unit(u'bucket', u'bkt')
+            onion_piece = Unit(u'луковица')
+            potato.APUs = [AmountPerUnit(100, piece),
+                           AmountPerUnit(8000, bucket)]
             carrot = Product(title=u'морковь')
             onion = Product(title=u'лук репчатый')
+            onion.APUs = [AmountPerUnit(75, onion_piece)]
             egg = Product(title=u'яйцо куриное')
             recipe.ingredients = [
-                Ingredient(potato, amount=400),
+                Ingredient(potato, amount=400, unit=piece),
                 Ingredient(carrot, amount=150),
                 Ingredient(sausage, amount=200),
                 Ingredient(onion, amount=75),
@@ -72,8 +78,13 @@ class TestMyViews(unittest.TestCase):
         assert potato in recipe.products
         self.assertEqual(len(recipe.steps), 4)
         potato_400g = Ingredient(potato, amount=400)
+        self.assertEqual(recipe.ingredients[0].apu, 100)
+        self.assertEqual(recipe.ingredients[1].apu, 1)
         assert potato_400g in recipe.ingredients
-        self.assertEqual(recipe.ingredients[0].measure(), u'4 шт.')
+        self.assertEqual(recipe.ingredients[0].measured, 4)
+        for ingredient in recipe.ingredients:
+            if ingredient.product.title == u'лук':
+                self.assertEqual(ingredient.measured, 1)
         assert garnishing in recipe.steps
 
     def test_create_recipe_view(self):
@@ -83,14 +94,19 @@ class TestMyViews(unittest.TestCase):
             ('description', u'Салат винегрет'),
             ('product', u'свекла'),
             ('amount', '400'),
+            ('unit_title', u'штука'),
             ('product', u'морковь'),
             ('amount', '300'),
+            ('unit_title', ''),
             ('product', u'картофель'),
             ('amount', '400'),
+            ('unit_title', ''),
             ('product', u'квашеная капуста'),
             ('amount', '200'),
+            ('unit_title', ''),
             ('product', u'лук репчатый'),
             ('amount', '150'),
+            ('unit_title', ''),
             ('step_number', '1'),
             ('step_text', u'свеклу, морковь и картофель отварить, пока овощи не станут мягкими'),
             ('time_value', 60),
@@ -105,7 +121,7 @@ class TestMyViews(unittest.TestCase):
         self.assertEqual(recipe.title, u'Винегрет')
         self.assertEqual(len(recipe.ingredients), 5)
         potato = Product(u'картофель')
-        potato_400g = Ingredient(potato, 400)
+        potato_400g = Ingredient(potato, amount=400)
         assert potato in recipe.products
         assert potato_400g in recipe.ingredients
         self.assertEqual(len(recipe.steps), 2)
@@ -168,3 +184,15 @@ class TestMyViews(unittest.TestCase):
         response = recipe_index_view(request)
         recipes = response['recipes']
         self.assertEqual(len(recipes), 2)
+
+    def test_product_units_view(self):
+        request = DummyRequest()
+        request.matchdict['product_title'] = u'картофель'
+        response = product_units_view(request)
+        response = json.dumps(response)
+        self.assertEqual('[{"amount": 8000, "abbr": "bkt", "title": "bucket"}, {"amount": 100, "abbr": "pcs", "title": "piece"}]', response)
+
+        request.matchdict['product_title'] = u'картофел'
+        response = product_units_view(request)
+        response = json.dumps(response)
+        self.assertEqual('[]', response)

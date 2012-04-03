@@ -52,3 +52,16 @@ def update_recipe_view(request):
         response.update({'update_recipe_path': update_path,
                          'recipe': Recipe.fetch(title)})
         return response
+
+def product_units_view(request):
+    product_title = request.matchdict['product_title']
+    product = Product.fetch(product_title)
+    result = []
+    if product is not None:
+        for apu in product.APUs:
+            result.append({
+                'title': apu.unit.title,
+                'abbr': apu.unit.abbr,
+                'amount': apu.amount
+            })
+    return result
