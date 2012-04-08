@@ -1,7 +1,7 @@
 <%page args="no, ingredient"/>
 <tr class="product_amount removable">
-    <td class="product_name">
-        <input id="product${no}" type="text" name="product" class="span4"
+    <td class="product_title">
+        <input id="product${no}" type="text" name="product_title" class="span4"
                data-id="${no}" value="${ingredient.product.title}"
                data-provide="typeahead">
     </td>

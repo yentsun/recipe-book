@@ -90,42 +90,42 @@ class TestMyViews(unittest.TestCase):
     def test_create_recipe_view(self):
         #testing post
         POST = MultiDict((
-            ('title', u'Винегрет'),
+            ('title', u' Винегрет '),
             ('description', u'Салат винегрет'),
-            ('product', u'свекла'),
+            ('product_title', u'свекла'),
             ('amount', '400'),
             ('unit_title', u'штука'),
-            ('product', u'морковь'),
+            ('product_title', u'морковь'),
             ('amount', '300'),
             ('unit_title', ''),
-            ('product', u'картофель'),
+            ('product_title', u'картофель'),
             ('amount', '400'),
             ('unit_title', ''),
-            ('product', u'квашеная капуста'),
+            ('product_title', u'квашеная капуста'),
             ('amount', '200'),
             ('unit_title', ''),
-            ('product', u'лук репчатый'),
+            ('product_title', u'лук репчатый'),
             ('amount', '150'),
             ('unit_title', ''),
             ('step_number', '1'),
             ('step_text', u'свеклу, морковь и картофель отварить, пока овощи не станут мягкими'),
             ('time_value', 60),
-            ('step_number', 2),
+            ('step_number', '2'),
             ('step_text', u'Нарезать свеклу, морковь и картофель мелкими кубиками'),
             ('time_value', 2),
         ))
         request = DummyRequest(POST=POST)
         create_recipe_view(request)
-        recipe = Recipe.fetch(u'Винегрет')
+        recipe = Recipe.fetch(u'винегрет')
         assert recipe is not None
-        self.assertEqual(recipe.title, u'Винегрет')
+        self.assertEqual(recipe.title, u'винегрет')
         self.assertEqual(len(recipe.ingredients), 5)
         potato = Product(u'картофель')
         potato_400g = Ingredient(potato, amount=400)
         assert potato in recipe.products
         assert potato_400g in recipe.ingredients
         self.assertEqual(len(recipe.steps), 2)
-        self.assertEqual(recipe.ordered_steps['1'].time_value, 60)
+        self.assertEqual(60, recipe.ordered_steps['1'].time_value)
 
         #testing initial output
         request = DummyRequest()
@@ -136,15 +136,15 @@ class TestMyViews(unittest.TestCase):
         POST = MultiDict((
             ('title', u'оливье-3'),
             ('description', u'Салат винегрет'),
-            ('product', u'свекла'),
+            ('product_title', u'свекла'),
             ('amount', '400'),
-            ('product', u'морковь'),
+            ('product_title', u'морковь'),
             ('amount', '300'),
-            ('product', u'картофель'),
+            ('product_title', u'картофель'),
             ('amount', '400'),
-            ('product', u'квашеная капуста'),
+            ('product_title', u'квашеная капуста'),
             ('amount', '200'),
-            ('product', u'лук репчатый'),
+            ('product_title', u'лук репчатый'),
             ('amount', '150'),
             ('step_number', '1'),
             ('step_text', u'свеклу, морковь и картофель отварить, пока овощи не станут мягкими'),

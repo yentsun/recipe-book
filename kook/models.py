@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import transaction
 from sqlalchemy import (Column,
                         Table,
                         Unicode,
@@ -28,7 +27,7 @@ class Recipe(Entity):
     """Recipe model"""
 
     def __init__(self, title, description, products_amounts=None):
-        self.title = title
+        self.title = title.lower()
         self.description = description
         self.steps = []
         if products_amounts is not None:
@@ -40,11 +39,11 @@ class Recipe(Entity):
     @classmethod
     def construct_from_multidict(cls, multidict):
         recipe = cls(multidict.getone('title'), multidict.getone('description'))
-        products = multidict.getall('product')
+        product_titles = multidict.getall('product_title')
         amounts = multidict.getall('amount')
         unit_titles = multidict.getall('unit_title')
         recipe.ingredients = []
-        for product_title, amount, unit_title in zip(products, amounts, unit_titles):
+        for product_title, amount, unit_title in zip(product_titles, amounts, unit_titles):
             product = Product(product_title)
             unit = Unit.factory(unit_title)
             recipe.ingredients.append(Ingredient(product, amount, unit))
@@ -61,11 +60,6 @@ class Recipe(Entity):
             step = Step(number, text, time_value)
             recipe.steps.append(step)
         return recipe
-
-    def get_ingredient_by_product_title(self, product_title):
-        for ingredient in self.ingredients:
-            if ingredient.product.title == product_title:
-                return ingredient
 
     @property
     def products(self):

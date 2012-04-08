@@ -28,7 +28,7 @@ $(function() {
         create_ckeditor(duplicate.find('textarea'));
         $(window).scrollTop(duplicate.position().top);
     });
-    var product_name_inputs = $('.product_name input');
+    var product_name_inputs = $('.product_title input');
     product_name_inputs.attr('autocomplete', 'off').typeahead({source:products});
     product_name_inputs.live('change', function(){
         repopulate_measures($(this));
