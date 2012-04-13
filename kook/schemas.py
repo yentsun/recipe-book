@@ -1,30 +1,30 @@
 from colander import (SchemaNode, MappingSchema, SequenceSchema,
                       String, Int, Length, Range)
 
-class ProductTitles(SequenceSchema):
-    product_title_node = SchemaNode(String(), validator=Length(3))
+def normalize_string(string):
+    """Remove whitespace and bring the string to lowercase"""
+    return string.strip().lower()
 
-class Amounts(SequenceSchema):
-    amount_node = SchemaNode(Int(), validator=Range(1))
+class IngredientSchema(MappingSchema):
+    product_title = SchemaNode(String(), validator=Length(3),
+                               preparer=normalize_string)
+    amount = SchemaNode(Int(), validator=Range(1))
+    unit_title = SchemaNode(String(), validator=Length(3), missing=None)
 
-class UnitTitles(SequenceSchema):
-    unit_title_node = SchemaNode(String())
+class Ingredients(SequenceSchema):
+    ingredient = IngredientSchema()
 
-class StepNumbers(SequenceSchema):
-    step_number_node = SchemaNode(Int(), validator=Range(1, 100))
+class StepSchema(MappingSchema):
+    number = SchemaNode(Int(), validator=Range(1, 100))
+    text = SchemaNode(String(), validator=Length(10))
+    time_value = SchemaNode(Int())
 
-class StepTexts(SequenceSchema):
-    step_text_node = SchemaNode(String(), validator=Length(10))
+class Steps(SequenceSchema):
+    step = StepSchema()
 
-class TimeValues(SequenceSchema):
-    time_value_node = SchemaNode(Int())
-
-class Recipe(MappingSchema):
-    title = SchemaNode(String(), validator=Length(3))
+class RecipeSchema(MappingSchema):
+    title = SchemaNode(String(), validator=Length(3),
+                       preparer=normalize_string)
     description = SchemaNode(String())
-    product_title = ProductTitles()
-    amount = Amounts()
-    unit_title = UnitTitles()
-    step_number = StepNumbers()
-    step_text = StepTexts()
-    time_value = TimeValues()
+    steps = Steps()
+    ingredients = Ingredients()

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import json
 from pyramid.httpexceptions import HTTPFound
 from beaker.cache import cache_region, region_invalidate
 from ..models import Recipe, Product, Step, Ingredient
@@ -11,16 +12,25 @@ def common():
 
 def create_recipe_view(request):
     create_recipe_path = '/create_recipe'
+    response = common()
     #   create_recipe_path = request.route_path('add_recipe') TODO tests cause "ComponentLookupError: (<InterfaceClass pyramid.interfaces.IRoutesMapper>, u'')"
     if request.POST:
-        recipe = Recipe.construct_from_multidict(request.POST)
-        recipe.save()
-        region_invalidate(common, 'long_term', 'common')
-        request.session.flash(u'<div class="alert alert-success">Рецепт "%s" добавлен!</div>'
-                              % recipe.title)
-        return HTTPFound('/?invalidate_cache=true')
+        result = Recipe.construct_from_multidict(request.POST)
+        if isinstance(result, Recipe):
+            result.save()
+            region_invalidate(common, 'long_term', 'common')
+            request.session.flash(u'<div class="alert alert-success">' \
+                                  u'Рецепт "%s" добавлен!' \
+                                  u'</div>'
+                                  % result.title)
+            return HTTPFound('/?invalidate_cache=true')
+        else:
+            request.session.flash(u'<div class="alert alert-error">'
+                                  u'Ошибка при добавлении рецепта!'
+                                  u'</div><div class="json_data">%s</div>'
+                                  % json.dumps(result))
+            return HTTPFound(create_recipe_path)
     else:
-        response = common()
         response['create_recipe_path'] = create_recipe_path
         response['step'] = Step.dummy()
         response['ingredient'] = Ingredient.dummy()
@@ -40,12 +50,18 @@ def update_recipe_view(request):
     else:
         update_path = request.current_route_url(title=title)
     if request.POST:
-        recipe = Recipe.construct_from_multidict(request.POST)
-        recipe.update(title)
-        if 'update_path' not in request.matchdict: #this check is only for tests
-            update_path = request.current_route_url(title=recipe.title)
-        region_invalidate(common, 'long_term', 'common')
-        request.session.flash(u'<div class="alert alert-success">Рецепт обновлен!</div>')
+        result = Recipe.construct_from_multidict(request.POST)
+        if isinstance(result, Recipe):
+            result.update(title)
+            if 'update_path' not in request.matchdict: #this check is only for tests
+                update_path = request.current_route_url(title=result.title)
+            region_invalidate(common, 'long_term', 'common')
+            request.session.flash(u'<div class="alert alert-success">Рецепт обновлен!</div>')
+        else:
+            request.session.flash(u'<div class="alert alert-error">'
+                                  u'Ошибка при обновлении рецепта!'
+                                  u'</div><div class="json_data">%s</div>'
+                                  % json.dumps(result))
         return HTTPFound(update_path)
     else:
         response = common()

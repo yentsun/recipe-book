@@ -90,7 +90,7 @@ class TestMyViews(unittest.TestCase):
     def test_create_recipe_view(self):
         #testing post
         POST = MultiDict((
-            ('title', u' Винегрет '),
+            ('title', u'ВинеГрет '),
             ('description', u'Салат винегрет'),
             ('product_title', u'свекла'),
             ('amount', '400'),
@@ -108,10 +108,13 @@ class TestMyViews(unittest.TestCase):
             ('amount', '150'),
             ('unit_title', ''),
             ('step_number', '1'),
-            ('step_text', u'свеклу, морковь и картофель отварить, пока овощи не станут мягкими'),
+            ('step_text',
+             u'свеклу, морковь и картофель отварить, пока овощи'
+             u' не станут мягкими'),
             ('time_value', 60),
             ('step_number', '2'),
-            ('step_text', u'Нарезать свеклу, морковь и картофель мелкими кубиками'),
+            ('step_text',
+             u'Нарезать свеклу, морковь и картофель мелкими кубиками'),
             ('time_value', 2),
         ))
         request = DummyRequest(POST=POST)
@@ -125,12 +128,28 @@ class TestMyViews(unittest.TestCase):
         assert potato in recipe.products
         assert potato_400g in recipe.ingredients
         self.assertEqual(len(recipe.steps), 2)
-        self.assertEqual(60, recipe.ordered_steps['1'].time_value)
+        self.assertEqual(60, recipe.ordered_steps[1].time_value)
 
         #testing initial output
         request = DummyRequest()
         response = create_recipe_view(request)
         assert potato in response['products']
+
+    def test_create_invalid_recipe(self):
+        POST = MultiDict((
+            ('title', u'Винегрет'),
+            ('description', u'Салат винегрет'),
+            ('product_title', u''),
+            ('amount', ''),
+            ('unit_title', u''),
+            ('step_number', ''),
+            ('step_text', u''),
+            ('time_value', 0)
+            ))
+        request = DummyRequest(POST=POST)
+        create_recipe_view(request)
+        recipe = Recipe.fetch(u'Винегрет')
+        assert recipe is None
 
     def test_update_recipe_view(self):
         POST = MultiDict((
@@ -147,10 +166,12 @@ class TestMyViews(unittest.TestCase):
             ('product_title', u'лук репчатый'),
             ('amount', '150'),
             ('step_number', '1'),
-            ('step_text', u'свеклу, морковь и картофель отварить, пока овощи не станут мягкими'),
+            ('step_text', u'свеклу, морковь и картофель отварить,'
+                          u' пока овощи не станут мягкими'),
             ('time_value', 60),
             ('step_number', 2),
-            ('step_text', u'Нарезать свеклу, морковь и картофель мелкими кубиками'),
+            ('step_text', u'Нарезать свеклу, морковь и картофель'
+                          u' мелкими кубиками'),
             ('time_value', 2),
         ))
         request = DummyRequest(POST=POST)
@@ -165,12 +186,6 @@ class TestMyViews(unittest.TestCase):
         assert sausage not in recipe_new.products
         self.assertEqual(recipe_new.description, u'Салат винегрет')
         self.assertEqual(len(recipe_new.steps), 2)
-
-        #testing initial output
-        request = DummyRequest()
-        response = create_recipe_view(request)
-        potato = Product(u'картофель')
-        assert potato in response['products']
 
     def test_delete_recipe_view(self):
         request = DummyRequest()
@@ -196,3 +211,11 @@ class TestMyViews(unittest.TestCase):
         response = product_units_view(request)
         response = json.dumps(response)
         self.assertEqual('[]', response)
+
+    def test_recipe_to_json(self):
+        request = DummyRequest()
+        request.matchdict['title'] = u'оливье'
+        response = read_recipe_view(request)
+        recipe = response['recipe']
+        recipe_json = json.dumps(recipe.to_dict())
+        self.assertEqual('{"ingredients": [{"amount": 400, "unit_title": "piece", "product_title": "\u043a\u0430\u0440\u0442\u043e\u0444\u0435\u043b\u044c"}, {"amount": 200, "unit_title": "", "product_title": "\u043a\u043e\u043b\u0431\u0430\u0441\u0430 \u0432\u0430\u0440\u0435\u043d\u0430\u044f"}, {"amount": 172, "unit_title": "", "product_title": "\u044f\u0439\u0446\u043e \u043a\u0443\u0440\u0438\u043d\u043e\u0435"}, {"amount": 150, "unit_title": "", "product_title": "\u043c\u043e\u0440\u043a\u043e\u0432\u044c"}, {"amount": 75, "unit_title": "", "product_title": "\u043b\u0443\u043a \u0440\u0435\u043f\u0447\u0430\u0442\u044b\u0439"}], "steps": [{"text": "\u0432\u0441\u0435 \u043e\u0432\u043e\u0449\u0438 \u043e\u0442\u0432\u0430\u0440\u0438\u0442\u044c", "time_value": 30, "number": 1}, {"text": "\u043a\u0430\u0440\u0442\u043e\u0444\u0435\u043b\u044c \u0438 \u043c\u043e\u0440\u043a\u043e\u0432\u044c \u043e\u0447\u0438\u0441\u0442\u0438\u0442\u044c \u043e\u0442 \u043a\u043e\u0436\u0438\u0446\u044b", "time_value": 5, "number": 2}, {"text": "\u043e\u0432\u043e\u0449\u0438 \u0438 \u043a\u043e\u043b\u0431\u0430\u0441\u0443 \u043d\u0430\u0440\u0435\u0437\u0430\u0442\u044c \u0438 \u043f\u0435\u0440\u0435\u043c\u0435\u0448\u0430\u0442\u044c, \u0437\u0430\u043f\u0440\u0430\u0432\u043b\u044f\u044f \u043c\u0430\u0439\u043e\u043d\u0435\u0437\u043e\u043c", "time_value": 1, "number": 3}, {"text": "\u0441\u0430\u043b\u0430\u0442 \u0443\u043a\u0440\u0430\u0441\u0438\u0442\u044c \u0432\u0435\u0442\u043a\u043e\u0439 \u043f\u0435\u0442\u0440\u0443\u0448\u043a\u0438", "time_value": 0, "number": 4}], "description": "\u041e\u0434\u0438\u043d \u0438\u0437 \u0441\u0430\u043c\u044b\u0445 \u043f\u043e\u043f\u0443\u043b\u044f\u0440\u043d\u044b\u0445 \u0441\u0430\u043b\u0430\u0442\u043e\u0432", "title": "\u043e\u043b\u0438\u0432\u044c\u0435"}', recipe_json)

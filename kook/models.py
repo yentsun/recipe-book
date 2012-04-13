@@ -11,8 +11,11 @@ from sqlalchemy.orm import (scoped_session,
                             relationship,
                             mapper)
 from zope.sqlalchemy import ZopeTransactionExtension
+from colander import Invalid
+from schemas import RecipeSchema
 
-DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
+DBSession = scoped_session(sessionmaker(
+    extension=ZopeTransactionExtension()))
 metadata = MetaData()
 
 class Entity(object):
@@ -26,40 +29,102 @@ class Entity(object):
 class Recipe(Entity):
     """Recipe model"""
 
-    def __init__(self, title, description, products_amounts=None):
-        self.title = title.lower()
+    def __init__(self, title, description):
+        self.title = title
         self.description = description
         self.steps = []
-        if products_amounts is not None:
-            self.ingredients = []
-            for product_title, amount in products_amounts:
-                product = Product(product_title)
-                self.ingredients.append(Ingredient(product, amount))
+        self.ingredients = []
 
     @classmethod
-    def construct_from_multidict(cls, multidict):
-        recipe = cls(multidict.getone('title'), multidict.getone('description'))
+    def multidict_to_dict(cls, multidict):
+        dictionary = {'title': multidict.getone('title'),
+                      'description': multidict.getone('description'),
+                      'ingredients': [],
+                      'steps': []}
         product_titles = multidict.getall('product_title')
         amounts = multidict.getall('amount')
         unit_titles = multidict.getall('unit_title')
-        recipe.ingredients = []
-        for product_title, amount, unit_title in zip(product_titles, amounts, unit_titles):
-            product = Product(product_title)
-            unit = Unit.factory(unit_title)
-            recipe.ingredients.append(Ingredient(product, amount, unit))
+
+        for product_title, amount, unit_title\
+        in zip(product_titles, amounts, unit_titles):
+            dictionary['ingredients'].append({
+                'product_title': product_title,
+                'amount': amount,
+                'unit_title': unit_title
+            })
+
         steps_numbers = multidict.getall('step_number')
         time_values = multidict.getall('time_value')
         steps_texts = multidict.getall('step_text')
-        recipe.steps = []
+
         for number,\
             text,\
             time_value,\
         in zip(steps_numbers,
-               steps_texts,
-               time_values):
-            step = Step(number, text, time_value)
-            recipe.steps.append(step)
+            steps_texts,
+            time_values):
+            dictionary['steps'].append({
+            'number': number,
+            'text': text,
+            'time_value': time_value
+            })
+
+        return dictionary
+
+    @classmethod
+    def construct_from_dict(cls, cstruct):
+        recipe_schema = RecipeSchema()
+        try:
+            appstruct = recipe_schema.deserialize(cstruct)
+        except Invalid, e:
+            return e.asdict()
+        recipe = cls(appstruct['title'],
+                     appstruct['description'])
+        for ingredient_entry in appstruct['ingredients']:
+            if ingredient_entry['unit_title'] is None:
+                unit = None
+            else:
+                unit = Unit(ingredient_entry['unit_title'])
+            recipe.ingredients.append(Ingredient(
+                Product(ingredient_entry['product_title']),
+                ingredient_entry['amount'],
+                unit
+            ))
+        for step_entry in appstruct['steps']:
+            recipe.steps.append(Step(step_entry['number'],
+                                     step_entry['text'],
+                                     step_entry['time_value']))
         return recipe
+
+    @classmethod
+    def construct_from_multidict(cls, multidict):
+        dict = cls.multidict_to_dict(multidict)
+        return cls.construct_from_dict(dict)
+
+    def to_dict(self):
+        result = {
+            'title': self.title,
+            'description': self.description,
+            'ingredients': [],
+            'steps': []
+        }
+        for ingredient in self.ingredients:
+            ingredient_dict = {
+                'product_title': ingredient.product.title,
+                'amount': ingredient.amount
+            }
+            if ingredient.unit is not None:
+                ingredient_dict['unit_title'] = ingredient.unit.title
+            else:
+                ingredient_dict['unit_title'] = ''
+            result['ingredients'].append(ingredient_dict)
+        for step in self.steps:
+            result['steps'].append({
+                'number': step.number,
+                'text': step.text,
+                'time_value': step.time_value
+            })
+        return result
 
     @property
     def products(self):
@@ -143,18 +208,6 @@ class Unit(Entity):
         self.abbr = abbr
 
     @classmethod
-    def factory(cls, title):
-        if title != '':
-            unit = cls.fetch(title)
-            if unit:
-                return unit
-            else:
-                new_unit = cls(title, title[:2])
-                return new_unit
-        else:
-            return None
-
-    @classmethod
     def fetch(cls, title):
         return DBSession.query(cls).filter(cls.title==title).first()
 
@@ -235,46 +288,44 @@ units = Table('units', metadata,
 
 amount_per_unit = Table('amount_per_unit', metadata,
     Column('product_title', Unicode, ForeignKey('products.title'),
-            primary_key=True, nullable=False),
+           primary_key=True, nullable=False),
     Column('unit_title', Unicode, ForeignKey('units.title'),
-            primary_key=True, nullable=False),
-    Column('amount', Integer, nullable=False)
-)
+           primary_key=True, nullable=False),
+    Column('amount', Integer, nullable=False))
 
 ingredients = Table('ingredients', metadata,
-    Column('recipe_title', Unicode, ForeignKey('recipes.title'), primary_key=True),
-    Column('product_title', Unicode, ForeignKey('products.title'), primary_key=True),
+    Column('recipe_title', Unicode, ForeignKey('recipes.title'),
+           primary_key=True),
+    Column('product_title', Unicode, ForeignKey('products.title'),
+           primary_key=True),
     Column('amount', Integer, nullable=False),
-    Column('unit_title', Unicode, ForeignKey('units.title')),
-)
+    Column('unit_title', Unicode, ForeignKey('units.title')))
 
 steps = Table('steps', metadata,
-    Column('recipe_title', Unicode, ForeignKey('recipes.title'), primary_key=True),
+    Column('recipe_title', Unicode, ForeignKey('recipes.title'),
+           primary_key=True),
     Column('number', Integer, nullable=False, primary_key=True),
     Column('time_value', Integer, nullable=False),
     Column('text', Unicode),
-    Column('note', Unicode)
-)
+    Column('note', Unicode))
 
 mapper(Step, steps)
 mapper(Unit, units)
-mapper(Recipe, recipes, properties={'ingredients': relationship(
-                                                        Ingredient,
-                                                        backref='recipe',
-                                                        lazy='subquery',
-                                                        cascade='all, delete, delete-orphan',
-                                                        order_by=ingredients.c.amount.desc()),
-                                    'steps': relationship(
-                                                        Step,
-                                                        cascade='all, delete, delete-orphan',
-                                                        lazy='subquery',
-                                                        order_by=steps.c.number)})
-mapper(Product, products, properties={'APUs':relationship(AmountPerUnit,
-                                                        cascade='all, delete-orphan')})
-mapper(AmountPerUnit, amount_per_unit, properties={'unit':relationship(Unit,
-                                                        lazy='joined'),
-                                                   'product':relationship(Product)})
-mapper(Ingredient, ingredients, properties={'product':relationship(Product,
-                                                        uselist=False,
-                                                        lazy='joined'),
-                                            'unit':relationship(Unit, uselist=False,                                                                     lazy='joined')})
+mapper(Recipe, recipes, properties={
+    'ingredients': relationship(Ingredient, backref='recipe',
+                                lazy='subquery',
+                                cascade='all, delete, delete-orphan',
+                                order_by=ingredients.c.amount.desc()),
+    'steps': relationship(Step, cascade='all, delete, delete-orphan',
+                          lazy='subquery', order_by=steps.c.number)})
+
+mapper(Product, products, properties={
+    'APUs':relationship(AmountPerUnit, cascade='all, delete-orphan')})
+
+mapper(AmountPerUnit, amount_per_unit, properties={
+    'unit':relationship(Unit, lazy='joined'),
+    'product':relationship(Product)})
+
+mapper(Ingredient, ingredients, properties={
+    'product':relationship(Product, uselist=False, lazy='joined'),
+    'unit':relationship(Unit, uselist=False, lazy='joined')})
