@@ -60,7 +60,7 @@ def update_recipe_view(request):
         else:
             request.session.flash(u'<div class="alert alert-error">'
                                   u'Ошибка при обновлении рецепта!'
-                                  u'</div><div class="json_data">%s</div>'
+                                  u'<div class="json-data">%s</div></div>'
                                   % json.dumps(result))
         return HTTPFound(update_path)
     else:

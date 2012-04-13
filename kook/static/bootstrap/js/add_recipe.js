@@ -38,6 +38,27 @@ $(function() {
             $(this).remove();
         });
     });
+    if ($('.alert-error .json-data').length) {
+        var error_fields = $.parseJSON(
+            $('.alert-error .json-data').text());
+        for (var field_params in error_fields) {
+            var subs = field_params.split('.');
+            var field_group = subs[0];
+            var element_field_name = subs[2];
+            var element_no = parseInt(subs[1]);
+            if (field_group && element_field_name == undefined) {
+            $('.'+field_group+' label').css('color', '#B94A48')
+                .append(' <span class="label label-important">'+
+                          error_fields[field_params]+'</span>');
+            } else {
+                $('.'+field_group+' .removable').eq(element_no)
+                    .find('[name='+element_field_name+']')
+                    .css('background', '#F2DEDE')
+                    .attr('data-content', error_fields[field_params])
+                    .popover();
+            }
+        }
+    }
 });
 
 function set_measure(cont, apu_unit_title, apu_unit_abbr, apu_amount) {

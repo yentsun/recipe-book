@@ -84,7 +84,7 @@ class Recipe(Entity):
             if ingredient_entry['unit_title'] is None:
                 unit = None
             else:
-                unit = Unit(ingredient_entry['unit_title'])
+                unit = Unit.fetch(ingredient_entry['unit_title'])
             recipe.ingredients.append(Ingredient(
                 Product(ingredient_entry['product_title']),
                 ingredient_entry['amount'],
@@ -242,13 +242,6 @@ class Ingredient(Entity):
                 return ''
 
     @property
-    def unit_abbr(self):
-        if self.unit is not None:
-            return self.unit.abbr
-        else:
-            return u'г'
-
-    @property
     def apu(self):
         if self.unit is not None:
             for apu in self.product.APUs:
@@ -275,6 +268,7 @@ class AmountPerUnit(Entity):
 
 #sqlalchemy stuff
 
+#tables
 recipes = Table('recipes', metadata,
     Column('title', Unicode, primary_key=True, nullable=False),
     Column('description', Unicode))
@@ -305,14 +299,15 @@ steps = Table('steps', metadata,
     Column('recipe_title', Unicode, ForeignKey('recipes.title'),
            primary_key=True),
     Column('number', Integer, nullable=False, primary_key=True),
-    Column('time_value', Integer, nullable=False),
-    Column('text', Unicode),
+    Column('time_value', Integer),
+    Column('text', Unicode, nullable=False),
     Column('note', Unicode))
 
+#mappers
 mapper(Step, steps)
 mapper(Unit, units)
 mapper(Recipe, recipes, properties={
-    'ingredients': relationship(Ingredient, backref='recipe',
+    'ingredients': relationship(Ingredient,
                                 lazy='subquery',
                                 cascade='all, delete, delete-orphan',
                                 order_by=ingredients.c.amount.desc()),
@@ -320,7 +315,8 @@ mapper(Recipe, recipes, properties={
                           lazy='subquery', order_by=steps.c.number)})
 
 mapper(Product, products, properties={
-    'APUs':relationship(AmountPerUnit, cascade='all, delete-orphan')})
+    'APUs':relationship(AmountPerUnit, cascade='all, delete-orphan',
+                        lazy='joined')})
 
 mapper(AmountPerUnit, amount_per_unit, properties={
     'unit':relationship(Unit, lazy='joined'),

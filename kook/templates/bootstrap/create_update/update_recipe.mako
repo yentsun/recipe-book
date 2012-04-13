@@ -20,10 +20,16 @@
             <label for="title">Название</label>
             <input class="span5" type="text" id="title"
                    name="title" value="${recipe.title}" data-title="${recipe.title}">
-            <label for="description">Описание</label>
-            <textarea name="description" id="description" cols="30" rows="10">${recipe.description}</textarea>
+            <div class="description"><label for="description">Описание</label>
+            <textarea name="description" id="description"
+                      cols="30" rows="10">
+                % if recipe.description is not None:
+                    ${recipe.description}
+                % endif
+            </textarea>
+            </div>
     </fieldset>
-    <fieldset class="well" id="steps_fields">
+    <fieldset class="well steps" id="steps_fields">
         <legend>Приготовление</legend>
 ##        TODO добавить пустую форму шага, если нет шагов
         % for step in recipe.steps:
