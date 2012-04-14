@@ -10,14 +10,18 @@
     <div class="row">
         <div class="span6">
             <fieldset class="well">
-        <legend>Название</legend>
+        <div class="title"><legend>Название</legend>
             <label for="title">Название</label>
             <input class="span5" type="text" id="title"
                    name="title" value="" data-title="">
-            <label for="description">Описание</label>
-            <textarea name="description" id="description" cols="30" rows="10"></textarea>
+        </div>
+            <div class="description">
+                <label for="description">Описание</label>
+                <textarea name="description" id="description"
+                          cols="30" rows="10"></textarea>
+            </div>
     </fieldset>
-            <fieldset class="well" id="steps_fields">
+            <fieldset class="well steps" id="steps_fields">
         <legend>Приготовление</legend>
 ##        TODO добавить пустую форму шага, если нет шагов
         <%include file="_step.mako" args="step=step"/>
@@ -27,7 +31,7 @@
     </fieldset>
         </div>
         <div class="span6">
-        <fieldset class="well" id="ingredients">
+        <fieldset class="well ingredients" id="ingredients">
         <legend>Ингредиенты</legend>
             <table class="table table-striped">
                 <thead>

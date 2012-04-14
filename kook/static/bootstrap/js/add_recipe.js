@@ -51,6 +51,8 @@ $(function() {
                 .append(' <span class="label label-important">'+
                           error_fields[field_params]+'</span>');
             } else {
+                if (element_field_name == 'amount')
+                    element_field_name = 'measured_amount'
                 $('.'+field_group+' .removable').eq(element_no)
                     .find('[name='+element_field_name+']')
                     .css('background', '#F2DEDE')

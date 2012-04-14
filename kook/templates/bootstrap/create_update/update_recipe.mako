@@ -17,9 +17,9 @@
     <div class="span6">
     <fieldset class="well">
         <legend>Название</legend>
-            <label for="title">Название</label>
+        <div class="title"><label for="title">Название</label>
             <input class="span5" type="text" id="title"
-                   name="title" value="${recipe.title}" data-title="${recipe.title}">
+                   name="title" value="${recipe.title}" data-title="${recipe.title}"></div>
             <div class="description"><label for="description">Описание</label>
             <textarea name="description" id="description"
                       cols="30" rows="10">
@@ -41,7 +41,7 @@
     </fieldset>
     </div>
     <div class="span6">
-    <fieldset class="well" id="ingredients">
+    <fieldset class="well ingredients" id="ingredients">
         <legend>Ингредиенты</legend>
             <table class="table table-striped">
                 <thead>

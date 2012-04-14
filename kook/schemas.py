@@ -5,6 +5,8 @@ def normalize_string(string):
     """Remove whitespace and bring the string to lowercase"""
     if string is not null:
         return string.strip().lower()
+    else:
+        return ''
 
 class IngredientSchema(MappingSchema):
     product_title = SchemaNode(String(), validator=Length(3))
