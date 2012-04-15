@@ -77,7 +77,8 @@ class Recipe(Entity):
         try:
             appstruct = recipe_schema.deserialize(cstruct)
         except Invalid, e:
-            return e.asdict()
+            return {'errors': e.asdict(),
+                    'original_data': cstruct}
         recipe = cls(appstruct['title'],
                      appstruct['description'])
         for ingredient_entry in appstruct['ingredients']:

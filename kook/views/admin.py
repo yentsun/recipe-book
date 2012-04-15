@@ -11,9 +11,11 @@ def common():
             'products': Product.fetch_all()}
 
 def create_recipe_view(request):
-    create_recipe_path = '/create_recipe'
     response = common()
-    #   create_recipe_path = request.route_path('add_recipe') TODO tests cause "ComponentLookupError: (<InterfaceClass pyramid.interfaces.IRoutesMapper>, u'')"
+    response['create_recipe_path'] = '/create_recipe'
+    #   create_recipe_path = request.route_path('add_recipe')
+    # TODO tests cause "ComponentLookupError:
+    # (<InterfaceClass pyramid.interfaces.IRoutesMapper>, u'')"
     if request.POST:
         result = Recipe.construct_from_multidict(request.POST)
         if isinstance(result, Recipe):
@@ -26,15 +28,9 @@ def create_recipe_view(request):
             return HTTPFound('/?invalidate_cache=true')
         else:
             request.session.flash(u'<div class="alert alert-error">'
-                                  u'Ошибка при добавлении рецепта!'
-                                  u'<div class="json-data">%s</div></div>'
-                                  % json.dumps(result))
-            return HTTPFound(create_recipe_path)
-    else:
-        response['create_recipe_path'] = create_recipe_path
-        response['step'] = Step.dummy()
-        response['ingredient'] = Ingredient.dummy()
-        return response
+                                  u'Ошибка при добавлении рецепта!</div>')
+            response['error_data'] = json.dumps(result)
+    return response
 
 def delete_recipe_view(request):
     title = request.matchdict['title']
@@ -45,6 +41,7 @@ def delete_recipe_view(request):
 
 def update_recipe_view(request):
     title = request.matchdict['title']
+    response = common()
     if 'update_path' in request.matchdict:
         update_path = request.matchdict['update_path']
     else:
@@ -53,21 +50,20 @@ def update_recipe_view(request):
         result = Recipe.construct_from_multidict(request.POST)
         if isinstance(result, Recipe):
             result.update(title)
-            if 'update_path' not in request.matchdict: #this check is only for tests
+            if 'update_path' not in request.matchdict:
+            #this check is only for tests
                 update_path = request.current_route_url(title=result.title)
             region_invalidate(common, 'long_term', 'common')
-            request.session.flash(u'<div class="alert alert-success">Рецепт обновлен!</div>')
+            request.session.flash(u'<div class="alert alert-success">'
+                                  u'Рецепт обновлен!</div>')
+            return HTTPFound(update_path)
         else:
             request.session.flash(u'<div class="alert alert-error">'
-                                  u'Ошибка при обновлении рецепта!'
-                                  u'<div class="json-data">%s</div></div>'
-                                  % json.dumps(result))
-        return HTTPFound(update_path)
-    else:
-        response = common()
-        response.update({'update_recipe_path': update_path,
-                         'recipe': Recipe.fetch(title)})
-        return response
+                                  u'Ошибка при обновлении рецепта!</div>')
+            response['error_data'] = json.dumps(result)
+    response.update({'update_recipe_path': update_path,
+                     'recipe': Recipe.fetch(title)})
+    return response
 
 def product_units_view(request):
     product_title = request.matchdict['product_title']

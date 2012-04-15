@@ -18,7 +18,7 @@ class Ingredients(SequenceSchema):
 
 class StepSchema(MappingSchema):
     number = SchemaNode(Int(), validator=Range(1, 100))
-    text = SchemaNode(String(), validator=Length(10))
+    text = SchemaNode(String())
     time_value = SchemaNode(Int(), validator=Range(1), missing=None)
 
 class Steps(SequenceSchema):

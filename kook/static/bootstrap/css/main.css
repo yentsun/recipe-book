@@ -22,4 +22,4 @@ td.amount .dropdown-menu{right:0; left:auto;}
 /*read recipe*/
 #ingredients, #steps{margin-bottom:1em}
 
-.alert-error .json-data{display:none;}
+textarea{width:98%}

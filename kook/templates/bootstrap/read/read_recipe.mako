@@ -1,11 +1,13 @@
 <%inherit file="../layout.mako"/>
 <%def name="title()">${recipe.title}</%def>
 <div class="span8">
-    <div class="row"><blockquote class="span8" id="description">
+    <div class="row">
             % if recipe.description is not None:
-            ${recipe.description | n}
+                <blockquote class="span8"
+                            id="description">${recipe.description | n}
+                </blockquote>
             % endif
-    </blockquote></div>
+    </div>
     <div class="row">
         <section id="ingredients" class="span8"><h2>Ингредиенты:</h2><br>
             <ul>
