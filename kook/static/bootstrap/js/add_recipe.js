@@ -101,6 +101,8 @@ function set_amount(cont) {
 
 function repopulate_measures(cont) {
     $.getJSON('/product_units/'+cont.val(), function(data){
+        var parent = cont.parents('.product_amount');
+        parent.find('.chosen_unit_abbr').text('г ');
         if (data.length > 0) {
             var items = [];
             $.each(data, function(key, item) {
@@ -110,12 +112,10 @@ function repopulate_measures(cont) {
                     item.amount+')">'+
                     item.title+'</a></li>');
             });
-            var parent = cont.parents('.product_amount');
-            parent.find('[name=measured_amount]').val('');
-            parent.find('[name=amount]').val('0');
-            parent.find('.chosen_unit_abbr').text('г ');
             parent.find('.alt_measures')
                 .html('<li class="divider"></li>'+items.join(''));
+        } else {
+            parent.find('.alt_measures').html('');
         }
     });
 }
@@ -132,10 +132,10 @@ function clone_ingredient(container, data) {
     product_title_input.attr('autocomplete', 'off').focus();
     if (data != undefined) {
         product_title_input.val(data.product_title);
-//        repopulate_measures(product_title_input);
-        duplicate.find('[name=amount]').val(data.amount);
-        duplicate.find('[name=measured_amount]').val(data.amount);
-        if (original.find('[name=product_title]').val() == '')
+        repopulate_measures(product_title_input);
+        duplicate.find('[name="amount"]').val(data.amount);
+        duplicate.find('[name="measured_amount"]').val(data.amount);
+        if (original.find('[name="product_title"]').val() == '')
             original.remove();
     }
 }

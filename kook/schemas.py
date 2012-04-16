@@ -9,7 +9,8 @@ def normalize_string(string):
         return ''
 
 class IngredientSchema(MappingSchema):
-    product_title = SchemaNode(String(), validator=Length(3))
+    product_title = SchemaNode(String(), validator=Length(3),
+                               preparer=normalize_string)
     amount = SchemaNode(Int(), validator=Range(1))
     unit_title = SchemaNode(String(), validator=Length(3), missing=None)
 

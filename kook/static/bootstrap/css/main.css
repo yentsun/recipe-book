@@ -6,7 +6,9 @@ body{background:#f8f3df url('../img/papertop.jpg') repeat-x}
 .step_no, .amount input, .time_value{font-weight:bold}
 .amount input{margin-bottom:0}
 .time{margin-left:100px}
-.input-prepend .add-on, .input-prepend.input-append .add-on:first-child{margin-right:-5px}
+.input-prepend .add-on,
+.input-prepend.input-append
+.add-on:first-child{margin-right:-5px}
 .input-prepend.input-append .add-on:last-child,
 .input-append a.add-on{margin-left:-5px}
 .well{background:#e8e3d1}
