@@ -20,8 +20,8 @@ if sys.version_info[:3] < (2,5,0):
     requires.append('pysqlite')
 
 setup(name='kook',
-      version='0.2',
-      description='a cookbook',
+      version='0.4',
+      description='the cookbook',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[
         "Programming Language :: Python",
