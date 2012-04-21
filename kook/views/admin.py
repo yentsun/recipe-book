@@ -3,7 +3,7 @@
 import json
 from pyramid.httpexceptions import HTTPFound
 from beaker.cache import cache_region, region_invalidate
-from ..models import Recipe, Product, Step, Ingredient
+from ..models import Recipe, Product
 
 @cache_region('long_term', 'common')
 def common():
@@ -77,3 +77,4 @@ def product_units_view(request):
                 'amount': apu.amount
             })
     return result
+

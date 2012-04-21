@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import (Column,
-                        Table,
-                        Unicode,
-                        Integer,
-                        ForeignKey,
-                        MetaData)
+from sqlalchemy import (Column, Table, Unicode, Integer, String,
+                        CHAR,ForeignKey, MetaData)
 from sqlalchemy.orm import (scoped_session,
                             sessionmaker,
                             relationship,
                             mapper)
 from zope.sqlalchemy import ZopeTransactionExtension
 from colander import Invalid
-from schemas import RecipeSchema
+from hashlib import md5
+from urllib import urlencode
+from schemas import RecipeSchema, UserSchema
 
 DBSession = scoped_session(sessionmaker(
     extension=ZopeTransactionExtension()))
@@ -25,6 +23,19 @@ class Entity(object):
 
     def save(self):
         DBSession.merge(self)
+
+    @classmethod
+    def multidict_to_dict(cls, multidict):
+        pass
+
+    @classmethod
+    def construct_from_dict(cls, cstruct):
+        pass
+
+    @classmethod
+    def construct_from_multidict(cls, multidict):
+        dict = cls.multidict_to_dict(multidict)
+        return cls.construct_from_dict(dict)
 
 class Recipe(Entity):
     """Recipe model"""
@@ -97,11 +108,6 @@ class Recipe(Entity):
                                      step_entry['time_value']))
         return recipe
 
-    @classmethod
-    def construct_from_multidict(cls, multidict):
-        dict = cls.multidict_to_dict(multidict)
-        return cls.construct_from_dict(dict)
-
     def to_dict(self):
         result = {
             'title': self.title,
@@ -156,7 +162,8 @@ class Recipe(Entity):
 
     @classmethod
     def fetch(cls, title):
-        return DBSession.query(Recipe).filter(Recipe.title==title).first()
+        return DBSession.query(Recipe)\
+                        .filter(Recipe.title==title).first()
 
     @classmethod
     def delete(cls, title):
@@ -212,7 +219,6 @@ class Unit(Entity):
     def fetch(cls, title):
         return DBSession.query(cls).filter(cls.title==title).first()
 
-
 class Ingredient(Entity):
     u"""Модель ингредиента (продукт+количество)"""
 
@@ -267,6 +273,71 @@ class AmountPerUnit(Entity):
     def measure(self, amount):
         return amount / self.amount
 
+class Group(Entity):
+
+    def __init__(self, title):
+        self.title = title
+
+    def __str__(self):
+        return 'group:%s' % self.title
+
+class User(Entity):
+
+    salt = u'nRZ防也qI建7Ậ'
+
+    def __init__(self, email, hash, groups=None):
+        self.email = email
+        self.hash = hash
+        self.groups = groups or [Group('registered')]
+
+    def check_password(self, password):
+        return self.hash == self.password_hash(password)
+
+    @property
+    def gravatar_url(self):
+        default = 'identicon'
+        size = 20
+        url = 'http://www.gravatar.com/avatar/%s?%s' %\
+              (md5(self.email).hexdigest(),
+               urlencode({'d':default, 's':str(size)}))
+        return url
+
+    @classmethod
+    def password_hash(cls, password):
+        pass_string = (password + cls.salt).encode('utf-8')
+        return md5(pass_string).hexdigest()
+
+    @classmethod
+    def fetch(cls, email):
+        return DBSession.query(cls)\
+                        .filter(cls.email==email)\
+                        .first()
+
+    @classmethod
+    def multidict_to_dict(cls, multidict):
+        return {'email': multidict.getone('email'),
+                'password': multidict.getone('password')}
+
+    @classmethod
+    def construct_from_dict(cls, cstruct):
+        user_schema = UserSchema()
+        try:
+            appstruct = user_schema.deserialize(cstruct)
+        except Invalid, e:
+            return {'errors': e.asdict(),
+                    'original_data': cstruct}
+        hash = cls.password_hash(appstruct['password'])
+        user = cls(appstruct['email'], hash)
+        return user
+
+class UserGroup(object):
+
+    @classmethod
+    def fetch_all(cls, email, request):
+        return DBSession.query(cls)\
+                        .filter(User.email==email)\
+                        .all()
+
 #sqlalchemy stuff
 
 #tables
@@ -304,9 +375,19 @@ steps = Table('steps', metadata,
     Column('text', Unicode, nullable=False),
     Column('note', Unicode))
 
+users = Table('users', metadata,
+    Column('email', String(320), primary_key=True, nullable=False),
+    Column('hash', CHAR(32), nullable=False))
+
+groups = Table('groups', metadata,
+    Column('title', String(20), primary_key=True, nullable=False))
+
+user_groups = Table('user_groups', metadata,
+    Column('user_email', String(320), ForeignKey('users.email'),
+        primary_key=True),
+    Column('group_title', String(20), ForeignKey('groups.title')))
+
 #mappers
-mapper(Step, steps)
-mapper(Unit, units)
 mapper(Recipe, recipes, properties={
     'ingredients': relationship(Ingredient,
                                 lazy='subquery',
@@ -316,13 +397,19 @@ mapper(Recipe, recipes, properties={
                           lazy='subquery', order_by=steps.c.number)})
 
 mapper(Product, products, properties={
-    'APUs':relationship(AmountPerUnit, cascade='all, delete-orphan',
+    'APUs': relationship(AmountPerUnit, cascade='all, delete-orphan',
                         lazy='joined')})
 
 mapper(AmountPerUnit, amount_per_unit, properties={
-    'unit':relationship(Unit, lazy='joined'),
-    'product':relationship(Product)})
+    'unit': relationship(Unit, lazy='joined'),
+    'product': relationship(Product)})
 
 mapper(Ingredient, ingredients, properties={
-    'product':relationship(Product, uselist=False, lazy='joined'),
-    'unit':relationship(Unit, uselist=False, lazy='joined')})
+    'product': relationship(Product, uselist=False, lazy='joined'),
+    'unit': relationship(Unit, uselist=False, lazy='joined')})
+mapper(User, users, properties={
+    'groups': relationship(Group, secondary=user_groups)})
+mapper(Step, steps)
+mapper(Unit, units)
+mapper(Group, groups)
+mapper(UserGroup, user_groups)

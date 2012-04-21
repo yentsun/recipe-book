@@ -11,7 +11,10 @@ requires = [
     'pyramid',
     'SQLAlchemy',
     'transaction',
+    'colander',
     'pyramid_tm',
+    'pyramid_beaker',
+    'beaker',
     'pyramid_debugtoolbar',
     'zope.sqlalchemy',
     ]

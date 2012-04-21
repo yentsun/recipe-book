@@ -30,3 +30,19 @@ CREATE TABLE units (
 	abbr VARCHAR,
 	PRIMARY KEY (title)
 )
+CREATE TABLE users (
+	email VARCHAR(320) NOT NULL,
+	hash CHAR(32) NOT NULL,
+	PRIMARY KEY (email)
+)
+CREATE TABLE groups (
+	title VARCHAR(20) NOT NULL,
+	PRIMARY KEY (title)
+)
+CREATE TABLE user_groups (
+	user_email VARCHAR(320) NOT NULL,
+	group_title VARCHAR(20),
+	PRIMARY KEY (user_email),
+	FOREIGN KEY(user_email) REFERENCES users (email),
+	FOREIGN KEY(group_title) REFERENCES groups (title)
+)
