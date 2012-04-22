@@ -37,9 +37,9 @@ def login_view(request):
     if request.POST:
         email = request.POST.getone('email')
         password = request.POST.getone('password')
-        user = User.fetch(email)
+        user = User.fetch(email=email)
         if user and user.check_password(password):
-            headers = remember(request, email)
+            headers = remember(request, user.id)
             request.session.flash(u'<div class="alert alert-success">'
                                   u'Добро пожаловать!'
                                   u'</div>')

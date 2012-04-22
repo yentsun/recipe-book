@@ -6,13 +6,10 @@ import transaction
 
 from sqlalchemy import engine_from_config
 
-from pyramid.paster import (
-    get_appsettings,
-    setup_logging,
-    )
+from pyramid.paster import (get_appsettings, setup_logging)
 
 from ..models import (DBSession, metadata, Recipe, Product, Ingredient, Step,
-                      Unit, AmountPerUnit)
+                      Unit, AmountPerUnit, User)
 
 def usage(argv):
     cmd = os.path.basename(argv[0])
@@ -30,7 +27,13 @@ def main(argv=sys.argv):
     DBSession.configure(bind=engine)
     metadata.create_all(engine)
     with transaction.manager:
-        recipe = Recipe(title=u'оливье', description=u'Один из самых популярных салатов')
+        user1 = User.construct_from_dict({
+            'email': 'user1@acme.com',
+            'password': '123456'})
+        user1.save()
+        recipe = Recipe(title=u'оливье',
+                        description=u'Один из самых популярных салатов',
+                        author=user1)
         potato = Product(title=u'картофель')
         sausage = Product(title=u'колбаса вареная')
         piece = Unit(u'штука', u'шт')

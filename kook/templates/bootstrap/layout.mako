@@ -45,8 +45,8 @@
                 <ul class="nav pull-right">
                         % if request.user:
                         <li><a href="#">
-                            <img src="${request.user.gravatar_url}"
-                                 alt="gravatar">
+                            <img width=20 src="${request.user.gravatar_url}"
+                                 alt="gravatar" height="20">
                             ${request.user.email}
                         </a></li>
                         <li><a href="${request.route_path('logout')}">
@@ -69,7 +69,7 @@
     <div class="page-header">
         <h1>${self.title()}
             % if hasattr(self,'sub_title'):
-                    <small>${self.sub_title()}</small>
+                <small>${self.sub_title()}</small>
             % endif
         </h1>
         % if hasattr(self,'additional_buttons'):

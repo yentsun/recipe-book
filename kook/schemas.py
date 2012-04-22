@@ -13,7 +13,7 @@ def normalize_string(string):
 
 def is_new_record(email):
     from models import User
-    if User.fetch(email) is not None:
+    if User.fetch(email=email) is not None:
         return False
     else:
         return True

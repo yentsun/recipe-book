@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from sqlalchemy import (Column, Table, Unicode, Integer, String,
-                        CHAR,ForeignKey, MetaData)
+                        CHAR, ForeignKey, MetaData)
 from sqlalchemy.orm import (scoped_session,
                             sessionmaker,
                             relationship,
@@ -10,6 +10,7 @@ from zope.sqlalchemy import ZopeTransactionExtension
 from colander import Invalid
 from hashlib import md5
 from urllib import urlencode
+from uuid import uuid4
 from schemas import RecipeSchema, UserSchema
 
 DBSession = scoped_session(sessionmaker(
@@ -40,9 +41,10 @@ class Entity(object):
 class Recipe(Entity):
     """Recipe model"""
 
-    def __init__(self, title, description):
+    def __init__(self, title, description, author=None):
         self.title = title
         self.description = description
+        self.author = author
         self.steps = []
         self.ingredients = []
 
@@ -55,7 +57,6 @@ class Recipe(Entity):
         product_titles = multidict.getall('product_title')
         amounts = multidict.getall('amount')
         unit_titles = multidict.getall('unit_title')
-
         for product_title, amount, unit_title\
         in zip(product_titles, amounts, unit_titles):
             dictionary['ingredients'].append({
@@ -63,11 +64,9 @@ class Recipe(Entity):
                 'amount': amount,
                 'unit_title': unit_title
             })
-
         steps_numbers = multidict.getall('step_number')
         time_values = multidict.getall('time_value')
         steps_texts = multidict.getall('step_text')
-
         for number,\
             text,\
             time_value,\
@@ -90,8 +89,7 @@ class Recipe(Entity):
         except Invalid, e:
             return {'errors': e.asdict(),
                     'original_data': cstruct}
-        recipe = cls(appstruct['title'],
-                     appstruct['description'])
+        recipe = cls(appstruct['title'], appstruct['description'])
         for ingredient_entry in appstruct['ingredients']:
             if ingredient_entry['unit_title'] is None:
                 unit = None
@@ -155,25 +153,29 @@ class Recipe(Entity):
             ordered_steps[step.number] = step
         return ordered_steps
 
-    def update(self, title):
-        old = DBSession.query(Recipe).get(title)
-        DBSession.delete(old)
+    def update(self, title, author_id):
+        self.delete(title, author_id)
         DBSession.merge(self)
 
     @classmethod
-    def fetch(cls, title):
+    def fetch(cls, title, author_id):
         return DBSession.query(Recipe)\
-                        .filter(Recipe.title==title).first()
+                        .filter(Recipe.title==title,
+                                User.id==author_id)\
+                        .first()
 
     @classmethod
-    def delete(cls, title):
-        victim = cls.fetch(title)
+    def delete(cls, title, author_id):
+        victim = cls.fetch(title, author_id)
         DBSession.delete(victim)
         return victim.title
 
     @classmethod
-    def fetch_all(cls):
-        return DBSession.query(cls).all()
+    def fetch_all(cls, author_id=None):
+        query = DBSession.query(cls)
+        if author_id:
+            query = query.filter(recipes.c.user_id==author_id)
+        return query.all()
 
 class Step(Entity):
     u"""Модель шага приготовления"""
@@ -285,13 +287,19 @@ class User(Entity):
 
     salt = u'nRZ防也qI建7Ậ'
 
-    def __init__(self, email, hash, groups=None):
+    def __init__(self, id, email, password_hash, groups=None):
+        self.id = id
         self.email = email
-        self.hash = hash
-        self.groups = groups or [Group('registered')]
+        self.password_hash = password_hash
+        self.groups = groups or []
 
     def check_password(self, password):
-        return self.hash == self.password_hash(password)
+        return self.password_hash == self.generate_hash(password)
+
+    def generate_password(self):
+        """Generate new password and send it to user email"""
+        #TODO complete function
+        return '000000'
 
     @property
     def gravatar_url(self):
@@ -303,15 +311,22 @@ class User(Entity):
         return url
 
     @classmethod
-    def password_hash(cls, password):
+    def generate_id(cls):
+        return uuid4().hex
+
+    @classmethod
+    def generate_hash(cls, password):
         pass_string = (password + cls.salt).encode('utf-8')
         return md5(pass_string).hexdigest()
 
     @classmethod
-    def fetch(cls, email):
-        return DBSession.query(cls)\
-                        .filter(cls.email==email)\
-                        .first()
+    def fetch(cls, id=None, email=None):
+        query = DBSession.query(cls)
+        if id:
+            return query.get(id)
+        elif email:
+            return query.filter(cls.email==email).first()
+        return None
 
     @classmethod
     def multidict_to_dict(cls, multidict):
@@ -320,14 +335,17 @@ class User(Entity):
 
     @classmethod
     def construct_from_dict(cls, cstruct):
+        """The way to construct new user"""
         user_schema = UserSchema()
         try:
             appstruct = user_schema.deserialize(cstruct)
         except Invalid, e:
             return {'errors': e.asdict(),
                     'original_data': cstruct}
-        hash = cls.password_hash(appstruct['password'])
-        user = cls(appstruct['email'], hash)
+        id = cls.generate_id()
+        hash = cls.generate_hash(appstruct['password'])
+        groups = [Group('applied')]
+        user = cls(id, appstruct['email'], hash, groups)
         return user
 
 class UserGroup(object):
@@ -343,7 +361,9 @@ class UserGroup(object):
 #tables
 recipes = Table('recipes', metadata,
     Column('title', Unicode, primary_key=True, nullable=False),
-    Column('description', Unicode))
+    Column('description', Unicode),
+    Column('user_id', CHAR(32), ForeignKey('users.id'), primary_key=True,
+           nullable=False))
 
 products = Table('products', metadata,
     Column('title', Unicode, primary_key=True, nullable=False))
@@ -376,15 +396,16 @@ steps = Table('steps', metadata,
     Column('note', Unicode))
 
 users = Table('users', metadata,
-    Column('email', String(320), primary_key=True, nullable=False),
-    Column('hash', CHAR(32), nullable=False))
+    Column('id', CHAR(32), primary_key=True, nullable=False),
+    Column('email', String(320), unique=True, nullable=False),
+    Column('password_hash', CHAR(32), nullable=False))
 
 groups = Table('groups', metadata,
     Column('title', String(20), primary_key=True, nullable=False))
 
 user_groups = Table('user_groups', metadata,
-    Column('user_email', String(320), ForeignKey('users.email'),
-        primary_key=True),
+    Column('user_id', CHAR(32), ForeignKey('users.id'),
+           primary_key=True),
     Column('group_title', String(20), ForeignKey('groups.title')))
 
 #mappers
@@ -394,7 +415,8 @@ mapper(Recipe, recipes, properties={
                                 cascade='all, delete, delete-orphan',
                                 order_by=ingredients.c.amount.desc()),
     'steps': relationship(Step, cascade='all, delete, delete-orphan',
-                          lazy='subquery', order_by=steps.c.number)})
+                          lazy='subquery', order_by=steps.c.number),
+    'author': relationship(User, lazy='joined', uselist=False)})
 
 mapper(Product, products, properties={
     'APUs': relationship(AmountPerUnit, cascade='all, delete-orphan',

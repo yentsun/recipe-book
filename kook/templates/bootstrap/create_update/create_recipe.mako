@@ -20,6 +20,7 @@
                     <textarea name="description" id="description"
                               cols="30" rows="10"></textarea>
                 </div>
+                <input type="hidden">
             </fieldset>
             <fieldset class="well steps">
                 <legend>Приготовление</legend>

@@ -1,24 +1,27 @@
 # -*- coding: utf-8 -*-
-
 import json
+from base64 import b64decode
 from pyramid.httpexceptions import HTTPFound
+from pyramid.security import authenticated_userid
 from beaker.cache import cache_region, region_invalidate
-from ..models import Recipe, Product
+from ..models import Recipe, Product, User
 
 @cache_region('long_term', 'common')
 def common():
-    return {'recipes': Recipe.fetch_all(),
-            'products': Product.fetch_all()}
+    return {'products': Product.fetch_all()}
 
 def create_recipe_view(request):
     response = common()
     response['create_recipe_path'] = '/create_recipe'
-    #   create_recipe_path = request.route_path('add_recipe')
-    # TODO tests cause "ComponentLookupError:
-    # (<InterfaceClass pyramid.interfaces.IRoutesMapper>, u'')"
+    if 'author_id' in request.matchdict:
+        author_id = request.matchdict['author_id']
+    else:
+        author_id = authenticated_userid(request)
+    author = User.fetch(id=author_id)
     if request.POST:
         result = Recipe.construct_from_multidict(request.POST)
         if isinstance(result, Recipe):
+            result.author = author
             result.save()
             region_invalidate(common, 'long_term', 'common')
             request.session.flash(u'<div class="alert alert-success">' \
@@ -34,13 +37,19 @@ def create_recipe_view(request):
 
 def delete_recipe_view(request):
     title = request.matchdict['title']
-    victim_title = Recipe.delete(title)
+    author_id = request.matchdict['author_id']
+    victim_title = Recipe.delete(title, author_id=author_id)
     request.session.flash(u'<div class="alert">Рецепт "%s" удален!</div>' % victim_title)
     region_invalidate(common, 'long_term', 'common')
     return HTTPFound('/?invalidate_cache=true')
 
 def update_recipe_view(request):
     title = request.matchdict['title']
+    if 'author_id' in request.matchdict:
+        author_id = request.matchdict['author_id']
+    else:
+        author_id = authenticated_userid(request)
+    author = User.fetch(id=author_id)
     response = common()
     if 'update_path' in request.matchdict:
         update_path = request.matchdict['update_path']
@@ -49,10 +58,8 @@ def update_recipe_view(request):
     if request.POST:
         result = Recipe.construct_from_multidict(request.POST)
         if isinstance(result, Recipe):
-            result.update(title)
-            if 'update_path' not in request.matchdict:
-            #this check is only for tests
-                update_path = request.current_route_url(title=result.title)
+            result.author = author
+            result.update(title, author_id=author_id)
             region_invalidate(common, 'long_term', 'common')
             request.session.flash(u'<div class="alert alert-success">'
                                   u'Рецепт обновлен!</div>')

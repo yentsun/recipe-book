@@ -34,8 +34,17 @@ class TestRecipeViews(unittest.TestCase):
         DBSession.configure(bind=engine)
         metadata.create_all(engine)
         with transaction.manager:
+            user1 = User.construct_from_dict({
+                'email': 'user1@acme.com',
+                'password': '123456'})
+            user1.save()
+            user2 = User.construct_from_dict({
+                'email': 'user2@acme.com',
+                'password': '654321'})
+            user2.save()
             recipe = Recipe(title=u'оливье',
-                            description=u'Один из самых популярных салатов')
+                            description=u'Один из самых популярных салатов',
+                            author=user1)
             potato = Product(title=u'картофель')
             piece = Unit(u'piece', u'pcs')
             bucket = Unit(u'bucket', u'bkt')
@@ -55,13 +64,17 @@ class TestRecipeViews(unittest.TestCase):
             ]
             recipe.steps = [
                 Step(1, u'все овощи отварить', time_value=30),
-                Step(2, u'картофель и морковь очистить от кожицы', time_value=5),
-                Step(3, u'овощи и колбасу нарезать и перемешать, заправляя майонезом', time_value=1),
+                Step(2, u'картофель и морковь очистить от кожицы',
+                     time_value=5),
+                Step(3, u'овощи и колбасу нарезать и перемешать, '
+                        u'заправляя майонезом', time_value=1),
                 Step(4, u'салат украсить веткой петрушки', time_value=0)
             ]
             recipe.save()
             recipe2 = recipe
             recipe2.title = u'Оливье 2'
+            recipe3 = recipe
+            recipe3.author = user2
             recipe2.save()
 
     def tearDown(self):
@@ -71,6 +84,8 @@ class TestRecipeViews(unittest.TestCase):
     def test_recipe_view(self):
         request = DummyRequest()
         request.matchdict['title'] = u'оливье'
+        author = User.fetch(email='user1@acme.com')
+        request.matchdict['author_id'] = author.id
         response = read_recipe_view(request)
         recipe = response['recipe']
         potato = Product(title=u'картофель')
@@ -120,8 +135,10 @@ class TestRecipeViews(unittest.TestCase):
             ('time_value', 2),
         ))
         request = DummyRequest(POST=POST)
+        author = User.fetch(email='user1@acme.com')
+        request.matchdict['author_id'] = author.id
         create_recipe_view(request)
-        recipe = Recipe.fetch(u'винегрет')
+        recipe = Recipe.fetch(u'винегрет', author.id)
         assert recipe is not None
         self.assertEqual(recipe.title, u'винегрет')
         self.assertEqual(len(recipe.ingredients), 5)
@@ -150,7 +167,7 @@ class TestRecipeViews(unittest.TestCase):
             ))
         request = DummyRequest(POST=POST)
         create_recipe_view(request)
-        recipe = Recipe.fetch(u'Винегрет')
+        recipe = Recipe.fetch(u'Винегрет', 'user1@acme.com')
         assert recipe is None
 
     def test_update_recipe_view(self):
@@ -178,12 +195,14 @@ class TestRecipeViews(unittest.TestCase):
         ))
         request = DummyRequest(POST=POST)
         request.matchdict['title'] = u'оливье'
+        author = User.fetch(email='user1@acme.com')
+        request.matchdict['author_id'] = author.id
         request.matchdict['update_path'] = \
             '/update_recipe/%D0%BE%D0%BB%D0%B8%D0%B2%D1%8C%D0%B5'
         update_recipe_view(request)
-        recipe_old = Recipe.fetch(u'оливье')
+        recipe_old = Recipe.fetch(u'оливье', author.id)
         assert recipe_old is None
-        recipe_new = Recipe.fetch(u'оливье-3')
+        recipe_new = Recipe.fetch(u'оливье-3', author.id)
         assert recipe_new is not None
         assert sausage not in recipe_new.products
         self.assertEqual(recipe_new.description, u'Салат винегрет')
@@ -192,22 +211,36 @@ class TestRecipeViews(unittest.TestCase):
     def test_delete_recipe_view(self):
         request = DummyRequest()
         request.matchdict['title'] = u'Оливье 2'
+        author = User.fetch(email='user1@acme.com')
+        request.matchdict['author_id'] = author.id
         response = delete_recipe_view(request)
         self.assertEqual(len(Recipe.fetch_all()), 1)
-        self.assertEqual(Recipe.fetch(u'Оливье 2'), None)
+        self.assertEqual(Recipe.fetch(u'Оливье 2', 'user1@acme.com'), None)
 
-    def test_recipe_index_view(self):
+    def test_user_recipe_index_view(self):
         request = DummyRequest()
+        author = User.fetch(email='user1@acme.com')
+        request.matchdict['author_id'] = author.id
         response = recipe_index_view(request)
-        recipes = response['recipes']
-        self.assertEqual(len(recipes), 2)
+        recipes = response['user_recipes']
+        self.assertEqual(len(recipes), 1)
+
+    def test_user_0_recipe_index_view(self):
+        request = DummyRequest()
+        author = User.fetch(email='user1@acme.com')
+        request.matchdict['author_id'] = author.id
+        response = recipe_index_view(request)
+        recipes = response['user_recipes']
+        self.assertEqual(len(recipes), 1)
 
     def test_product_units_view(self):
         request = DummyRequest()
         request.matchdict['product_title'] = u'картофель'
         response = product_units_view(request)
         response = json.dumps(response)
-        self.assertEqual('[{"amount": 8000, "abbr": "bkt", "title": "bucket"}, {"amount": 100, "abbr": "pcs", "title": "piece"}]', response)
+        self.assertEqual('[{"amount": 8000, "abbr": "bkt", "title": "bucket"}, '
+                         '{"amount": 100, "abbr": "pcs", "title": "piece"}]',
+                         response)
 
         request.matchdict['product_title'] = u'картофел'
         response = product_units_view(request)
@@ -217,6 +250,8 @@ class TestRecipeViews(unittest.TestCase):
     def test_recipe_to_json(self):
         request = DummyRequest()
         request.matchdict['title'] = u'оливье'
+        author = User.fetch(email='user1@acme.com')
+        request.matchdict['author_id'] = author.id
         response = read_recipe_view(request)
         recipe = response['recipe']
         recipe_json = json.dumps(recipe.to_dict())
@@ -277,9 +312,12 @@ class TestUserViews(unittest.TestCase):
         DBSession.configure(bind=engine)
         metadata.create_all(engine)
         with transaction.manager:
-            user1 = User('user1@acme.com', User.password_hash('1234'))
-            user2 = User('user2@acme.com', User.password_hash('gtER'))
-            user3 = User('user3@acme.com', User.password_hash('0983'))
+            user1 = User('753f10bd80dc4d2a977749ff12d7232f',
+                         'user1@acme.com', User.generate_hash('1234'))
+            user2 = User('8050bc54f47b451ca7ef2c399b31d494',
+                         'user2@acme.com', User.generate_hash('gtER'))
+            user3 = User('c8a81b82e75344d0a8adb6dccbea635f',
+                         'user3@acme.com', User.generate_hash('0983'))
             user1.save()
             user2.save()
             user3.save()
@@ -296,10 +334,11 @@ class TestUserViews(unittest.TestCase):
         request = DummyRequest(POST=POST)
         request.matchdict['next_path'] = '/dashboard'
         register_view(request)
-        user = User.fetch('test@acme.com')
+        user = User.fetch(email='test@acme.com')
         assert user is not None
-        self.assertEqual('f76acb34db8e6def25cd079978e511d1', user.hash)
-        self.assertEqual('registered', user.groups[0].title)
+        self.assertEqual('f76acb34db8e6def25cd079978e511d1',
+                         user.password_hash)
+        self.assertEqual('applied', user.groups[0].title)
 
     def test_deny_invalid_password(self):
         POST = MultiDict((
@@ -309,16 +348,17 @@ class TestUserViews(unittest.TestCase):
         request = DummyRequest(POST=POST)
         request.matchdict['next_path'] = '/dashboard'
         register_view(request)
-        user = User.fetch('invalid@acme.com')
+        user = User.fetch(email='invalid@acme.com')
         assert user is None
 
     def test_register_existent_user(self):
         POST = MultiDict((
             ('email', 'user1@acme.com'),
-            ('password', u'8Z然y落Σ#2就O'),
+            ('password', u'8765432'),
             ))
         request = DummyRequest(POST=POST)
         request.matchdict['next_path'] = '/dashboard'
         register_view(request)
-        user = User.fetch('user1@acme.com')
-        self.assertEqual('930ea67201ae3f808b954e3073c6b7d2', user.hash)
+        user = User.fetch(email='user1@acme.com')
+        self.assertEqual('930ea67201ae3f808b954e3073c6b7d2',
+                         user.password_hash)
