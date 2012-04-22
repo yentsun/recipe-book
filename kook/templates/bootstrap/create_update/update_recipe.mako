@@ -9,7 +9,8 @@
 % endif
 <%def name="additional_buttons()">
     <a class="btn pull-right"
-       href="${request.route_path('read_recipe', title=recipe.title)}">
+       href="${request.route_path('read_recipe', title=recipe.title,
+                                  author_id=author.id)}">
         <i class="icon-eye-open"></i> посмотреть рецепт
     </a>
 </%def>

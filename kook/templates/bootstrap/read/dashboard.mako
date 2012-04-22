@@ -23,11 +23,16 @@
         <tr>
           <td>
             <a title="открыть рецепт"
-               href="${request.route_path('read_recipe', title=recipe.title)}">${recipe.title}</a>
-              <a title="обновить рецепт" class="btn btn-mini edit"
-               href="${request.route_path('update_recipe', title=recipe.title)}">
+               href="${request.route_path('read_recipe',
+                                          title=recipe.title,
+                                          author_id=recipe.author.id)}">
+                ${recipe.title}
+            </a>
+            <a title="обновить рецепт" class="btn btn-mini edit"
+               href="${request.route_path('update_recipe', title=recipe.title,
+                                          author_id=recipe.author.id)}">
                  <i class="icon-pencil"></i>
-              </a>
+            </a>
           </td>
           <td>
               <img src="${recipe.author.gravatar_url}" alt="">

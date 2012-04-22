@@ -5,13 +5,19 @@ from pyramid.session import UnencryptedCookieSessionFactoryConfig
 from pyramid.events import NewRequest
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
+from pyramid.security import authenticated_userid
 from sqlalchemy import engine_from_config
 from pyramid_beaker import set_cache_regions_from_settings
 from subscibers import handle_new_request
 
-from .models import DBSession, UserGroup
+from .models import DBSession, User, UserGroup
 
 THEME = 'bootstrap'
+
+def fetch_user(request):
+    id = authenticated_userid(request)
+    if id is not None:
+        return User.fetch(id)
 
 def find_renderer(template_file, theme=THEME):
     return 'kook:templates/%s/%s' % (theme, template_file)
@@ -31,13 +37,15 @@ def main(global_settings, **settings):
                           authentication_policy=authentication_policy,
                           authorization_policy=authorization_policy)
 
+    config.set_request_property(fetch_user, 'user', reify=True)
+
     config.add_static_view('static', 'static', cache_max_age=3600)
 
     config.add_route('dashboard', '/')
-    config.add_route('read_recipe', '/recipe/{title}')
+    config.add_route('read_recipe', '/recipe/{title}/{author_id}')
     config.add_route('create_recipe', '/create_recipe')
-    config.add_route('update_recipe', '/update_recipe/{title}')
-    config.add_route('delete_recipe', '/delete_recipe/{title}')
+    config.add_route('update_recipe', '/update_recipe/{title}/{author_id}')
+    config.add_route('delete_recipe', '/delete_recipe/{title}/{author_id}')
     config.add_route('product_units', '/product_units/{product_title}')
 
     config.add_route('register_user', '/register')

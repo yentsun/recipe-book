@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
-from base64 import b64decode
 from pyramid.httpexceptions import HTTPFound
-from pyramid.security import authenticated_userid
 from beaker.cache import cache_region, region_invalidate
 from ..models import Recipe, Product, User
 
@@ -15,9 +13,9 @@ def create_recipe_view(request):
     response['create_recipe_path'] = '/create_recipe'
     if 'author_id' in request.matchdict:
         author_id = request.matchdict['author_id']
+        author = User.fetch(id=author_id)
     else:
-        author_id = authenticated_userid(request)
-    author = User.fetch(id=author_id)
+        author = request.user
     if request.POST:
         result = Recipe.construct_from_multidict(request.POST)
         if isinstance(result, Recipe):
@@ -45,10 +43,7 @@ def delete_recipe_view(request):
 
 def update_recipe_view(request):
     title = request.matchdict['title']
-    if 'author_id' in request.matchdict:
-        author_id = request.matchdict['author_id']
-    else:
-        author_id = authenticated_userid(request)
+    author_id = request.matchdict['author_id']
     author = User.fetch(id=author_id)
     response = common()
     if 'update_path' in request.matchdict:
@@ -69,7 +64,8 @@ def update_recipe_view(request):
                                   u'Ошибка при обновлении рецепта!</div>')
             response['error_data'] = json.dumps(result)
     response.update({'update_recipe_path': update_path,
-                     'recipe': Recipe.fetch(title)})
+                     'recipe': Recipe.fetch(title, author_id),
+                     'author': author})
     return response
 
 def product_units_view(request):
