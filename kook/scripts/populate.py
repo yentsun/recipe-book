@@ -30,6 +30,7 @@ def main(argv=sys.argv):
         user1 = User.construct_from_dict({
             'email': 'user1@acme.com',
             'password': '123456'})
+        print user1
         user1.save()
         recipe = Recipe(title=u'оливье',
                         description=u'Один из самых популярных салатов',

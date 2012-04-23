@@ -10,7 +10,7 @@ from sqlalchemy import engine_from_config
 from pyramid_beaker import set_cache_regions_from_settings
 from subscibers import handle_new_request
 
-from .models import DBSession, User, UserGroup
+from .models import DBSession, User, Group
 
 THEME = 'bootstrap'
 
@@ -27,7 +27,7 @@ def main(global_settings, **settings):
     """
     authentication_policy = \
         AuthTktAuthenticationPolicy('0J/#.JD6;LGNR-',
-                                    callback=UserGroup.fetch_all)
+                                    callback=Group.fetch_all)
     authorization_policy = ACLAuthorizationPolicy()
     engine = engine_from_config(settings)
     DBSession.configure(bind=engine)
@@ -50,6 +50,7 @@ def main(global_settings, **settings):
 
     config.add_route('register_user', '/register')
     config.add_route('login', '/login')
+    config.add_route('update_profile', '/update_profile')
     config.add_route('logout', '/logout')
 
     config.add_view('kook.views.presentation.recipe_index_view',
@@ -76,6 +77,9 @@ def main(global_settings, **settings):
                     renderer=find_renderer('user/login.mako'))
     config.add_view('kook.views.user.logout_view',
                     route_name='logout')
+    config.add_view('kook.views.user.update_profile_view',
+                    route_name='update_profile',
+                    renderer=find_renderer('user/update_profile.mako'))
     config.add_subscriber(handle_new_request, NewRequest)
     config.scan()
     return config.make_wsgi_app()

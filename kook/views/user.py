@@ -3,6 +3,7 @@
 import json
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember, forget, authenticated_userid
+from kook.models import Profile
 from ..models import User
 
 def check_matchdict(param, request):
@@ -20,9 +21,9 @@ def register_view(request):
         if isinstance(result, User):
             result.save()
             request.session.flash(u'<div class="alert alert-success">'
-                                  u'Пользователь "%s" зарегистрирован!'
-                                  u'</div>' % result.email)
-            headers = remember(request, result.email)
+                                  u'Вы зарегистрированы и авторизованы!'
+                                  u'</div>')
+            headers = remember(request, result.id)
             return HTTPFound(next, headers=headers)
         else:
             request.session.flash(u'<div class="alert alert-error">'
@@ -54,3 +55,22 @@ def logout_view(request):
     next = request.route_url('login')
     headers = forget(request)
     return HTTPFound(next, headers=headers)
+
+def update_profile_view(request):
+    response = dict()
+    response['profile'] = request.user.profile
+    if request.POST:
+        result = Profile.construct_from_multidict(
+            request.POST, current_profile=response['profile'])
+        if isinstance(result, Profile):
+            user = request.user
+            user.profile = result
+            user.save()
+            response['profile'] = user.profile
+            request.session.flash(u'<div class="alert alert-success">'
+                                  u'Профиль обновлен!</div>')
+        else:
+            request.session.flash(u'<div class="alert alert-error">'
+                                  u'Ошибка при обновлении профиля!</div>')
+            response['error_data'] = json.dumps(result)
+    return response

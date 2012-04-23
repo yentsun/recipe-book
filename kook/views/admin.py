@@ -11,15 +11,10 @@ def common():
 def create_recipe_view(request):
     response = common()
     response['create_recipe_path'] = '/create_recipe'
-    if 'author_id' in request.matchdict:
-        author_id = request.matchdict['author_id']
-        author = User.fetch(id=author_id)
-    else:
-        author = request.user
     if request.POST:
         result = Recipe.construct_from_multidict(request.POST)
         if isinstance(result, Recipe):
-            result.author = author
+            result.author = request.user
             result.save()
             region_invalidate(common, 'long_term', 'common')
             request.session.flash(u'<div class="alert alert-success">' \
@@ -80,4 +75,3 @@ def product_units_view(request):
                 'amount': apu.amount
             })
     return result
-

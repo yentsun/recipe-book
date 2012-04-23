@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
+
 import json
 import unittest
 import transaction
 
+from datetime import date
+from webob.multidict import MultiDict
 from pyramid import testing
 from pyramid.testing import DummyRequest
-from webob.multidict import MultiDict
 from sqlalchemy import engine_from_config
 from pyramid_beaker import set_cache_regions_from_settings
 from paste.deploy.loadwsgi import appconfig
@@ -18,7 +20,7 @@ from kook.views.admin import (create_recipe_view,
                               update_recipe_view,
                               delete_recipe_view,
                               product_units_view)
-from kook.views.user import register_view
+from kook.views.user import register_view, update_profile_view
 
 sausage = Product(title=u'колбаса вареная')
 
@@ -134,11 +136,10 @@ class TestRecipeViews(unittest.TestCase):
              u'Нарезать свеклу, морковь и картофель мелкими кубиками'),
             ('time_value', 2),
         ))
-        request = DummyRequest(POST=POST)
-        author = User.fetch(email='user1@acme.com')
-        request.matchdict['author_id'] = author.id
+        user=User.fetch(email='user1@acme.com')
+        request = DummyRequest(POST=POST, user=user)
         create_recipe_view(request)
-        recipe = Recipe.fetch(u'винегрет', author.id)
+        recipe = Recipe.fetch(u'винегрет', user.id)
         assert recipe is not None
         self.assertEqual(recipe.title, u'винегрет')
         self.assertEqual(len(recipe.ingredients), 5)
@@ -165,7 +166,8 @@ class TestRecipeViews(unittest.TestCase):
             ('step_text', u''),
             ('time_value', 0)
             ))
-        request = DummyRequest(POST=POST)
+        request = DummyRequest(POST=POST,
+                               user=User.fetch(email='user1@acme.com'))
         create_recipe_view(request)
         recipe = Recipe.fetch(u'Винегрет', 'user1@acme.com')
         assert recipe is None
@@ -339,6 +341,8 @@ class TestUserViews(unittest.TestCase):
         self.assertEqual('f76acb34db8e6def25cd079978e511d1',
                          user.password_hash)
         self.assertEqual('applied', user.groups[0].title)
+        assert user.profile is not None
+        assert type(user.profile.registration_day) is date
 
     def test_deny_invalid_password(self):
         POST = MultiDict((
@@ -362,3 +366,17 @@ class TestUserViews(unittest.TestCase):
         user = User.fetch(email='user1@acme.com')
         self.assertEqual('930ea67201ae3f808b954e3073c6b7d2',
                          user.password_hash)
+
+    def test_update_profile(self):
+        POST = MultiDict((
+            ('nickname', 'AcmeBOSS'),
+            ('real_name', 'John Darko'),
+            ('birthday', '1979-07-21'),
+            ('location', 'Europe/London')
+        ))
+        request = DummyRequest(POST=POST,
+                               user=User.fetch(email='user1@acme.com'))
+        update_profile_view(request)
+        user = User.fetch(email='user1@acme.com')
+        self.assertEqual('AcmeBOSS', user.profile.nickname)
+        self.assertEqual(date(1979, 7, 21), user.profile.birthday)

@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import (Column, Table, Unicode, Integer, String,
+from sqlalchemy import (Column, Table, Unicode, Integer, String, Date,
                         CHAR, ForeignKey, MetaData)
 from sqlalchemy.orm import (scoped_session,
                             sessionmaker,
                             relationship,
                             mapper)
 from zope.sqlalchemy import ZopeTransactionExtension
-from colander import Invalid
+from colander import Invalid, null
 from hashlib import md5
 from urllib import urlencode
 from uuid import uuid4
-from schemas import RecipeSchema, UserSchema
+from datetime import date
+from schemas import (RecipeSchema, UserSchema, ProfileSchema,
+                     dont_check_current_nickname)
 
 DBSession = scoped_session(sessionmaker(
     extension=ZopeTransactionExtension()))
@@ -34,7 +36,7 @@ class Entity(object):
         pass
 
     @classmethod
-    def construct_from_multidict(cls, multidict):
+    def construct_from_multidict(cls, multidict, **kwargs):
         dict = cls.multidict_to_dict(multidict)
         return cls.construct_from_dict(dict)
 
@@ -283,15 +285,22 @@ class Group(Entity):
     def __str__(self):
         return 'group:%s' % self.title
 
+    @classmethod
+    def fetch_all(cls, id, request):
+        return DBSession.query(cls)\
+                        .filter(User.id==id)\
+                        .all()
+
 class User(Entity):
 
     salt = u'nRZ防也qI建7Ậ'
 
-    def __init__(self, id, email, password_hash, groups=None):
+    def __init__(self, id, email, password_hash, groups=None, profile=None):
         self.id = id
         self.email = email
         self.password_hash = password_hash
         self.groups = groups or []
+        self.profile = profile or Profile()
 
     def check_password(self, password):
         return self.password_hash == self.generate_hash(password)
@@ -348,13 +357,42 @@ class User(Entity):
         user = cls(id, appstruct['email'], hash, groups)
         return user
 
-class UserGroup(object):
+class Profile(Entity):
+    """Profile for a user"""
+
+    def __init__(self, nickname=None, real_name=None, birthday=None,
+                 location=None, registration_day=None):
+        self.nickname = nickname
+        self.real_name = real_name
+        self.birthday = birthday
+        self.location = location
+        self.registration_day = registration_day or date.today()
 
     @classmethod
-    def fetch_all(cls, email, request):
-        return DBSession.query(cls)\
-                        .filter(User.email==email)\
-                        .all()
+    def fetch(cls, nickname):
+        query = DBSession.query(cls)
+        return query.filter(cls.nickname==nickname).first()
+
+    @classmethod
+    def construct_from_multidict(cls, multidict, **kwargs):
+        current_profile=kwargs.get('current_profile')
+        skip_nickname = False
+        if current_profile.nickname == multidict.getone('nickname'):
+            skip_nickname = True
+        schema = ProfileSchema(after_bind=dont_check_current_nickname)\
+                    .bind(skip_nickname=skip_nickname)
+        try:
+            appstruct = schema.deserialize(multidict)
+        except Invalid, e:
+            return {'errors': e.asdict(),
+                    'original_data': multidict.mixed()}
+        if 'nickname' in appstruct:
+            nickname = appstruct['nickname']
+        else:
+            nickname = current_profile.nickname
+        profile = cls(nickname, appstruct['real_name'],
+                      appstruct['birthday'], appstruct['location'])
+        return profile
 
 #sqlalchemy stuff
 
@@ -408,6 +446,14 @@ user_groups = Table('user_groups', metadata,
            primary_key=True),
     Column('group_title', String(20), ForeignKey('groups.title')))
 
+profiles = Table('profiles', metadata,
+    Column('user_id', CHAR(32), ForeignKey('users.id'), primary_key=True),
+    Column('birthday', Date()),
+    Column('registration_day', Date()),
+    Column('location', String(100)),
+    Column('nickname', String(100), unique=True),
+    Column('real_name', String(200)))
+
 #mappers
 mapper(Recipe, recipes, properties={
     'ingredients': relationship(Ingredient,
@@ -430,8 +476,10 @@ mapper(Ingredient, ingredients, properties={
     'product': relationship(Product, uselist=False, lazy='joined'),
     'unit': relationship(Unit, uselist=False, lazy='joined')})
 mapper(User, users, properties={
-    'groups': relationship(Group, secondary=user_groups)})
+    'groups': relationship(Group, secondary=user_groups),
+    'profile': relationship(Profile, uselist=False,
+                            cascade='all, delete, delete-orphan')})
 mapper(Step, steps)
 mapper(Unit, units)
 mapper(Group, groups)
-mapper(UserGroup, user_groups)
+mapper(Profile, profiles)
