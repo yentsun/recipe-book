@@ -1,14 +1,29 @@
 # -*- coding: utf-8 -*-
+
 import json
 from pyramid.httpexceptions import HTTPFound
 from beaker.cache import cache_region, region_invalidate
-from ..models import Recipe, Product, User
+from ..models import Product, Recipe
 
 @cache_region('long_term', 'common')
 def common():
     return {'products': Product.fetch_all()}
 
-def create_recipe_view(request):
+def index_view(request):
+    response = dict()
+    response['all_recipes'] = Recipe.fetch_all()
+    response['user_recipes'] = Recipe.fetch_all(author_id=request.user.id)
+    return response
+
+def read_view(request):
+    response = dict()
+    title = request.matchdict['title']
+    author_id = request.matchdict['author_id']
+    recipe = Recipe.fetch(title=title, author_id=author_id)
+    response['recipe'] = recipe
+    return response
+
+def create_view(request):
     response = common()
     response['create_recipe_path'] = '/create_recipe'
     if request.POST:
@@ -17,10 +32,10 @@ def create_recipe_view(request):
             result.author = request.user
             result.save()
             region_invalidate(common, 'long_term', 'common')
-            request.session.flash(u'<div class="alert alert-success">' \
-                                  u'Рецепт "%s" добавлен!' \
+            request.session.flash(u'<div class="alert alert-success">'\
+                                  u'Рецепт "%s" добавлен!'\
                                   u'</div>'
-                                  % result.title)
+            % result.title)
             return HTTPFound('/?invalidate_cache=true')
         else:
             request.session.flash(u'<div class="alert alert-error">'
@@ -28,28 +43,29 @@ def create_recipe_view(request):
             response['error_data'] = json.dumps(result)
     return response
 
-def delete_recipe_view(request):
+def delete_view(request):
     title = request.matchdict['title']
-    author_id = request.matchdict['author_id']
-    victim_title = Recipe.delete(title, author_id=author_id)
+    victim_title = Recipe.delete(title, author_id=request.user.id)
     request.session.flash(u'<div class="alert">Рецепт "%s" удален!</div>' % victim_title)
     region_invalidate(common, 'long_term', 'common')
     return HTTPFound('/?invalidate_cache=true')
 
-def update_recipe_view(request):
+def update_view(request):
+
     title = request.matchdict['title']
-    author_id = request.matchdict['author_id']
-    author = User.fetch(id=author_id)
     response = common()
     if 'update_path' in request.matchdict:
         update_path = request.matchdict['update_path']
     else:
         update_path = request.current_route_url(title=title)
+    recipe = Recipe.fetch(title, request.user.id)
+    response.update({'update_recipe_path': update_path,
+                     'recipe': recipe})
     if request.POST:
         result = Recipe.construct_from_multidict(request.POST)
         if isinstance(result, Recipe):
-            result.author = author
-            result.update(title, author_id=author_id)
+            result.author = request.user
+            result.update(title, author_id=request.user.id)
             region_invalidate(common, 'long_term', 'common')
             request.session.flash(u'<div class="alert alert-success">'
                                   u'Рецепт обновлен!</div>')
@@ -58,9 +74,6 @@ def update_recipe_view(request):
             request.session.flash(u'<div class="alert alert-error">'
                                   u'Ошибка при обновлении рецепта!</div>')
             response['error_data'] = json.dumps(result)
-    response.update({'update_recipe_path': update_path,
-                     'recipe': Recipe.fetch(title, author_id),
-                     'author': author})
     return response
 
 def product_units_view(request):

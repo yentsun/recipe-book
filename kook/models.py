@@ -7,7 +7,8 @@ from sqlalchemy.orm import (scoped_session,
                             relationship,
                             mapper)
 from zope.sqlalchemy import ZopeTransactionExtension
-from colander import Invalid, null
+from pyramid.security import Everyone, Allow, ALL_PERMISSIONS, has_permission
+from colander import Invalid
 from hashlib import md5
 from urllib import urlencode
 from uuid import uuid4
@@ -41,14 +42,22 @@ class Entity(object):
         return cls.construct_from_dict(dict)
 
 class Recipe(Entity):
-    """Recipe model"""
-
+    """
+    Recipe model
+    """
     def __init__(self, title, description, author=None):
         self.title = title
         self.description = description
         self.author = author
         self.steps = []
         self.ingredients = []
+
+    def __repr__(self):
+        return u'%s from %s' % (self.title, self.author.email)
+
+    @property
+    def __acl__(self):
+        return [(Allow, self.author.id, 'update')]
 
     @classmethod
     def multidict_to_dict(cls, multidict):
@@ -161,9 +170,9 @@ class Recipe(Entity):
 
     @classmethod
     def fetch(cls, title, author_id):
-        return DBSession.query(Recipe)\
-                        .filter(Recipe.title==title,
-                                User.id==author_id)\
+        return DBSession.query(cls)\
+                        .filter(cls.title==title,
+                                recipes.c.user_id==author_id)\
                         .first()
 
     @classmethod
@@ -282,15 +291,6 @@ class Group(Entity):
     def __init__(self, title):
         self.title = title
 
-    def __str__(self):
-        return 'group:%s' % self.title
-
-    @classmethod
-    def fetch_all(cls, id, request):
-        return DBSession.query(cls)\
-                        .filter(User.id==id)\
-                        .all()
-
 class User(Entity):
 
     salt = u'nRZ防也qI建7Ậ'
@@ -357,6 +357,23 @@ class User(Entity):
         user = cls(id, appstruct['email'], hash, groups)
         return user
 
+    @classmethod
+    def group_finder(cls, id=None, request=None, user=None):
+        """
+        The callback function for AuthTktAuthenticationPolicy
+        """
+        if user:
+            user = user
+        elif id:
+            user = DBSession.query(cls).get(id)
+        else:
+            return None
+        groups = user.groups
+        strings = []
+        for instance in groups:
+            strings.append(instance.title)
+        return strings
+
 class Profile(Entity):
     """Profile for a user"""
 
@@ -420,6 +437,8 @@ amount_per_unit = Table('amount_per_unit', metadata,
 ingredients = Table('ingredients', metadata,
     Column('recipe_title', Unicode, ForeignKey('recipes.title'),
            primary_key=True),
+    Column('user_id', CHAR(32), ForeignKey('recipes.user_id'),
+        primary_key=True, nullable=False),
     Column('product_title', Unicode, ForeignKey('products.title'),
            primary_key=True),
     Column('amount', Integer, nullable=False),
@@ -427,7 +446,9 @@ ingredients = Table('ingredients', metadata,
 
 steps = Table('steps', metadata,
     Column('recipe_title', Unicode, ForeignKey('recipes.title'),
-           primary_key=True),
+           primary_key=True, nullable=False),
+    Column('user_id', CHAR(32), ForeignKey('recipes.user_id'),
+        primary_key=True, nullable=False),
     Column('number', Integer, nullable=False, primary_key=True),
     Column('time_value', Integer),
     Column('text', Unicode, nullable=False),
@@ -444,7 +465,8 @@ groups = Table('groups', metadata,
 user_groups = Table('user_groups', metadata,
     Column('user_id', CHAR(32), ForeignKey('users.id'),
            primary_key=True),
-    Column('group_title', String(20), ForeignKey('groups.title')))
+    Column('group_title', String(20), ForeignKey('groups.title'),
+           primary_key=True, nullable=False))
 
 profiles = Table('profiles', metadata,
     Column('user_id', CHAR(32), ForeignKey('users.id'), primary_key=True),
@@ -459,9 +481,14 @@ mapper(Recipe, recipes, properties={
     'ingredients': relationship(Ingredient,
                                 lazy='subquery',
                                 cascade='all, delete, delete-orphan',
-                                order_by=ingredients.c.amount.desc()),
+                                order_by=ingredients.c.amount.desc(),
+                                primaryjoin=
+                                (ingredients.c.recipe_title==recipes.c.title)
+                               &(ingredients.c.user_id==recipes.c.user_id)),
     'steps': relationship(Step, cascade='all, delete, delete-orphan',
-                          lazy='subquery', order_by=steps.c.number),
+                          lazy='subquery', order_by=steps.c.number,
+                          primaryjoin=(steps.c.recipe_title==recipes.c.title)
+                                     &(steps.c.user_id==recipes.c.user_id)),
     'author': relationship(User, lazy='joined', uselist=False)})
 
 mapper(Product, products, properties={
@@ -483,3 +510,11 @@ mapper(Step, steps)
 mapper(Unit, units)
 mapper(Group, groups)
 mapper(Profile, profiles)
+
+class RootFactory(object):
+    __acl__ = [(Allow, Everyone, ('read')),
+               (Allow, 'registered', ('create', 'update', 'delete')),
+               (Allow, 'admins', ALL_PERMISSIONS)]
+
+    def __init__(self, request):
+        pass  # pragma: no cover

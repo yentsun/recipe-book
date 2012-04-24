@@ -10,7 +10,7 @@ from sqlalchemy import engine_from_config
 from pyramid_beaker import set_cache_regions_from_settings
 from subscibers import handle_new_request
 
-from .models import DBSession, User, Group
+from .models import DBSession, User
 
 THEME = 'bootstrap'
 
@@ -27,7 +27,7 @@ def main(global_settings, **settings):
     """
     authentication_policy = \
         AuthTktAuthenticationPolicy('0J/#.JD6;LGNR-',
-                                    callback=Group.fetch_all)
+                                    callback=User.group_finder)
     authorization_policy = ACLAuthorizationPolicy()
     engine = engine_from_config(settings)
     DBSession.configure(bind=engine)
@@ -35,7 +35,8 @@ def main(global_settings, **settings):
     session_factory = UnencryptedCookieSessionFactoryConfig('5I73F3gRoYmj')
     config = Configurator(settings=settings, session_factory=session_factory,
                           authentication_policy=authentication_policy,
-                          authorization_policy=authorization_policy)
+                          authorization_policy=authorization_policy,
+                          root_factory='kook.models.RootFactory')
 
     config.set_request_property(fetch_user, 'user', reify=True)
 
@@ -44,8 +45,8 @@ def main(global_settings, **settings):
     config.add_route('dashboard', '/')
     config.add_route('read_recipe', '/recipe/{title}/{author_id}')
     config.add_route('create_recipe', '/create_recipe')
-    config.add_route('update_recipe', '/update_recipe/{title}/{author_id}')
-    config.add_route('delete_recipe', '/delete_recipe/{title}/{author_id}')
+    config.add_route('update_recipe', '/update_recipe/{title}')
+    config.add_route('delete_recipe', '/delete_recipe/{title}')
     config.add_route('product_units', '/product_units/{product_title}')
 
     config.add_route('register_user', '/register')
@@ -53,21 +54,21 @@ def main(global_settings, **settings):
     config.add_route('update_profile', '/update_profile')
     config.add_route('logout', '/logout')
 
-    config.add_view('kook.views.presentation.recipe_index_view',
+    config.add_view('kook.views.recipe.index_view',
                     route_name='dashboard',
                     renderer=find_renderer('read/dashboard.mako'))
-    config.add_view('kook.views.presentation.read_recipe_view',
+    config.add_view('kook.views.recipe.read_view',
                     route_name='read_recipe',
                     renderer=find_renderer('read/read_recipe.mako'))
-    config.add_view('kook.views.admin.create_recipe_view',
-                    route_name='create_recipe',
+    config.add_view('kook.views.recipe.create_view',
+                    route_name='create_recipe', permission='create',
                     renderer=find_renderer('create_update/create_recipe.mako'))
-    config.add_view('kook.views.admin.update_recipe_view',
-                    route_name='update_recipe',
+    config.add_view('kook.views.recipe.update_view',
+                    route_name='update_recipe', permission='update',
                     renderer=find_renderer('create_update/update_recipe.mako'))
-    config.add_view('kook.views.admin.delete_recipe_view',
+    config.add_view('kook.views.recipe.delete_view',
                     route_name='delete_recipe')
-    config.add_view('kook.views.admin.product_units_view',
+    config.add_view('kook.views.recipe.product_units_view',
                     route_name='product_units', renderer='json')
     config.add_view('kook.views.user.register_view',
                     route_name='register_user',

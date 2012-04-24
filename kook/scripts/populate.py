@@ -14,7 +14,7 @@ from ..models import (DBSession, metadata, Recipe, Product, Ingredient, Step,
 def usage(argv):
     cmd = os.path.basename(argv[0])
     print('usage: %s <config_uri>\n'
-          '(example: "%s development.ini")' % (cmd, cmd)) 
+          '(example: "%s development.ini")' % (cmd, cmd))
     sys.exit(1)
 
 def main(argv=sys.argv):
@@ -33,8 +33,8 @@ def main(argv=sys.argv):
         print user1
         user1.save()
         recipe = Recipe(title=u'оливье',
-                        description=u'Один из самых популярных салатов',
-                        author=user1)
+            description=u'Один из самых популярных салатов',
+            author=user1)
         potato = Product(title=u'картофель')
         sausage = Product(title=u'колбаса вареная')
         piece = Unit(u'штука', u'шт')

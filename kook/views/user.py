@@ -2,9 +2,8 @@
 
 import json
 from pyramid.httpexceptions import HTTPFound
-from pyramid.security import remember, forget, authenticated_userid
-from kook.models import Profile
-from ..models import User
+from pyramid.security import remember, forget
+from ..models import User, Profile, Group
 
 def check_matchdict(param, request):
     if param in request.matchdict:
@@ -19,6 +18,7 @@ def register_view(request):
     if request.POST:
         result = User.construct_from_multidict(request.POST)
         if isinstance(result, User):
+            result.groups = [Group('registered')]
             result.save()
             request.session.flash(u'<div class="alert alert-success">'
                                   u'Вы зарегистрированы и авторизованы!'
