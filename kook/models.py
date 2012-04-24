@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import cryptacular.bcrypt
 from sqlalchemy import (Column, Table, Unicode, Integer, String, Date,
                         CHAR, ForeignKey, MetaData)
 from sqlalchemy.orm import (scoped_session,
@@ -19,6 +20,7 @@ from schemas import (RecipeSchema, UserSchema, ProfileSchema,
 DBSession = scoped_session(sessionmaker(
     extension=ZopeTransactionExtension()))
 metadata = MetaData()
+crypt = cryptacular.bcrypt.BCRYPTPasswordManager()
 
 class Entity(object):
 
@@ -293,8 +295,6 @@ class Group(Entity):
 
 class User(Entity):
 
-    salt = u'nRZ防也qI建7Ậ'
-
     def __init__(self, id, email, password_hash, groups=None, profile=None):
         self.id = id
         self.email = email
@@ -303,7 +303,7 @@ class User(Entity):
         self.profile = profile or Profile()
 
     def check_password(self, password):
-        return self.password_hash == self.generate_hash(password)
+        return crypt.check(self.password_hash, password)
 
     def generate_password(self):
         """Generate new password and send it to user email"""
@@ -325,8 +325,7 @@ class User(Entity):
 
     @classmethod
     def generate_hash(cls, password):
-        pass_string = (password + cls.salt).encode('utf-8')
-        return md5(pass_string).hexdigest()
+        return crypt.encode(password)
 
     @classmethod
     def fetch(cls, id=None, email=None):
@@ -457,7 +456,7 @@ steps = Table('steps', metadata,
 users = Table('users', metadata,
     Column('id', CHAR(32), primary_key=True, nullable=False),
     Column('email', String(320), unique=True, nullable=False),
-    Column('password_hash', CHAR(32), nullable=False))
+    Column('password_hash', CHAR(60), nullable=False))
 
 groups = Table('groups', metadata,
     Column('title', String(20), primary_key=True, nullable=False))

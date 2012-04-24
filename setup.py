@@ -17,13 +17,14 @@ requires = [
     'beaker',
     'pyramid_debugtoolbar',
     'zope.sqlalchemy',
+    'cryptacular'
     ]
 
 if sys.version_info[:3] < (2,5,0):
     requires.append('pysqlite')
 
 setup(name='kook',
-      version='0.4',
+      version='0.5-user',
       description='the cookbook',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[

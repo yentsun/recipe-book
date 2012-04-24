@@ -344,8 +344,7 @@ class TestUserViews(unittest.TestCase):
         user_.register_view(request)
         user = User.fetch(email='test@acme.com')
         assert user is not None
-        self.assertEqual('f76acb34db8e6def25cd079978e511d1',
-                         user.password_hash)
+        assert user.check_password(u'8Z然y落Σ#2就O')
         self.assertEqual('registered', user.groups[0].title)
         group_strings = User.group_finder(user=user)
         assert 'registered' in group_strings
@@ -372,8 +371,7 @@ class TestUserViews(unittest.TestCase):
         request.matchdict['next_path'] = '/dashboard'
         user_.register_view(request)
         user = User.fetch(email='user1@acme.com')
-        self.assertEqual('930ea67201ae3f808b954e3073c6b7d2',
-                         user.password_hash)
+        assert user.check_password(u'1234')
 
     def test_update_profile(self):
         POST = MultiDict((
