@@ -8,7 +8,8 @@ from copy import copy
 from datetime import date
 from webob.multidict import MultiDict
 from pyramid.testing import DummyRequest, setUp, tearDown
-from pyramid.security import Allow
+from pyramid.security import (Everyone, Allow, Deny, ALL_PERMISSIONS,
+                              principals_allowed_by_permission)
 from sqlalchemy import engine_from_config
 from pyramid_beaker import set_cache_regions_from_settings
 from paste.deploy.loadwsgi import appconfig
@@ -76,6 +77,7 @@ class TestRecipeViews(unittest.TestCase):
             recipe3 = copy(recipe)
             recipe2.title = u'Оливье 2'
             recipe3.author = user2
+            recipe3.status_id = 0
             recipe.save()
             recipe2.save()
             recipe3.save()
@@ -148,7 +150,8 @@ class TestRecipeViews(unittest.TestCase):
         assert recipe is not None
         self.assertEqual(recipe.title, u'винегрет')
         self.assertEqual(len(recipe.ingredients), 5)
-        self.assertEqual([(Allow, user.id, 'update')], recipe.__acl__)
+        self.assertEqual([(Allow, user.id, ALL_PERMISSIONS),
+                          (Allow, Everyone, 'read')], recipe.__acl__)
         potato = Product(u'картофель')
         potato_400g = Ingredient(potato, amount=400)
         assert potato in recipe.products
@@ -302,12 +305,27 @@ class TestRecipeViews(unittest.TestCase):
              '\u0430\u0442\u043e\u0432", "title": "\u043e\u043b\u0438'
              '\u0432\u044c\u0435"}', recipe_json)
 
+    def test_recipe_status(self):
+        author = User.fetch(email='user1@acme.com')
+        author2 = User.fetch(email='user2@acme.com')
+        recipe2 = Recipe.fetch(u'оливье', author2.id)
+        recipe = Recipe.fetch(u'оливье', author.id)
+        assert recipe.status_id is 1
+        assert recipe2.status_id is 0
+        self.assertEqual(
+            [(Allow, author2.id, ALL_PERMISSIONS),
+             ('Deny', Everyone, 'read')],
+            recipe2.__acl__
+        )
+
+
 class TestUserViews(unittest.TestCase):
     """
     ----------
     USER TESTS
     ----------
     """
+
     def setUp(self):
         settings = appconfig('config:testing.ini',
             'main',

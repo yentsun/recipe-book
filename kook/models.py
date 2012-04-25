@@ -8,7 +8,7 @@ from sqlalchemy.orm import (scoped_session,
                             relationship,
                             mapper)
 from zope.sqlalchemy import ZopeTransactionExtension
-from pyramid.security import Everyone, Allow, ALL_PERMISSIONS, has_permission
+from pyramid.security import Everyone, Allow, Deny, ALL_PERMISSIONS
 from colander import Invalid
 from hashlib import md5
 from urllib import urlencode
@@ -47,10 +47,11 @@ class Recipe(Entity):
     """
     Recipe model
     """
-    def __init__(self, title, description, author=None):
+    def __init__(self, title, description, author=None, status_id=1):
         self.title = title
         self.description = description
         self.author = author
+        self.status_id = status_id
         self.steps = []
         self.ingredients = []
 
@@ -59,7 +60,16 @@ class Recipe(Entity):
 
     @property
     def __acl__(self):
-        return [(Allow, self.author.id, 'update')]
+        """
+        Return acl minding recipe's status
+        """
+        STATUS_MAP = {
+            0: (Deny, Everyone, 'read'),
+            1: (Allow, Everyone, 'read')
+        }
+        acl = [(Allow, self.author.id, ALL_PERMISSIONS)]
+        acl.append(STATUS_MAP[self.status_id])
+        return acl
 
     @classmethod
     def multidict_to_dict(cls, multidict):
@@ -416,6 +426,7 @@ class Profile(Entity):
 recipes = Table('recipes', metadata,
     Column('title', Unicode, primary_key=True, nullable=False),
     Column('description', Unicode),
+    Column('status_id', Integer, nullable=False),
     Column('user_id', CHAR(32), ForeignKey('users.id'), primary_key=True,
            nullable=False))
 
