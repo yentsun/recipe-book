@@ -30,33 +30,32 @@ def dont_check_current_nickname(node, kw):
         del node['nickname']
 
 class IngredientSchema(MappingSchema):
-    product_title = SchemaNode(
-        String(), validator=Length(3), preparer=normalize_string)
-    amount = SchemaNode(
-        Int(), validator=Range(1))
-    unit_title = SchemaNode(
-        String(), validator=Length(3), missing=None)
+    product_title = SchemaNode(String(), validator=Length(3),
+                               preparer=normalize_string)
+    amount = SchemaNode(Int(), validator=Range(1))
+    unit_title = SchemaNode(String(), validator=Length(3), missing=None)
 
 class Ingredients(SequenceSchema):
     ingredient = IngredientSchema()
 
 class StepSchema(MappingSchema):
-    number = SchemaNode(
-        Int(), validator=Range(1, 100))
+    number = SchemaNode(Int(), validator=Range(1, 100))
     text = SchemaNode(String())
-    time_value = SchemaNode(
-        Int(), validator=Range(1), missing=None)
+    time_value = SchemaNode(Int(), validator=Range(1), missing=None)
+
+class Tags(SequenceSchema):
+    title = SchemaNode(String(), missing=None)
 
 class Steps(SequenceSchema):
     step = StepSchema()
 
 class RecipeSchema(MappingSchema):
-    title = SchemaNode(
-        String(), validator=Length(3), preparer=normalize_string)
-    description = SchemaNode(
-        String(), validator=Length(3), missing=None)
+    title = SchemaNode(String(), validator=Length(3),
+                       preparer=normalize_string)
+    description = SchemaNode(String(), validator=Length(3), missing=None)
     steps = Steps()
     ingredients = Ingredients()
+    tags = Tags()
 
 class UserSchema(MappingSchema):
     email = SchemaNode(

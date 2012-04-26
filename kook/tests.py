@@ -15,7 +15,7 @@ from pyramid_beaker import set_cache_regions_from_settings
 from paste.deploy.loadwsgi import appconfig
 
 from kook.models import (Recipe, Step, Product, Ingredient, metadata,
-                         DBSession, Unit, AmountPerUnit, User, Group)
+                         DBSession, Unit, AmountPerUnit, User, Group, Tag)
 from kook.views import recipe as recipe_, user as user_
 
 sausage = Product(title=u'колбаса вареная')
@@ -73,6 +73,7 @@ class TestRecipeViews(unittest.TestCase):
                         u'заправляя майонезом', time_value=1),
                 Step(4, u'салат украсить веткой петрушки', time_value=0)
             ]
+            recipe.tags = [Tag(u'салат')]
             recipe2 = copy(recipe)
             recipe3 = copy(recipe)
             recipe2.title = u'Оливье 2'
@@ -112,6 +113,7 @@ class TestRecipeViews(unittest.TestCase):
             if ingredient.product.title == u'лук':
                 self.assertEqual(ingredient.measured, 1)
         assert garnishing in recipe.steps
+        assert Tag(u'салат') in recipe.tags
 
     def test_create_recipe_view(self):
         #testing post
@@ -142,6 +144,8 @@ class TestRecipeViews(unittest.TestCase):
             ('step_text',
              u'Нарезать свеклу, морковь и картофель мелкими кубиками'),
             ('time_value', 2),
+            ('tag', u'салат'),
+            ('tag', u'советская кухня'),
         ))
         user=User.fetch(email='user1@acme.com')
         request = DummyRequest(POST=POST, user=user)
@@ -158,6 +162,8 @@ class TestRecipeViews(unittest.TestCase):
         assert potato_400g in recipe.ingredients
         self.assertEqual(len(recipe.steps), 2)
         self.assertEqual(60, recipe.ordered_steps[1].time_value)
+        self.assertEqual(2, len(recipe.tags))
+        assert Tag(u'советская кухня') in recipe.tags
 
         #testing initial output
         request = DummyRequest()
@@ -302,7 +308,9 @@ class TestRecipeViews(unittest.TestCase):
              '"description": "\u041e\u0434\u0438\u043d \u0438\u0437 '
              '\u0441\u0430\u043c\u044b\u0445 \u043f\u043e\u043f\u0443'
              '\u043b\u044f\u0440\u043d\u044b\u0445 \u0441\u0430\u043b'
-             '\u0430\u0442\u043e\u0432", "title": "\u043e\u043b\u0438'
+             '\u0430\u0442\u043e\u0432", '
+             '"tags": ["\u0441\u0430\u043b\u0430\u0442"], '
+             '"title": "\u043e\u043b\u0438'
              '\u0432\u044c\u0435"}', recipe_json)
 
     def test_recipe_status(self):
@@ -317,7 +325,6 @@ class TestRecipeViews(unittest.TestCase):
              ('Deny', Everyone, 'read')],
             recipe2.__acl__
         )
-
 
 class TestUserViews(unittest.TestCase):
     """

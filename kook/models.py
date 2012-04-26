@@ -7,6 +7,7 @@ from sqlalchemy.orm import (scoped_session,
                             sessionmaker,
                             relationship,
                             mapper)
+from sqlalchemy.schema import ForeignKeyConstraint
 from zope.sqlalchemy import ZopeTransactionExtension
 from pyramid.security import Everyone, Allow, Deny, ALL_PERMISSIONS
 from colander import Invalid
@@ -54,6 +55,7 @@ class Recipe(Entity):
         self.status_id = status_id
         self.steps = []
         self.ingredients = []
+        self.tags = []
 
     def __repr__(self):
         return u'%s from %s' % (self.title, self.author.email)
@@ -76,7 +78,8 @@ class Recipe(Entity):
         dictionary = {'title': multidict.getone('title'),
                       'description': multidict.getone('description'),
                       'ingredients': [],
-                      'steps': []}
+                      'steps': [],
+                      'tags': []}
         product_titles = multidict.getall('product_title')
         amounts = multidict.getall('amount')
         unit_titles = multidict.getall('unit_title')
@@ -101,6 +104,8 @@ class Recipe(Entity):
             'text': text,
             'time_value': time_value
             })
+        for tag in multidict.getall('tag'):
+            dictionary['tags'].append(tag)
 
         return dictionary
 
@@ -127,6 +132,8 @@ class Recipe(Entity):
             recipe.steps.append(Step(step_entry['number'],
                                      step_entry['text'],
                                      step_entry['time_value']))
+        for tag_title in appstruct['tags']:
+            recipe.tags.append(Tag(tag_title))
         return recipe
 
     def to_dict(self):
@@ -134,7 +141,8 @@ class Recipe(Entity):
             'title': self.title,
             'description': self.description,
             'ingredients': [],
-            'steps': []
+            'steps': [],
+            'tags': [],
         }
         for ingredient in self.ingredients:
             ingredient_dict = {
@@ -152,6 +160,9 @@ class Recipe(Entity):
                 'text': step.text,
                 'time_value': step.time_value
             })
+        for tag in self.tags:
+            result['tags'].append(tag.title)
+
         return result
 
     @property
@@ -243,6 +254,16 @@ class Unit(Entity):
     @classmethod
     def fetch(cls, title):
         return DBSession.query(cls).filter(cls.title==title).first()
+
+class Tag(Entity):
+    """
+    Tag model
+    """
+    def __init__(self, title):
+        self.title = title
+
+    def __str__(self):
+        return self.title
 
 class Ingredient(Entity):
     u"""Модель ингредиента (продукт+количество)"""
@@ -448,7 +469,7 @@ ingredients = Table('ingredients', metadata,
     Column('recipe_title', Unicode, ForeignKey('recipes.title'),
            primary_key=True),
     Column('user_id', CHAR(32), ForeignKey('recipes.user_id'),
-        primary_key=True, nullable=False),
+           primary_key=True, nullable=False),
     Column('product_title', Unicode, ForeignKey('products.title'),
            primary_key=True),
     Column('amount', Integer, nullable=False),
@@ -458,11 +479,22 @@ steps = Table('steps', metadata,
     Column('recipe_title', Unicode, ForeignKey('recipes.title'),
            primary_key=True, nullable=False),
     Column('user_id', CHAR(32), ForeignKey('recipes.user_id'),
-        primary_key=True, nullable=False),
+           primary_key=True, nullable=False),
     Column('number', Integer, nullable=False, primary_key=True),
     Column('time_value', Integer),
     Column('text', Unicode, nullable=False),
     Column('note', Unicode))
+
+tags = Table('tags', metadata,
+    Column('title', Unicode, primary_key=True, nullable=False))
+
+recipe_tags = Table('recipe_tags', metadata,
+    Column('recipe_title', Unicode, primary_key=True, nullable=False),
+    Column('user_id', CHAR(32), primary_key=True, nullable=False),
+    Column('tag_title', Unicode,  ForeignKey('tags.title'),
+           primary_key=True, nullable=False),
+    ForeignKeyConstraint(['recipe_title', 'user_id'],
+                         ['recipes.title', 'recipes.user_id']))
 
 users = Table('users', metadata,
     Column('id', CHAR(32), primary_key=True, nullable=False),
@@ -499,6 +531,7 @@ mapper(Recipe, recipes, properties={
                           lazy='subquery', order_by=steps.c.number,
                           primaryjoin=(steps.c.recipe_title==recipes.c.title)
                                      &(steps.c.user_id==recipes.c.user_id)),
+    'tags': relationship(Tag, secondary=recipe_tags),
     'author': relationship(User, lazy='joined', uselist=False)})
 
 mapper(Product, products, properties={
@@ -517,6 +550,7 @@ mapper(User, users, properties={
     'profile': relationship(Profile, uselist=False,
                             cascade='all, delete, delete-orphan')})
 mapper(Step, steps)
+mapper(Tag, tags)
 mapper(Unit, units)
 mapper(Group, groups)
 mapper(Profile, profiles)
