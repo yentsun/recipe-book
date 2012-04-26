@@ -88,3 +88,12 @@ def product_units_view(request):
                 'amount': apu.amount
             })
     return result
+
+def update_status_view(request):
+    title = request.matchdict['title']
+    recipe = Recipe.fetch(title, request.user.id)
+    if request.POST:
+        new_status_id = request.POST.getone('new_status')
+        recipe.status_id = new_status_id
+        recipe.save()
+        return {'status_id': new_status_id}

@@ -48,6 +48,8 @@ def main(global_settings, **settings):
     config.add_route('update_recipe', '/update_recipe/{title}')
     config.add_route('delete_recipe', '/delete_recipe/{title}')
     config.add_route('product_units', '/product_units/{product_title}')
+    config.add_route('update_recipe_status',
+                     '/update_recipe_status/{title}')
 
     config.add_route('register_user', '/register')
     config.add_route('login', '/login')
@@ -70,6 +72,8 @@ def main(global_settings, **settings):
                     route_name='delete_recipe')
     config.add_view('kook.views.recipe.product_units_view',
                     route_name='product_units', renderer='json')
+    config.add_view('kook.views.recipe.update_status_view',
+                    route_name='update_recipe_status', renderer='json')
     config.add_view('kook.views.user.register_view',
                     route_name='register_user',
                     renderer=find_renderer('user/register.mako'))
