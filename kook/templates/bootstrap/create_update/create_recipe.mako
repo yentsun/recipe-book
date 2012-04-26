@@ -8,7 +8,7 @@
 % endif
 <form class="span12" action="${create_recipe_path}" method="post">
     <div class="row">
-        <div class="span6">
+        <div id="general_steps" class="span6">
             <fieldset class="well">
                 <legend>Название</legend>
                 <div class="title"><label for="title">Название</label>
@@ -19,6 +19,14 @@
                     <label for="description">Описание</label>
                     <textarea name="description" id="description"
                               cols="30" rows="10"></textarea>
+                </div>
+                <div class="tags">
+                    <label for="tags">Категории</label>
+                    <select multiple name="tag" id="tags">
+                        % for tag in tags:
+                        <option value="${tag.title}">${tag.title}</option>
+                        % endfor
+                    </select>
                 </div>
                 <input type="hidden">
             </fieldset>

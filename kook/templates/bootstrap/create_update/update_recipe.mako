@@ -39,6 +39,21 @@ ${recipe.description}
                             % endif
                     </textarea>
                 </div>
+                <div class="tags">
+                    <label for="tags">Категори</label>
+                    <select data-placeholder="выберите одну ил инесколько"
+                            class="span5" multiple name="tag" id="tags">
+                    % for tag in tags:
+                        <option value="${tag.title}"
+                                % if tag in recipe.tags:
+                            selected
+                                % endif
+                        >
+                        ${tag.title}
+                        </option>
+                    % endfor
+                    </select>
+                </div>
             </fieldset>
             <fieldset id="hidden-fields">
                 <legend></legend>
@@ -105,6 +120,11 @@ ${recipe.description}
             src="/static/bootstrap/js/add_recipe.js"></script>
     <script type="text/javascript"
             src="/static/bootstrap/js/update_recipe.js"></script>
+    <script type="text/javascript"
+            src="/static/bootstrap/js/chosen/chosen.jquery.min.js"></script>
+</%def>
+<%def name="css()">
+    <link href="/static/bootstrap/js/chosen/chosen.css" rel="stylesheet">
 </%def>
 <script type="text/javascript">
     var recipe_title = '${recipe.title}';

@@ -76,6 +76,7 @@ $(function() {
             }
         } // end mark invalid data
     }
+    $('#tags').chosen();
 });
 
 function set_measure(cont, apu_unit_title, apu_unit_abbr, apu_amount) {

@@ -1,5 +1,8 @@
 <%inherit file="../layout.mako"/>
 <%def name="title()">${recipe.title}</%def>
+<%def name="sub_title()">
+    ${', '.join([tag.title for tag in recipe.tags])}
+</%def>
 <div class="span8">
     <div class="row">
             % if recipe.description is not None:

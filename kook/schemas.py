@@ -12,7 +12,9 @@ def normalize_string(string):
         return ''
 
 def is_new_email(email):
-    """Check if email is not in the DB"""
+    """
+    Check if email is not in the DB
+    """
     from models import User
     if User.fetch(email=email) is not None:
         return False

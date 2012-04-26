@@ -3,11 +3,12 @@
 import json
 from pyramid.httpexceptions import HTTPFound
 from beaker.cache import cache_region, region_invalidate
-from ..models import Product, Recipe
+from ..models import Product, Recipe, Tag
 
 @cache_region('long_term', 'common')
 def common():
-    return {'products': Product.fetch_all()}
+    return {'products': Product.fetch_all(),
+            'tags': Tag.fetch_all()}
 
 def index_view(request):
     response = dict()
@@ -34,8 +35,7 @@ def create_view(request):
             region_invalidate(common, 'long_term', 'common')
             request.session.flash(u'<div class="alert alert-success">'\
                                   u'Рецепт "%s" добавлен!'\
-                                  u'</div>'
-            % result.title)
+                                  u'</div>' % result.title)
             return HTTPFound('/?invalidate_cache=true')
         else:
             request.session.flash(u'<div class="alert alert-error">'
@@ -51,7 +51,6 @@ def delete_view(request):
     return HTTPFound('/?invalidate_cache=true')
 
 def update_view(request):
-
     title = request.matchdict['title']
     response = common()
     if 'update_path' in request.matchdict:

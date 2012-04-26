@@ -32,6 +32,10 @@ class Entity(object):
         DBSession.merge(self)
 
     @classmethod
+    def fetch_all(cls, **kwargs):
+        return DBSession.query(cls).all()
+
+    @classmethod
     def multidict_to_dict(cls, multidict):
         pass
 
@@ -239,10 +243,6 @@ class Product(Entity):
     @classmethod
     def fetch(cls, title):
         return DBSession.query(Product).filter(Product.title==title).first()
-
-    @classmethod
-    def fetch_all(cls):
-        return DBSession.query(cls).all()
 
 class Unit(Entity):
     """Measure unit"""
