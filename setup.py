@@ -17,7 +17,8 @@ requires = [
     'beaker',
     'pyramid_debugtoolbar',
     'zope.sqlalchemy',
-    'cryptacular'
+    'cryptacular',
+    'markdown'
     ]
 
 if sys.version_info[:3] < (2,5,0):

@@ -1,4 +1,7 @@
 <%inherit file="../layout.mako"/>
+<%!
+    from kook.mako_filters import markdown
+%>
 <%def name="title()">${recipe.title}</%def>
 <%def name="sub_title()">
     ${', '.join([tag.title for tag in recipe.tags])}
@@ -7,7 +10,8 @@
     <div class="row">
             % if recipe.description is not None:
                 <blockquote class="span8"
-                            id="description">${recipe.description | n}
+                            id="description">
+                ${recipe.description | markdown, n}
                 </blockquote>
             % endif
     </div>
@@ -44,7 +48,7 @@
                     <i class="icon-time icon-white"></i> ${step.time_value} мин
                 </span>
                     % endif
-                    ${step.text | n}
+                    ${step.text | markdown, n}
                     </td>
                     </tr>
                     %endfor

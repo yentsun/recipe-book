@@ -77,6 +77,7 @@ $(function() {
         } // end mark invalid data
     }
     $('#tags').chosen();
+    $('textarea').markItUp(mySettings);
 });
 
 function set_measure(cont, apu_unit_title, apu_unit_abbr, apu_amount) {
@@ -152,7 +153,7 @@ function clone_step(container, data) {
     step_number_field.val(step_number);
     duplicate.attr('id', 'step_'+step_number);
     duplicate.find('textarea').text('').css('background', '#fff');
-    duplicate.find('span').remove();
+    duplicate.find('span, .markItUpHeader').remove();
     duplicate.appendTo(container);
     $(window).scrollTop(duplicate.position().top);
     if (data != undefined) {
@@ -163,6 +164,7 @@ function clone_step(container, data) {
             original.remove();
         }
     }
+    duplicate.find('textarea').markItUp(mySettings);
 }
 
 function name_with_value_exists(name, value) {

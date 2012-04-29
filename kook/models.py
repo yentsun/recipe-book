@@ -12,6 +12,7 @@ from zope.sqlalchemy import ZopeTransactionExtension
 from pyramid.security import Everyone, Allow, Deny, ALL_PERMISSIONS
 from colander import Invalid
 from hashlib import md5
+from markdown import markdown
 from urllib import urlencode
 from uuid import uuid4
 from datetime import date
