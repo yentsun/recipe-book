@@ -2,6 +2,7 @@
 
 import json
 from pyramid.httpexceptions import HTTPFound
+from pyramid.security import has_permission
 from beaker.cache import cache_region, region_invalidate
 from ..models import Product, Recipe, Tag
 
@@ -18,9 +19,8 @@ def index_view(request):
 
 def read_view(request):
     response = dict()
-    title = request.matchdict['title']
-    author_id = request.matchdict['author_id']
-    recipe = Recipe.fetch(title=title, author_id=author_id)
+    id = request.matchdict['id']
+    recipe = Recipe.fetch(id)
     response['recipe'] = recipe
     return response
 
@@ -35,7 +35,7 @@ def create_view(request):
             region_invalidate(common, 'long_term', 'common')
             request.session.flash(u'<div class="alert alert-success">'\
                                   u'Рецепт "%s" добавлен!'\
-                                  u'</div>' % result.title)
+                                  u'</div>' % result.dish.title)
             return HTTPFound('/?invalidate_cache=true')
         else:
             request.session.flash(u'<div class="alert alert-error">'
@@ -44,31 +44,37 @@ def create_view(request):
     return response
 
 def delete_view(request):
-    title = request.matchdict['title']
-    victim_title = Recipe.delete(title, author_id=request.user.id)
-    request.session.flash(u'<div class="alert">Рецепт "%s" удален!</div>' % victim_title)
-    region_invalidate(common, 'long_term', 'common')
-    return HTTPFound('/?invalidate_cache=true')
+    id = request.matchdict['id']
+    recipe = Recipe.fetch(id=id)
+    if has_permission('delete', recipe, request):
+        recipe.delete()
+        request.session.flash(u'<div class="alert">Рецепт "%s" удален!</div>'
+                              % recipe.dish.title)
+        region_invalidate(common, 'long_term', 'common')
+        return HTTPFound('/?invalidate_cache=true')
 
 def update_view(request):
-    title = request.matchdict['title']
+    id = request.matchdict['id']
     response = common()
-    if 'update_path' in request.matchdict:
-        update_path = request.matchdict['update_path']
-    else:
-        update_path = request.current_route_url(title=title)
-    recipe = Recipe.fetch(title, request.user.id)
+    try:
+        update_path = request.current_route_url(id=id)
+    except ValueError:
+        update_path = '/'
+    recipe = Recipe.fetch(id)
     response.update({'update_recipe_path': update_path,
                      'recipe': recipe})
     if request.POST:
         result = Recipe.construct_from_multidict(request.POST)
         if isinstance(result, Recipe):
-            result.author = request.user
-            result.update(title, author_id=request.user.id)
-            region_invalidate(common, 'long_term', 'common')
-            request.session.flash(u'<div class="alert alert-success">'
-                                  u'Рецепт обновлен!</div>')
-            return HTTPFound(update_path)
+            if has_permission('update', recipe, request):
+                result.id = recipe.id
+                result.author = recipe.author
+                recipe.delete()
+                result.save()
+                region_invalidate(common, 'long_term', 'common')
+                request.session.flash(u'<div class="alert alert-success">'
+                                      u'Рецепт обновлен!</div>')
+                return HTTPFound(update_path)
         else:
             request.session.flash(u'<div class="alert alert-error">'
                                   u'Ошибка при обновлении рецепта!</div>')

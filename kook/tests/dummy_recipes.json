@@ -1,0 +1,108 @@
+[
+    {"dish_title": "Potato salad",
+     "description": "The fastest way to cook potato salad",
+     "ingredients": [
+         {
+             "product_title": "potato",
+             "amount": 300,
+             "unit_title": "piece"
+         },
+         {
+             "product_title": "olive oil (extra virgin)",
+             "amount": 30,
+             "unit_title": null
+         },
+         {
+             "product_title": "lemon juice",
+             "amount": 40
+         }
+     ],
+     "steps": [
+         {
+             "number": 1,
+             "text": "Place potatoes in a large saucepan or Dutch oven and cover with lightly salted water. Bring to a boil and cook until tender",
+             "time_value": 30
+         },
+         {
+             "number": 2,
+             "text": "Whisk lemon juice, oil, salt and pepper in a large bowl. Add the potatoes and toss to coat.",
+             "time_value": 1
+         },
+         {
+             "number": 3,
+             "text": "Just before serving, add scallions and mint to the salad and toss gently.",
+             "time_value": 5
+         }
+     ]
+    },
+    {"dish_title": "Spicy Chick Pea",
+     "description": "A good fall-back meal using ingredients that many pantries will often have lying in a dusty corner, but are also cheap to pick up.",
+     "ingredients": [
+         {
+             "product_title": "chickpeas",
+             "amount": 250,
+             "unit_title": null
+         },
+         {
+             "product_title": "Dijon mustard",
+             "amount": 30
+         },
+         {
+             "product_title": "spices",
+             "amount": 5,
+             "unit_title": null
+         }
+     ],
+     "steps": [
+         {
+             "number": 1,
+             "text": "Strain chick peas and dry with a towel.",
+             "time_value": 2
+         },
+         {
+             "number": 2,
+             "text": "Heat 2 tablespoons oil in large skillet",
+             "time_value": 10
+         },
+         {
+             "number": 3,
+             "text": "Sauté peas until slightly colored, about 6 minutes",
+             "time_value": 5
+         }
+     ]
+    },
+    {"dish_title": "Cream Cheese Wontons",
+     "description": "Makes 16 wontons or 24 small wontons",
+     "ingredients": [
+         {
+             "product_title": "cream cheese",
+             "amount": 250
+         },
+         {
+             "product_title": "egg roll wrappers",
+             "amount": 200
+         },
+         {
+             "product_title": "oil",
+             "amount": 200
+         }
+     ],
+     "steps": [
+         {
+             "number": 1,
+             "text": "Heat oil in a deep-fat fryer or pour into a deep skillet on high temperature. Vegetable oil or peanut oil works best.",
+             "time_value": 20
+         },
+         {
+             "number": 2,
+             "text": "While oil is heating, lay out as many wrappers as you plan to use. Have a small bowl of water nearby to wet your fingers.",
+             "time_value": 10
+         },
+         {
+             "number": 3,
+             "text": "Drop several wontons into oil at a time. Turn over when the edges start to brown and cook for another minute or two.",
+             "time_value": 5
+         }
+     ]
+    }
+]

@@ -2,7 +2,7 @@
 
 from colander import (SchemaNode, MappingSchema, SequenceSchema,
                       String, Int, Length, Range, Email, All, Function,
-                      Date, null)
+                      Date, Regex, null)
 
 def normalize_string(string):
     """Remove whitespace and bring the string to lowercase"""
@@ -52,12 +52,14 @@ class Steps(SequenceSchema):
     step = StepSchema()
 
 class RecipeSchema(MappingSchema):
-    title = SchemaNode(String(), validator=Length(3),
+    id = SchemaNode(String(), validator=
+        Regex('[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'),
+        missing=None)
+    dish_title = SchemaNode(String(), validator=Length(3),
                        preparer=normalize_string)
     description = SchemaNode(String(), validator=Length(3), missing=None)
     steps = Steps()
     ingredients = Ingredients()
-    tags = Tags()
 
 class UserSchema(MappingSchema):
     email = SchemaNode(
