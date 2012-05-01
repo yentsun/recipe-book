@@ -15,14 +15,14 @@ def is_new_email(email):
     """
     Check if email is not in the DB
     """
-    from models import User
+    from kook.models.user import User
     if User.fetch(email=email) is not None:
         return False
     else:
         return True
 
 def check_nickname(nickname):
-    from models import Profile
+    from kook.models.user import Profile
     if Profile.fetch(nickname=nickname):
         return False
     return True

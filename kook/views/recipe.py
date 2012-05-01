@@ -4,7 +4,7 @@ import json
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 from beaker.cache import cache_region, region_invalidate
-from ..models import Product, Recipe, Tag
+from kook.models.recipe import Product, Recipe, Tag
 
 @cache_region('long_term', 'common')
 def common():

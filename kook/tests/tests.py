@@ -13,8 +13,11 @@ from sqlalchemy import engine_from_config
 from pyramid_beaker import set_cache_regions_from_settings
 from paste.deploy.loadwsgi import appconfig
 
-from kook.models import (Dish, Recipe, Step, Product, Ingredient, metadata,
-                         DBSession, Unit, AmountPerUnit, User, Group, Tag)
+from kook.models import DBSession
+from kook.models.recipe import (Recipe, Step, Product, Ingredient,
+                                Unit, AmountPerUnit)
+from kook.models.user import User, Group
+from kook.models.sqla_metadata import metadata
 from kook.views.recipe import (create_view, delete_view, index_view,
                                read_view, product_units_view, update_view)
 from kook.views.user import register_view, update_profile_view

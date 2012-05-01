@@ -3,7 +3,7 @@
 import json
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember, forget
-from ..models import User, Profile, Group
+from kook.models.user import User, Profile, Group
 
 def check_matchdict(param, request):
     if param in request.matchdict:

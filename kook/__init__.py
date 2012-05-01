@@ -10,7 +10,8 @@ from sqlalchemy import engine_from_config
 from pyramid_beaker import set_cache_regions_from_settings
 from subscibers import handle_new_request
 
-from .models import DBSession, User
+from kook.models import DBSession
+from kook.models.user import User
 
 THEME = 'bootstrap'
 
