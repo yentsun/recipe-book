@@ -1,6 +1,6 @@
 [
     {"dish_title": "Potato salad",
-     "description": "The fastest way to cook potato salad",
+     "description": "The **fastest** way to cook potato salad",
      "ingredients": [
          {
              "product_title": "potato",

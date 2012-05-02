@@ -14,6 +14,9 @@ class Dish(Entity):
         self.description = description
         self.tags = tags or []
 
+    def __repr__(self):
+        return self.title
+
 class Recipe(Entity):
     """
     Recipe model
@@ -180,7 +183,7 @@ class Step(Entity):
         self.time_value = time_value
         self.note = note
 
-    def __str__(self) :
+    def __repr__(self) :
         return u'Шаг %s: %s (%s мин)' % (self.number, self.text, self.time_value)
 
     @classmethod
@@ -193,7 +196,7 @@ class Product(Entity):
     def __init__(self, title):
         self.title = title
 
-    def __str__(self) :
+    def __repr__(self) :
         return self.title
 
     @classmethod
@@ -229,7 +232,7 @@ class Ingredient(Entity):
         self.amount = int(amount)
         self.unit = unit
 
-    def __str__(self) :
+    def __repr__(self) :
         return u'%s %d г' % (self.product.title, self.amount)
 
     @classmethod

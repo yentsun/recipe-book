@@ -8,8 +8,11 @@ from sqlalchemy import engine_from_config
 
 from pyramid.paster import (get_appsettings, setup_logging)
 
-from ..models import (DBSession, metadata, Recipe, Product, Ingredient, Step,
-                      Unit, AmountPerUnit, User)
+from kook.models import DBSession
+from kook.models.sqla_metadata import metadata
+from kook.models.recipe import (Recipe, Product, Ingredient, Step, Unit,
+                               AmountPerUnit)
+from kook.models.user import User
 
 def usage(argv):
     cmd = os.path.basename(argv[0])

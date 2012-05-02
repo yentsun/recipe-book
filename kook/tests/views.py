@@ -8,26 +8,65 @@ import transaction
 from datetime import date
 from webob.multidict import MultiDict
 from pyramid.testing import DummyRequest, setUp, tearDown
-from pyramid.security import (Everyone, Allow, ALL_PERMISSIONS)
+from pyramid.security import Everyone, Allow, ALL_PERMISSIONS
 from sqlalchemy import engine_from_config
 from pyramid_beaker import set_cache_regions_from_settings
 from paste.deploy.loadwsgi import appconfig
 
 from kook.models import DBSession
 from kook.models.recipe import (Recipe, Step, Product, Ingredient,
-                                Unit, AmountPerUnit)
+                                Unit, AmountPerUnit, Dish)
 from kook.models.user import User, Group
 from kook.models.sqla_metadata import metadata
 from kook.views.recipe import (create_view, delete_view, index_view,
                                read_view, product_units_view, update_view)
 from kook.views.user import register_view, update_profile_view
 
+def populate_test_data():
+
+    #add users
+
+    user1 = User.construct_from_dict({
+        'email': 'user1@acme.com',
+        'password': u'题GZG例没%07Z'})
+    user1.groups = [Group('admins'), Group('bosses')]
+    user1.favourite_dishes = [Dish(u'potato salad')]
+    user1.save()
+    user2 = User.construct_from_dict({
+        'email': 'user2@acme.com',
+        'password': u'R52RO圣ṪF特J'})
+    user2.groups = [Group('workers'), Group('clerks')]
+    user2.save()
+
+    #add products with APUs
+
+    potato = Product(title=u'potato')
+    piece = Unit(u'piece', u'pcs.')
+    bucket = Unit(u'bucket', u'bkt.')
+    potato.APUs = [AmountPerUnit(100, piece),
+                   AmountPerUnit(8000, bucket)]
+    carrot = Product(title=u'carrot')
+    onion = Product(title=u'onion')
+    potato.save()
+    onion.save()
+    carrot.save()
+
+    #add recipes
+
+    _here = os.path.dirname(__file__)
+    json_data=open(os.path.join(_here, 'dummy_recipes.json'))
+    dummy_recipes = json.load(json_data)
+    for num, recipe_dict in enumerate(dummy_recipes):
+        recipe = Recipe.construct_from_dict(recipe_dict)
+        if isinstance(recipe, Recipe):
+            recipe.author = user1
+            if num is 2:
+                recipe.author = user2
+            recipe.save()
+        else:
+            print recipe
+
 class TestRecipeViews(unittest.TestCase):
-    """
-    -----------------
-    RECIPE TESTS
-    -----------------
-    """
 
     def setUp(self):
         settings = appconfig('config:testing.ini',
@@ -40,45 +79,7 @@ class TestRecipeViews(unittest.TestCase):
         metadata.create_all(engine)
 
         with transaction.manager:
-
-            #add users
-
-            user1 = User.construct_from_dict({
-                'email': 'user1@acme.com',
-                'password': '123456'})
-            user1.save()
-            user2 = User.construct_from_dict({
-                'email': 'user2@acme.com',
-                'password': '654321'})
-            user2.save()
-
-            #add products with APUs
-
-            potato = Product(title=u'potato')
-            piece = Unit(u'piece', u'pcs.')
-            bucket = Unit(u'bucket', u'bkt.')
-            potato.APUs = [AmountPerUnit(100, piece),
-                           AmountPerUnit(8000, bucket)]
-            carrot = Product(title=u'carrot')
-            onion = Product(title=u'onion')
-            potato.save()
-            onion.save()
-            carrot.save()
-
-            #add recipes
-
-            _here = os.path.dirname(__file__)
-            json_data=open(os.path.join(_here, 'dummy_recipes.json'))
-            dummy_recipes = json.load(json_data)
-            for num, recipe_dict in enumerate(dummy_recipes):
-                recipe = Recipe.construct_from_dict(recipe_dict)
-                if isinstance(recipe, Recipe):
-                    recipe.author = user1
-                    if num is 2:
-                        recipe.author = user2
-                    recipe.save()
-                else:
-                    print recipe
+            populate_test_data()
 
     def tearDown(self):
         DBSession.remove()
@@ -274,7 +275,7 @@ class TestRecipeViews(unittest.TestCase):
             '{"text": "Just before serving, add scallions and mint to the '
             'salad and toss gently.", "time_value": 5, "number": 3}], '
             '"dish_title": "potato salad", '
-            '"description": "The fastest way to cook potato salad"}',
+            '"description": "The **fastest** way to cook potato salad"}',
             recipe_json)
 
     def test_recipe_acl(self):
@@ -283,33 +284,19 @@ class TestRecipeViews(unittest.TestCase):
         assert (Allow, user.id, ALL_PERMISSIONS) in recipe.__acl__
 
 class TestUserViews(unittest.TestCase):
-    """
-    ----------
-    USER TESTS
-    ----------
-    """
 
     def setUp(self):
         settings = appconfig('config:testing.ini',
-            'main',
-            relative_to='/home/yentsun/www/kook')
+                             'main',
+                             relative_to='/home/yentsun/www/kook')
         self.config = setUp(settings=settings)
         engine = engine_from_config(settings)
         set_cache_regions_from_settings(settings)
         DBSession.configure(bind=engine)
         metadata.create_all(engine)
+
         with transaction.manager:
-            user1 = User('753f10bd80dc4d2a977749ff12d7232f',
-                         'user1@acme.com', User.generate_hash('1234'),
-                         [Group('admins'), Group('bosses')])
-            user2 = User('8050bc54f47b451ca7ef2c399b31d494',
-                         'user2@acme.com', User.generate_hash('gtER'),
-                         [Group('workers'), Group('clerks')])
-            user3 = User('c8a81b82e75344d0a8adb6dccbea635f',
-                         'user3@acme.com', User.generate_hash('0983'))
-            user1.save()
-            user2.save()
-            user3.save()
+            populate_test_data()
 
     def tearDown(self):
         DBSession.remove()
@@ -352,7 +339,7 @@ class TestUserViews(unittest.TestCase):
         request.matchdict['next_path'] = '/dashboard'
         register_view(request)
         user = User.fetch(email='user1@acme.com')
-        assert user.check_password(u'1234')
+        assert user.check_password(u'题GZG例没%07Z')
 
     def test_update_profile(self):
         POST = MultiDict((
@@ -378,3 +365,8 @@ class TestUserViews(unittest.TestCase):
         assert u'bosses' in group_strings
         assert u'workers' in User.group_finder(user=user2)
         assert u'clerks' in User.group_finder(user=user2)
+
+    def test_user_fav_dishes(self):
+        potato_salad = Dish(u'potato salad')
+        user=User.fetch(email='user1@acme.com')
+        assert potato_salad in user.favourite_dishes

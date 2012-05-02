@@ -44,7 +44,7 @@ def main(global_settings, **settings):
     config.add_static_view('static', 'static', cache_max_age=3600)
 
     config.add_route('dashboard', '/')
-    config.add_route('read_recipe', '/recipe/{title}/{author_id}')
+    config.add_route('read_recipe', '/recipe/{id}')
     config.add_route('create_recipe', '/create_recipe')
     config.add_route('update_recipe', '/update_recipe/{title}')
     config.add_route('delete_recipe', '/delete_recipe/{title}')

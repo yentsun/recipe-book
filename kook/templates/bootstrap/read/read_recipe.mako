@@ -1,10 +1,8 @@
 <%inherit file="../layout.mako"/>
-<%!
-    from kook.mako_filters import markdown
-%>
-<%def name="title()">${recipe.title}</%def>
+<%! from kook.mako_filters import markdown %>
+<%def name="title()">${recipe.dish.title}</%def>
 <%def name="sub_title()">
-    ${', '.join([tag.title for tag in recipe.tags])}
+##    ${', '.join([tag.title for tag in recipe.dish.tags])}
 </%def>
 <div class="span8">
     <div class="row">

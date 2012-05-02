@@ -16,7 +16,7 @@ def register_view(request):
            request.route_path('dashboard')
     response['register_path'] = '/register'
     if request.POST:
-        result = User.construct_from_multidict(request.POST)
+        result = User.construct_from_dict(request.POST.mixed())
         if isinstance(result, User):
             result.groups = [Group('registered')]
             result.save()

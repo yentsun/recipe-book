@@ -64,9 +64,13 @@ users = Table('users', metadata,
 groups = Table('groups', metadata,
     Column('title', String(20), primary_key=True, nullable=False))
 
+user_favourites = Table('user_favourites', metadata,
+    Column('user_id', CHAR(36), ForeignKey('users.id'), primary_key=True),
+    Column('dish_title', Unicode, ForeignKey('dishes.title'), primary_key=True,
+           nullable=False))
+
 user_groups = Table('user_groups', metadata,
-    Column('user_id', CHAR(36), ForeignKey('users.id'),
-        primary_key=True),
+    Column('user_id', CHAR(36), ForeignKey('users.id'), primary_key=True),
     Column('group_title', String(20), ForeignKey('groups.title'),
         primary_key=True, nullable=False))
 
@@ -103,6 +107,7 @@ mapper(Ingredient, ingredients, properties={
 
 mapper(User, users, properties={
     'groups': relationship(Group, secondary=user_groups),
+    'favourite_dishes': relationship(Dish, secondary=user_favourites),
     'profile': relationship(Profile, uselist=False,
         cascade='all, delete, delete-orphan')})
 mapper(Dish, dishes)

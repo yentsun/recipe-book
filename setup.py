@@ -18,7 +18,8 @@ requires = [
     'pyramid_debugtoolbar',
     'zope.sqlalchemy',
     'cryptacular',
-    'markdown'
+    'markdown',
+    'webtest'
     ]
 
 if sys.version_info[:3] < (2,5,0):

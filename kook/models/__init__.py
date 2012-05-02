@@ -10,8 +10,8 @@ class Entity(object):
     """
     Basic (abstract) class for all entities
     """
-    def __eq__(self, other) :
-        return self.__str__() == other.__str__()
+    def __eq__(self, other):
+        return self.__repr__() == other.__repr__()
 
     def save(self):
         DBSession.merge(self)
