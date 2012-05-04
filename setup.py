@@ -19,7 +19,8 @@ requires = [
     'zope.sqlalchemy',
     'cryptacular',
     'markdown',
-    'webtest'
+    'webtest',
+    'Babel'
     ]
 
 if sys.version_info[:3] < (2,5,0):
@@ -27,7 +28,7 @@ if sys.version_info[:3] < (2,5,0):
 
 setup(name='kook',
       version='0.5.1',
-      description='the cookbook',
+      description='a robust recipe inventory storing and sharing',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[
         "Programming Language :: Python",

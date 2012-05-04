@@ -11,9 +11,10 @@
         <div id="general_steps" class="span6">
             <fieldset class="well">
                 <legend>Название</legend>
-                <div class="title"><label for="title">Название</label>
-                    <input class="span5" type="text" id="title"
-                           name="title" value="" data-title="">
+                <div class="dish_title">
+                        <label for="dish_title">Название</label>
+                    <input class="span5" type="text" id="dish_title"
+                           name="dish_title" value="" data-title="">
                 </div>
                 <div class="description">
                     <label for="description">Описание</label>
@@ -78,6 +79,12 @@
             src="/static/bootstrap/js/bootstrap-typeahead.js"></script>
     <script type="text/javascript"
             src="/static/bootstrap/js/add_recipe.js"></script>
+    <script type="text/javascript"
+            src="/static/bootstrap/js/chosen/chosen.jquery.min.js"></script>
+    <script type="text/javascript"
+            src="/static/bootstrap/js/markitup/jquery.markitup.js"></script>
+    <script type="text/javascript"
+            src="/static/bootstrap/js/markitup/sets/markdown/set.js"></script>
 </%def>
 <script type="text/javascript">
     var products = [
@@ -89,3 +96,10 @@
     var error_data = ${error_data | n};
     % endif
 </script>
+<%def name="css()">
+    <link href="/static/bootstrap/js/chosen/chosen.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css"
+          href="/static/bootstrap/js/markitup/skins/simple/style.css">
+    <link rel="stylesheet" type="text/css"
+          href="/static/bootstrap/js/markitup/sets/markdown/style.css" />
+</%def>

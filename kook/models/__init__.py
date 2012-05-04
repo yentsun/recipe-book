@@ -28,13 +28,13 @@ class Entity(object):
         pass
 
     @classmethod
-    def construct_from_dict(cls, cstruct):
+    def construct_from_dict(cls, cstruct, **kwargs):
         pass
 
     @classmethod
     def construct_from_multidict(cls, multidict, **kwargs):
         dict = cls.multidict_to_dict(multidict)
-        return cls.construct_from_dict(dict)
+        return cls.construct_from_dict(dict, kwargs.get('localizer'))
 
     @classmethod
     def generate_id(cls):

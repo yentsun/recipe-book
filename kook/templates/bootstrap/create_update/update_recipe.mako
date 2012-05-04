@@ -1,7 +1,5 @@
 <%inherit file="../layout.mako"/>
-<%!
-    from kook.mako_filters import not_none
-%>
+<%! from kook.mako_filters import not_none %>
 <%def name="title()">Обновление рецепта</%def>
 <%def name="sub_title()">${recipe.title}</%def>
 % if request.session.peek_flash():

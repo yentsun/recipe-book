@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pyramid.security import Everyone, Allow, Deny, ALL_PERMISSIONS
-from colander import Invalid
+from colander import Invalid, interpolate
 from schemas import RecipeSchema
 from kook.models import Entity, DBSession
 
@@ -82,12 +82,24 @@ class Recipe(Entity):
         return dictionary
 
     @classmethod
-    def construct_from_dict(cls, cstruct):
+    def construct_from_dict(cls, cstruct, localizer=None):
         recipe_schema = RecipeSchema()
         try:
             appstruct = recipe_schema.deserialize(cstruct)
         except Invalid, e:
-            return {'errors': e.asdict(),
+            errors = {}
+            for path in e.paths():
+                keyparts = []
+                msgs = []
+                for exc in path:
+                    exc.msg and msgs.extend(exc.messages())
+                    keyname = exc._keyname()
+                    keyname and keyparts.append(keyname)
+                    if localizer:
+                        msgs = [localizer.translate(s, domain='kook')
+                                for s in msgs]
+                errors['.'.join(keyparts)] = '; '.join(interpolate(msgs))
+            return {'errors': errors,
                     'original_data': cstruct}
         recipe = cls(dish=Dish(appstruct['dish_title']),
                      description=appstruct['description'])

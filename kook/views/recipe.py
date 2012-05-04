@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import json
+import datetime
+
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
+from pyramid.i18n import get_locale_name
 from beaker.cache import cache_region, region_invalidate
+from babel.core import Locale
+from babel.dates import format_date
+
 from kook.models.recipe import Product, Recipe, Tag
 
 @cache_region('long_term', 'common')
@@ -25,10 +31,23 @@ def read_view(request):
     return response
 
 def create_view(request):
+#    locale = Locale(get_locale_name(request))
+#    print '---------------'
+#    print format_date(datetime.datetime.now(), format=u'EEE, MMM d, yyyy',
+#                      locale=locale)
+#    from pyramid.i18n import TranslationString
+    from pyramid.i18n import get_localizer
+#    req = TranslationString('Required')
+    localizer = get_localizer(request)
+#    print '------------------------------------'
+#    print localizer.translate(req, domain='colander')
+#    print localizer.locale_name
+#    print req
     response = common()
     response['create_recipe_path'] = '/create_recipe'
     if request.POST:
-        result = Recipe.construct_from_multidict(request.POST)
+        result = Recipe.construct_from_multidict(request.POST,
+                                                 localizer=localizer)
         if isinstance(result, Recipe):
             result.author = request.user
             result.save()
@@ -97,6 +116,7 @@ def product_units_view(request):
 def update_status_view(request):
     title = request.matchdict['title']
     recipe = Recipe.fetch(title, request.user.id)
+#    TODO test and fix
     if request.POST:
         new_status_id = request.POST.getone('new_status')
         recipe.status_id = new_status_id

@@ -2,9 +2,8 @@
 KOOK PROJECT
 ============
 
-Kook is a robust recipe inventory storing and sharing software. It is built
-on Pyramid framework and intended to be run as SaaS. Its open source only
-while in development.
+Kook is a robust recipe inventory storing and sharing SaaS. It is built
+on Pyramid framework and is open source only while in development.
 
 Key features:
     * multiple versions of a recipe, sorted by user rating

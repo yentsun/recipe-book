@@ -56,7 +56,7 @@ class RecipeSchema(MappingSchema):
         Regex('[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'),
         missing=None)
     dish_title = SchemaNode(String(), validator=Length(3),
-                       preparer=normalize_string)
+                       preparer=normalize_string, msg=u'Неверныое название')
     description = SchemaNode(String(), validator=Length(3), missing=None)
     steps = Steps()
     ingredients = Ingredients()

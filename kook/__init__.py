@@ -40,6 +40,7 @@ def main(global_settings, **settings):
                           root_factory='kook.models.RootFactory')
 
     config.set_request_property(fetch_user, 'user', reify=True)
+    config.add_translation_dirs('kook:locale/')
 
     config.add_static_view('static', 'static', cache_max_age=3600)
 
