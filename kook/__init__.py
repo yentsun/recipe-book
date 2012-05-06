@@ -47,11 +47,11 @@ def main(global_settings, **settings):
     config.add_route('dashboard', '/')
     config.add_route('read_recipe', '/recipe/{id}')
     config.add_route('create_recipe', '/create_recipe')
-    config.add_route('update_recipe', '/update_recipe/{title}')
-    config.add_route('delete_recipe', '/delete_recipe/{title}')
+    config.add_route('update_recipe', '/update_recipe/{id}')
+    config.add_route('delete_recipe', '/delete_recipe/{id}')
     config.add_route('product_units', '/product_units/{product_title}')
     config.add_route('update_recipe_status',
-                     '/update_recipe_status/{title}')
+                     '/update_recipe_status/{id}')
 
     config.add_route('register_user', '/register')
     config.add_route('login', '/login')

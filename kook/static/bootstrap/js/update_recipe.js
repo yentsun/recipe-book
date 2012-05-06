@@ -28,10 +28,11 @@ $(function(){
 
 });
 
-function deleteRecipe(title) {
+function deleteRecipe(id) {
     var really_delete = confirm('Действительно удалить рецепт?');
     if (really_delete) {
-        window.location = '/delete_recipe/'+title;
+        window.location = '/delete_recipe/'+id;
+        return true;
     } else {
         return false;
     }

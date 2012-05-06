@@ -92,9 +92,11 @@ class Recipe(Entity):
                 keyparts = []
                 msgs = []
                 for exc in path:
-                    exc.msg and msgs.extend(exc.messages())
+                    if exc.msg:
+                        msgs.extend(exc.messages())
                     keyname = exc._keyname()
-                    keyname and keyparts.append(keyname)
+                    if keyname:
+                        keyparts.append(keyname)
                     if localizer:
                         msgs = [localizer.translate(s, domain='kook')
                                 for s in msgs]
@@ -121,6 +123,7 @@ class Recipe(Entity):
         return recipe
 
     def to_dict(self):
+        #TODO try to automate from model attribs
         result = {
             'dish_title': self.dish.title,
             'description': self.description,

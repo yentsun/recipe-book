@@ -1,4 +1,5 @@
 <%inherit file="../layout.mako"/>
+<%! from kook.mako_filters import failsafe_get as get %>
 <%def name="title()">Добавление рецепта</%def>
 % if request.session.peek_flash():
     <% flash = request.session.pop_flash() %>
@@ -14,27 +15,34 @@
                 <div class="dish_title">
                         <label for="dish_title">Название</label>
                     <input class="span5" type="text" id="dish_title"
-                           name="dish_title" value="" data-title="">
+                           name="dish_title"
+                           value="${get(data, 'dish_title')}">
                 </div>
                 <div class="description">
                     <label for="description">Описание</label>
-                    <textarea name="description" id="description"
-                              cols="30" rows="10"></textarea>
+                    <textarea name="description" id="description" cols="30"
+                              rows="10">${get(data, 'description')}</textarea>
                 </div>
-                <div class="tags">
-                    <label for="tags">Категории</label>
-                    <select multiple name="tag" id="tags">
-                        % for tag in tags:
-                        <option value="${tag.title}">${tag.title}</option>
-                        % endfor
-                    </select>
-                </div>
+##                <div class="tags">
+##                    <label for="tags">Категории</label>
+##                    <select multiple name="tag" id="tags">
+##                        % for tag in tags:
+##                        <option value="${tag.title}">${tag.title}</option>
+##                        % endfor
+##                    </select>
+##                </div>
                 <input type="hidden">
             </fieldset>
             <fieldset class="well steps">
                 <legend>Приготовление</legend>
                 <div id="steps">
+                    % if data and data['steps']:
+                        % for step in data['steps']:
+                        <%include file="_step.mako" args="step=step" />
+                        % endfor
+                    % else:
                     <%include file="_step.mako" args="step=None" />
+                    % endif
                 </div>
                 <button id="add_step_fields" type="button"
                         class="btn pull-right">
@@ -54,8 +62,15 @@
                     </tr>
                     </thead>
                     <tbody>
+                    % if data and data['ingredients']:
+                        % for ingredient in data['ingredients']:
+                        <%include file="_ingredient.mako"
+                                  args="ingredient=ingredient" />
+                        % endfor
+                    % else:
                         <%include file="_ingredient.mako"
                                   args="ingredient=None" />
+                    %endif
                     </tbody></table>
                 <button type="button" class="btn pull-right"
                         id="add_ingredient_fields">
@@ -92,8 +107,8 @@
                 '${product.title}',
         % endfor
     ];
-    % if error_data:
-    var error_data = ${error_data | n};
+    % if errors:
+    var error_data = ${errors | n};
     % endif
 </script>
 <%def name="css()">

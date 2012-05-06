@@ -1,7 +1,7 @@
 <%inherit file="../layout.mako"/>
-<%! from kook.mako_filters import not_none %>
+<%! from kook.mako_filters import failsafe_get as get %>
 <%def name="title()">Обновление рецепта</%def>
-<%def name="sub_title()">${recipe.title}</%def>
+<%def name="sub_title()">${recipe.dish.title}</%def>
 % if request.session.peek_flash():
     <% flash = request.session.pop_flash() %>
     % for message in flash:
@@ -11,7 +11,7 @@
 <%def name="additional_buttons()">
     <div class="btn-group pull-right">
         <a class="btn"
-           href="${request.route_path('read_recipe', title=recipe.title,
+           href="${request.route_path('read_recipe', id=recipe.id,
            author_id=request.user.id)}">
             <i class="icon-eye-open"></i> посмотреть на сайте
         </a>
@@ -27,44 +27,52 @@
         <div class="span6">
             <fieldset class="well">
                 <legend>Название</legend>
-                <div class="title"><label for="title">Название</label>
-                    <input class="span5" type="text" id="title"
-                           name="title" value="${recipe.title}"
-                           data-title="${recipe.title}"></div>
+                <div class="dish_title">
+                    <label for="dish_title">Название</label>
+                    <input class="span5" type="text" id="dish_title"
+                           name="dish_title"
+                           value="${get(recipe, 'dish.title')}"
+                           data-title="${get(recipe, 'dish.title')}"></div>
                 <div class="description">
                     <label for="description">Описание</label>
                     <textarea name="description" id="description"
                               cols="30"
                               rows="10">
-${recipe.description | not_none}</textarea>
+${get(recipe, 'description')}</textarea>
                 </div>
-                <div class="tags">
-                    <label for="tags">Категории</label>
-                    <select data-placeholder="выберите одну или несколько"
-                            class="span5" multiple name="tag" id="tags">
-                    % for tag in tags:
-                        <option value="${tag.title}"
-                                % if tag in recipe.tags:
-                            selected
-                                % endif
-                        >
-                        ${tag.title}
-                        </option>
-                    % endfor
-                    </select>
-                </div>
+##                <div class="tags">
+##                    <label for="tags">Категории</label>
+##                    <select data-placeholder="выберите одну или несколько"
+##                            class="span5" multiple name="tag" id="tags">
+##                    % for tag in tags:
+##                        <option value="${tag.title}"
+##                                % if tag in recipe.tags:
+##                            selected
+##                                % endif
+##                        >
+##                        ${tag.title}
+##                        </option>
+##                    % endfor
+##                    </select>
+##                </div>
             </fieldset>
             <fieldset id="hidden-fields">
                 <legend></legend>
                 <input type="hidden" name="status_id"
-                       value="${recipe.status_id}">
+                       value="${get(recipe, 'status_id')}">
             </fieldset>
             <fieldset class="well steps" id="steps_fields">
                 <legend>Приготовление</legend>
                 <div id="steps">
-                        % for step in recipe.steps:
+                % if data and data['steps']:
+                    % for step in data['steps']:
+                    <%include file="_step.mako" args="step=step" />
+                    % endfor
+                % else:
+                    % for step in recipe.steps:
                     <%include file="_step.mako" args="step=step"/>
-                        % endfor
+                    % endfor
+                % endif
                 </div>
                 <button type="button" class="btn pull-right"
                         id="add_step_fields">
@@ -84,10 +92,17 @@ ${recipe.description | not_none}</textarea>
                     </tr>
                     </thead>
                     <tbody>
-                            % for ingredient in recipe.ingredients:
+                    % if data and data['ingredients']:
+                        % for ingredient in data['ingredients']:
                         <%include file="_ingredient.mako"
                                   args="ingredient=ingredient"/>
-                            % endfor
+                        % endfor
+                    % else:
+                        % for ingredient in recipe.ingredients:
+                        <%include file="_ingredient.mako"
+                                  args="ingredient=ingredient"/>
+                        % endfor
+                    % endif
                     </tbody></table>
                 <button type="button" class="btn pull-right"
                         id="add_ingredient_fields">
@@ -100,7 +115,7 @@ ${recipe.description | not_none}</textarea>
         <fieldset class="navbar-inner"><div class="container">
             <button type="button" class="btn btn-danger"
                     id="delete_recipe"
-                    onclick="deleteRecipe('${recipe.title}');">
+                    onclick="deleteRecipe('${recipe.id}');">
                 <i class="icon-remove icon-white"></i> удалить
             </button>
             <div class="btn-group pull-right">
@@ -134,13 +149,13 @@ ${recipe.description | not_none}</textarea>
           href="/static/bootstrap/js/markitup/sets/markdown/style.css" />
 </%def>
 <script type="text/javascript">
-    var recipe_title = '${recipe.title}';
+    var recipe_title = '${recipe.dish.title}';
     var products = [
         % for product in products:
                 '${product.title}',
         % endfor
     ];
-        % if error_data:
-            var error_data = ${error_data | n};
+        % if errors:
+            var error_data = ${errors | n};
         % endif
 </script>

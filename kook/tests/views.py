@@ -12,6 +12,7 @@ from pyramid.security import Everyone, Allow, ALL_PERMISSIONS
 from sqlalchemy import engine_from_config
 from pyramid_beaker import set_cache_regions_from_settings
 from paste.deploy.loadwsgi import appconfig
+from kook.mako_filters import failsafe_get
 
 from kook.models import DBSession
 from kook.models.recipe import (Recipe, Step, Product, Ingredient,
@@ -282,6 +283,24 @@ class TestRecipeViews(unittest.TestCase):
         user = User.fetch(email='user1@acme.com')
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         assert (Allow, user.id, ALL_PERMISSIONS) in recipe.__acl__
+
+    def test_failsafe_get(self):
+        none = None
+        res0 = failsafe_get(none, 'dish_title')
+        self.assertEqual('', res0)
+        recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
+        self.assertRaises(TypeError, failsafe_get(recipe, 'title'))
+        res2 = failsafe_get(recipe, 'dish_title')
+        self.assertEqual(u'potato salad', res2)
+        res3 = failsafe_get(recipe, 'dish.title')
+        self.assertEqual(u'potato salad', res3)
+        ingredient1 = recipe.ingredients[0]
+        res4 = failsafe_get(ingredient1, 'unit.abbr')
+        self.assertEqual(u'pcs.', res4)
+        APUs = failsafe_get(ingredient1, 'product.APUs')
+        self.assertEqual(2, len(APUs))
+        measured = failsafe_get(ingredient1, 'measured')
+        self.assertEqual(3, measured)
 
 class TestUserViews(unittest.TestCase):
 

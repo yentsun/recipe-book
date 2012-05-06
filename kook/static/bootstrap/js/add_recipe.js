@@ -19,38 +19,7 @@ $(function() {
         });
     });
     if (typeof error_data !== 'undefined') {
-        var error_fields = error_data.errors;
-        var original_data = error_data.original_data;
-
-        //repopulate
-        for (var field_name in original_data) {
-            $('input[name='+field_name+']')
-                .val(original_data[field_name]);
-            $('textarea[name='+field_name+']')
-                .text(original_data[field_name]);
-        }
-        if (original_data.ingredients.length) {
-            var i = 0;
-            while (i <= (original_data.ingredients.length - 1)) {
-                if (!name_with_value_exists('product_title',
-                                            original_data.ingredients[i]
-                                               .product_title)) {
-                    clone_ingredient(ingredient_container,
-                                     original_data.ingredients[i]);
-                }
-                i++;
-            }
-        }
-        if (original_data.steps.length) {
-            var j = 0;
-            while (j <= (original_data.steps.length - 1)) {
-                if (!name_with_value_exists('step_text',
-                                            original_data.steps[j].text))
-                    clone_step(step_container, original_data.steps[j]);
-                j++;
-            }
-        }
-        // end repopulate
+        var error_fields = error_data;
 
         //mark invalid data
         for (var field_params in error_fields) {
@@ -145,6 +114,7 @@ function clone_ingredient(container, data) {
 function clone_step(container, data) {
     var original = container.find('.step:last');
     var duplicate = original.clone();
+    duplicate.remove();
     var step_number_field =
         duplicate.find('input[name="step_number"]');
     var step_number = Number(step_number_field.val());
@@ -153,7 +123,6 @@ function clone_step(container, data) {
     step_number_field.val(step_number);
     duplicate.attr('id', 'step_'+step_number);
     duplicate.find('textarea').text('').css('background', '#fff');
-    duplicate.find('span, .markItUpHeader').remove();
     duplicate.appendTo(container);
     $(window).scrollTop(duplicate.position().top);
     if (data != undefined) {

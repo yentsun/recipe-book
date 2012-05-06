@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import json
-import datetime
 
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
-from pyramid.i18n import get_locale_name
+from pyramid.i18n import get_localizer
 from beaker.cache import cache_region, region_invalidate
 from babel.core import Locale
 from babel.dates import format_date
@@ -36,15 +35,15 @@ def create_view(request):
 #    print format_date(datetime.datetime.now(), format=u'EEE, MMM d, yyyy',
 #                      locale=locale)
 #    from pyramid.i18n import TranslationString
-    from pyramid.i18n import get_localizer
 #    req = TranslationString('Required')
-    localizer = get_localizer(request)
 #    print '------------------------------------'
 #    print localizer.translate(req, domain='colander')
 #    print localizer.locale_name
 #    print req
     response = common()
+    localizer = get_localizer(request)
     response['create_recipe_path'] = '/create_recipe'
+    response['data'] = None
     if request.POST:
         result = Recipe.construct_from_multidict(request.POST,
                                                  localizer=localizer)
@@ -59,7 +58,8 @@ def create_view(request):
         else:
             request.session.flash(u'<div class="alert alert-error">'
                                   u'Ошибка при добавлении рецепта!</div>')
-            response['error_data'] = json.dumps(result)
+            response['errors'] = json.dumps(result['errors'])
+            response['data'] = result['original_data']
     return response
 
 def delete_view(request):
@@ -75,6 +75,7 @@ def delete_view(request):
 def update_view(request):
     id = request.matchdict['id']
     response = common()
+    localizer = get_localizer(request)
     try:
         update_path = request.current_route_url(id=id)
     except ValueError:
@@ -83,7 +84,8 @@ def update_view(request):
     response.update({'update_recipe_path': update_path,
                      'recipe': recipe})
     if request.POST:
-        result = Recipe.construct_from_multidict(request.POST)
+        result = Recipe.construct_from_multidict(request.POST,
+                                                 localizer=localizer)
         if isinstance(result, Recipe):
             if has_permission('update', recipe, request):
                 result.id = recipe.id
@@ -97,7 +99,8 @@ def update_view(request):
         else:
             request.session.flash(u'<div class="alert alert-error">'
                                   u'Ошибка при обновлении рецепта!</div>')
-            response['error_data'] = json.dumps(result)
+            response['errors'] = json.dumps(result['errors'])
+            response['data'] = result['original_data']
     return response
 
 def product_units_view(request):
