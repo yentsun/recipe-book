@@ -19,7 +19,7 @@ $(function(){
         var status_id_field = $('[name="status_id"]');
         status_id_field.val() == 1 ?
             status_id_field.val(0) : status_id_field.val(1);
-        $.post('/update_recipe_status/'+recipe_title,
+        $.post('/update_recipe_status/'+recipe_id,
                {new_status: status_id_field.val()},
                function(data){
                    status_id_field.val(data.status_id)

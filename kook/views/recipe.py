@@ -117,11 +117,10 @@ def product_units_view(request):
     return result
 
 def update_status_view(request):
-    title = request.matchdict['title']
-    recipe = Recipe.fetch(title, request.user.id)
-#    TODO test and fix
+    id = request.matchdict['id']
+    recipe = Recipe.fetch(id)
     if request.POST:
         new_status_id = request.POST.getone('new_status')
-        recipe.status_id = new_status_id
+        recipe.status_id = int(new_status_id)
         recipe.save()
         return {'status_id': new_status_id}

@@ -20,7 +20,8 @@ from kook.models.recipe import (Recipe, Step, Product, Ingredient,
 from kook.models.user import User, Group
 from kook.models.sqla_metadata import metadata
 from kook.views.recipe import (create_view, delete_view, index_view,
-                               read_view, product_units_view, update_view)
+                               read_view, product_units_view, update_view,
+                               update_status_view)
 from kook.views.user import register_view, update_profile_view
 
 def populate_test_data():
@@ -301,6 +302,19 @@ class TestRecipeViews(unittest.TestCase):
         self.assertEqual(2, len(APUs))
         measured = failsafe_get(ingredient1, 'measured')
         self.assertEqual(3, measured)
+
+    def test_update_status(self):
+        recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
+        POST = MultiDict((
+            ('new_status', '0'),
+            ))
+        request = DummyRequest(POST=POST,
+                               user=User.fetch(email='user1@acme.com'))
+        request.matchdict['id'] = recipe.id
+        update_status_view(request)
+        recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
+        self.assertEqual(0, recipe.status_id)
+
 
 class TestUserViews(unittest.TestCase):
 

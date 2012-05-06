@@ -149,7 +149,7 @@ ${get(recipe, 'description')}</textarea>
           href="/static/bootstrap/js/markitup/sets/markdown/style.css" />
 </%def>
 <script type="text/javascript">
-    var recipe_title = '${recipe.dish.title}';
+    var recipe_id = '${recipe.id}';
     var products = [
         % for product in products:
                 '${product.title}',
