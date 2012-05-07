@@ -1,8 +1,9 @@
 import cryptacular.bcrypt
 from hashlib import md5
 from urllib import urlencode
-from datetime import date
+from datetime import date, datetime
 from colander import Invalid
+from sqlalchemy import desc
 from kook.models import Entity, DBSession
 from schemas import UserSchema, ProfileSchema, dont_check_current_nickname
 
@@ -31,6 +32,12 @@ class User(Entity):
         """Generate new password and send it to user email"""
         #TODO complete function
         return '000000'
+
+    def add_rep(self, rep_value):
+        new_rep = self.profile.rep + rep_value
+        self.profile.rep = new_rep
+        record = RepRecord(self.id, rep_value)
+        record.save()
 
     @property
     def gravatar_url(self):
@@ -95,12 +102,13 @@ class Profile(Entity):
     """Profile for a user"""
 
     def __init__(self, nickname=None, real_name=None, birthday=None,
-                 location=None, registration_day=None):
+                 location=None, registration_day=None, rep=None):
         self.nickname = nickname
         self.real_name = real_name
         self.birthday = birthday
         self.location = location
         self.registration_day = registration_day or date.today()
+        self.rep = rep or 1
 
     @classmethod
     def fetch(cls, nickname):
@@ -127,3 +135,21 @@ class Profile(Entity):
         profile = cls(nickname, appstruct['real_name'],
             appstruct['birthday'], appstruct['location'])
         return profile
+
+class RepRecord(Entity):
+    """
+    A reputation record for a user
+    """
+    def __init__(self, user_id, rep_value):
+        self.user_id = user_id
+        self.rep_value = rep_value
+        self.creation_time = datetime.now()
+
+    @classmethod
+    def fetch(cls, user_id, latest=True):
+        query = DBSession.query(cls)
+        if latest:
+            return query.filter(cls.user_id==user_id)\
+                        .order_by(desc(cls.creation_time))\
+                        .first()
+        return None

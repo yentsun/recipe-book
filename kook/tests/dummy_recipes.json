@@ -1,7 +1,7 @@
 [
     {"dish_title": "Potato salad",
      "description": "The **fastest** way to cook potato salad",
-     "creation_time": "2012-05-03T23:00:00",
+     "creation_time": "2012-05-03T00:00:00",
      "ingredients": [
          {
              "product_title": "potato",

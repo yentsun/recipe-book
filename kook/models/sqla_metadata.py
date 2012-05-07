@@ -3,7 +3,7 @@ from sqlalchemy import (Column, Table, Unicode, Integer, String, Date,
                         DateTime, CHAR, ForeignKey, MetaData)
 from kook.models.recipe import (Recipe, Dish, Ingredient, Step, Product,
                                 AmountPerUnit, Unit, Tag)
-from kook.models.user import User, Group, Profile
+from kook.models.user import User, Group, Profile, RepRecord
 
 metadata = MetaData()
 
@@ -75,15 +75,21 @@ user_favourites = Table('user_favourites', metadata,
 user_groups = Table('user_groups', metadata,
     Column('user_id', CHAR(36), ForeignKey('users.id'), primary_key=True),
     Column('group_title', String(20), ForeignKey('groups.title'),
-        primary_key=True, nullable=False))
+           primary_key=True, nullable=False))
 
 profiles = Table('profiles', metadata,
     Column('user_id', CHAR(36), ForeignKey('users.id'), primary_key=True),
+    Column('rep', Integer),
     Column('birthday', Date()),
     Column('registration_day', Date()),
     Column('location', String(100)),
     Column('nickname', String(100), unique=True),
     Column('real_name', String(200)))
+
+rep_records = Table('rep_records', metadata,
+    Column('user_id', CHAR(36), ForeignKey('users.id'), primary_key=True),
+    Column('rep_value', Integer),
+    Column('creation_time', DateTime()))
 
 #========
 # MAPPERS
@@ -122,3 +128,4 @@ mapper(Tag, tags)
 mapper(Unit, units)
 mapper(Group, groups)
 mapper(Profile, profiles)
+mapper(RepRecord, rep_records)

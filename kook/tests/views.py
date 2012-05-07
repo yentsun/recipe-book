@@ -17,7 +17,7 @@ from kook.mako_filters import failsafe_get
 from kook.models import DBSession
 from kook.models.recipe import (Recipe, Step, Product, Ingredient,
                                 Unit, AmountPerUnit, Dish)
-from kook.models.user import User, Group
+from kook.models.user import User, Group, Profile, RepRecord
 from kook.models.sqla_metadata import metadata
 from kook.views.recipe import (create_view, delete_view, index_view,
                                read_view, product_units_view, update_view,
@@ -33,11 +33,13 @@ def populate_test_data():
         'password': u'题GZG例没%07Z'})
     user1.groups = [Group('admins'), Group('bosses')]
     user1.favourite_dishes = [Dish(u'potato salad')]
+    user1.profile = Profile(rep=100)
     user1.save()
     user2 = User.construct_from_dict({
         'email': 'user2@acme.com',
         'password': u'R52RO圣ṪF特J'})
     user2.groups = [Group('workers'), Group('clerks')]
+    user2.profile = Profile(rep=-10)
     user2.save()
 
     #add products with APUs
@@ -114,7 +116,7 @@ class TestRecipeViews(unittest.TestCase):
             if ingredient.product.title == u'лук':
                 self.assertEqual(ingredient.measured, 1)
         assert mix in recipe.steps
-        self.assertEqual(datetime(2012, 5, 8), recipe.creation_time)
+        self.assertEqual(datetime(2012, 5, 3), recipe.creation_time)
 
     def test_create_recipe_view(self):
         #testing post
@@ -406,3 +408,15 @@ class TestUserViews(unittest.TestCase):
         potato_salad = Dish(u'potato salad')
         user=User.fetch(email='user1@acme.com')
         assert potato_salad in user.favourite_dishes
+
+    def test_user_rep(self):
+        user1=User.fetch(email='user1@acme.com')
+        self.assertEqual(100, user1.profile.rep)
+        user1.add_rep(20)
+        user1.add_rep(-10)
+        record = RepRecord.fetch(user_id=user1.id)
+        self.assertEqual(-10, record.rep_value)
+        self.assertEqual(110, user1.profile.rep)
+        datetime_format = '%Y-%m-%d %H:%M'
+        self.assertEqual(datetime.now().strftime(datetime_format),
+            record.creation_time.strftime(datetime_format))
