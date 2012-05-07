@@ -2,6 +2,7 @@
 
 import json
 
+from datetime import datetime
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 from pyramid.i18n import get_localizer
@@ -90,6 +91,9 @@ def update_view(request):
             if has_permission('update', recipe, request):
                 result.id = recipe.id
                 result.author = recipe.author
+                result.id = recipe.id
+                result.creation_time = recipe.creation_time
+                result.update_time = datetime.now()
                 recipe.delete()
                 result.save()
                 region_invalidate(common, 'long_term', 'common')

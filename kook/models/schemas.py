@@ -2,7 +2,7 @@
 
 from colander import (SchemaNode, MappingSchema, SequenceSchema,
                       String, Int, Length, Range, Email, All, Function,
-                      Date, Regex, null)
+                      Date, DateTime, Regex, null)
 
 def normalize_string(string):
     """Remove whitespace and bring the string to lowercase"""
@@ -58,6 +58,7 @@ class RecipeSchema(MappingSchema):
     dish_title = SchemaNode(String(), validator=Length(3),
                        preparer=normalize_string, msg=u'Неверныое название')
     description = SchemaNode(String(), validator=Length(3), missing=None)
+    creation_time = SchemaNode(DateTime(), missing=None)
     steps = Steps()
     ingredients = Ingredients()
 

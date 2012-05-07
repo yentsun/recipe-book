@@ -1,4 +1,5 @@
 <%inherit file="../layout.mako"/>
+<%! from kook.mako_filters import pretty_date %>
 % if request.session.peek_flash():
     <% flash = request.session.pop_flash() %>
     % for message in flash:
@@ -48,7 +49,7 @@
     <h3>Избранное  <span class="badge">0</span></h3>
     <table class="table table-striped">
         <thead>
-        <tr><th>название</th><th></th></tr>
+        <tr><th>название</th><th></th><th></th></tr>
         </thead>
         <tbody>
             % for recipe in all_recipes:
@@ -70,6 +71,10 @@
                     <td>
                         <img src="${recipe.author.gravatar_url}" alt="">
                     ${recipe.author.email}
+                    </td>
+                    <td>
+                        ${pretty_date(recipe.update_time)} /
+                        ${pretty_date(recipe.creation_time)}
                     </td>
             </tr>
             % endfor

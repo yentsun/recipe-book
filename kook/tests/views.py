@@ -5,7 +5,7 @@ import json
 import unittest
 import transaction
 
-from datetime import date
+from datetime import date, datetime
 from webob.multidict import MultiDict
 from pyramid.testing import DummyRequest, setUp, tearDown
 from pyramid.security import Everyone, Allow, ALL_PERMISSIONS
@@ -114,6 +114,7 @@ class TestRecipeViews(unittest.TestCase):
             if ingredient.product.title == u'лук':
                 self.assertEqual(ingredient.measured, 1)
         assert mix in recipe.steps
+        self.assertEqual(datetime(2012, 5, 8), recipe.creation_time)
 
     def test_create_recipe_view(self):
         #testing post
@@ -216,6 +217,9 @@ class TestRecipeViews(unittest.TestCase):
         self.assertEqual(recipe_new.description,
                          u'A not-so-good fall-back meal')
         self.assertEqual(len(recipe_new.steps), 2)
+        datetime_format = '%Y-%m-%d %H:%M'
+        self.assertEqual(datetime.now().strftime(datetime_format),
+                         recipe_new.update_time.strftime(datetime_format))
 
     def test_delete_recipe_view(self):
         user = User.fetch(email='user1@acme.com')
@@ -314,7 +318,6 @@ class TestRecipeViews(unittest.TestCase):
         update_status_view(request)
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         self.assertEqual(0, recipe.status_id)
-
 
 class TestUserViews(unittest.TestCase):
 

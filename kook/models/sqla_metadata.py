@@ -1,7 +1,8 @@
 from sqlalchemy.orm import relationship, mapper
 from sqlalchemy import (Column, Table, Unicode, Integer, String, Date,
-                        CHAR, ForeignKey, MetaData)
-from kook.models.recipe import Recipe, Dish, Ingredient, Step, Product, AmountPerUnit, Unit, Tag
+                        DateTime, CHAR, ForeignKey, MetaData)
+from kook.models.recipe import (Recipe, Dish, Ingredient, Step, Product,
+                                AmountPerUnit, Unit, Tag)
 from kook.models.user import User, Group, Profile
 
 metadata = MetaData()
@@ -14,6 +15,8 @@ recipes = Table('recipes', metadata,
     Column('id', CHAR(36), primary_key=True),
     Column('dish_title', Unicode, ForeignKey('dishes.title')),
     Column('description', Unicode),
+    Column('creation_time', DateTime()),
+    Column('update_time', DateTime()),
     Column('status_id', Integer, nullable=False),
     Column('user_id', CHAR(36), ForeignKey('users.id'), nullable=False))
 
@@ -82,7 +85,10 @@ profiles = Table('profiles', metadata,
     Column('nickname', String(100), unique=True),
     Column('real_name', String(200)))
 
-#mappers
+#========
+# MAPPERS
+#========
+
 mapper(Recipe, recipes, properties={
     'dish': relationship(Dish, lazy='join'),
     'ingredients': relationship(Ingredient,

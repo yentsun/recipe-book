@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
 from pyramid.security import Everyone, Allow, Deny, ALL_PERMISSIONS
 from colander import Invalid, interpolate
 from schemas import RecipeSchema
@@ -22,7 +23,7 @@ class Recipe(Entity):
     Recipe model
     """
     def __init__(self, dish, id=None, description=None, author=None,
-                 status_id=1):
+                 status_id=1, creation_time=None):
         self.dish = dish
         self.id = id or self.generate_id()
         self.description = description
@@ -30,7 +31,8 @@ class Recipe(Entity):
         self.status_id = status_id
         self.steps = []
         self.ingredients = []
-        self.tags = []
+        self.creation_time = creation_time or datetime.now()
+        self.update_time = None
 
     def __repr__(self):
         return u'%s from %s' % (self.dish.title, self.author.email)
@@ -104,7 +106,8 @@ class Recipe(Entity):
             return {'errors': errors,
                     'original_data': cstruct}
         recipe = cls(dish=Dish(appstruct['dish_title']),
-                     description=appstruct['description'])
+                     description=appstruct['description'],
+                     creation_time=appstruct['creation_time'])
         for ingredient_entry in appstruct['ingredients']:
             if ingredient_entry['unit_title'] is None:
                 unit = None
@@ -170,9 +173,6 @@ class Recipe(Entity):
         for step in self.steps:
             ordered_steps[step.number] = step
         return ordered_steps
-
-    def update(self):
-        DBSession.merge(self)
 
     @classmethod
     def fetch(cls, id):
@@ -292,8 +292,3 @@ class AmountPerUnit(Entity):
 
     def measure(self, amount):
         return amount / self.amount
-
-#sqlalchemy stuff
-
-
-
