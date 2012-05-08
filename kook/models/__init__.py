@@ -20,7 +20,7 @@ class Entity(object):
         DBSession.delete(self)
 
     @classmethod
-    def fetch(cls, primary):
+    def fetch(cls, primary, **kwargs):
         return DBSession.query(cls).get(primary)
 
     @classmethod

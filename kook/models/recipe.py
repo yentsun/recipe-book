@@ -3,6 +3,7 @@
 from datetime import datetime
 from pyramid.security import Everyone, Allow, Deny, ALL_PERMISSIONS
 from colander import Invalid, interpolate
+from sqlalchemy import desc
 from schemas import RecipeSchema
 from kook.models import Entity, DBSession
 
@@ -27,12 +28,13 @@ class Recipe(Entity):
     Recipe model
     """
     def __init__(self, dish, id=None, description=None, author=None,
-                 status_id=1, creation_time=None):
+                 status_id=1, creation_time=None, rating=0):
         self.dish = dish
         self.id = id or self.generate_id()
         self.description = description
         self.author = author
         self.status_id = status_id
+        self.rating = rating
         self.steps = []
         self.ingredients = []
         self.creation_time = creation_time or datetime.now()
@@ -53,6 +55,12 @@ class Recipe(Entity):
         acl = [(Allow, self.author.id, ALL_PERMISSIONS)]
         acl.append(STATUS_MAP[self.status_id])
         return acl
+
+    def add_vote(self, user_id, vote_value):
+        new_rating = self.rating + vote_value
+        self.rating = new_rating
+        record = VoteRecord(user_id, self.id, vote_value)
+        record.save()
 
     @classmethod
     def multidict_to_dict(cls, multidict):
@@ -296,3 +304,22 @@ class AmountPerUnit(Entity):
 
     def measure(self, amount):
         return amount / self.amount
+
+class VoteRecord(Entity):
+    """
+    A vote record for a recipe
+    """
+    def __init__(self, user_id, recipe_id, vote_value):
+        self.user_id = user_id
+        self.recipe_id = recipe_id
+        self.vote_value = vote_value
+        self.creation_time = datetime.now()
+
+    @classmethod
+    def fetch(cls, user_id, latest=True):
+        query = DBSession.query(cls)
+        if latest:
+            return query.filter(cls.user_id==user_id)\
+            .order_by(desc(cls.creation_time))\
+            .first()
+        return None

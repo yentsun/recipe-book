@@ -2,7 +2,7 @@ from sqlalchemy.orm import relationship, mapper
 from sqlalchemy import (Column, Table, Unicode, Integer, String, Date,
                         DateTime, CHAR, ForeignKey, MetaData)
 from kook.models.recipe import (Recipe, Dish, Ingredient, Step, Product,
-                                AmountPerUnit, Unit, Tag)
+                                AmountPerUnit, Unit, Tag, VoteRecord)
 from kook.models.user import User, Group, Profile, RepRecord
 
 metadata = MetaData()
@@ -18,6 +18,7 @@ recipes = Table('recipes', metadata,
     Column('creation_time', DateTime()),
     Column('update_time', DateTime()),
     Column('status_id', Integer, nullable=False),
+    Column('rating', Integer, nullable=False),
     Column('user_id', CHAR(36), ForeignKey('users.id'), nullable=False))
 
 products = Table('products', metadata,
@@ -35,7 +36,7 @@ amount_per_unit = Table('amount_per_unit', metadata,
     Column('amount', Integer, nullable=False))
 
 ingredients = Table('ingredients', metadata,
-    Column('recipe_id', Integer, ForeignKey('recipes.id'),
+    Column('recipe_id', CHAR(36), ForeignKey('recipes.id'),
         primary_key=True),
     Column('product_title', Unicode, ForeignKey('products.title'),
         primary_key=True),
@@ -43,7 +44,7 @@ ingredients = Table('ingredients', metadata,
     Column('unit_title', Unicode, ForeignKey('units.title')))
 
 steps = Table('steps', metadata,
-    Column('recipe_id', Integer, ForeignKey('recipes.id'),
+    Column('recipe_id', CHAR(36), ForeignKey('recipes.id'),
         primary_key=True, nullable=False),
     Column('number', Integer, nullable=False, primary_key=True),
     Column('time_value', Integer),
@@ -91,6 +92,12 @@ rep_records = Table('rep_records', metadata,
     Column('rep_value', Integer),
     Column('creation_time', DateTime(), primary_key=True))
 
+vote_records = Table('vote_records', metadata,
+    Column('user_id', CHAR(36), ForeignKey('users.id'), primary_key=True),
+    Column('recipe_id', CHAR(36), ForeignKey('recipes.id'), primary_key=True),
+    Column('vote_value', Integer),
+    Column('creation_time', DateTime(), primary_key=True))
+
 #========
 # MAPPERS
 #========
@@ -132,3 +139,4 @@ mapper(Unit, units)
 mapper(Group, groups)
 mapper(Profile, profiles)
 mapper(RepRecord, rep_records)
+mapper(VoteRecord, vote_records)

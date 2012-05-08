@@ -128,3 +128,12 @@ def update_status_view(request):
         recipe.status_id = int(new_status_id)
         recipe.save()
         return {'status_id': new_status_id}
+
+def vote_view(request):
+    if request.POST:
+        id = request.POST.getone('recipe_id')
+        vote_value = int(request.POST.getone('vote_value'))
+        recipe = Recipe.fetch(id)
+        recipe.add_vote(request.user.id, vote_value)
+        recipe.save()
+        return {'new_rating': recipe.rating}

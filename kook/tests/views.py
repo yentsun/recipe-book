@@ -21,7 +21,7 @@ from kook.models.user import User, Group, Profile, RepRecord
 from kook.models.sqla_metadata import metadata
 from kook.views.recipe import (create_view, delete_view, index_view,
                                read_view, product_units_view, update_view,
-                               update_status_view)
+                               update_status_view, vote_view)
 from kook.views.user import register_view, update_profile_view
 
 def populate_test_data():
@@ -324,15 +324,25 @@ class TestRecipeViews(unittest.TestCase):
 
     def test_update_status(self):
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
-        POST = MultiDict((
-            ('new_status', '0'),
-            ))
+        POST = MultiDict((('new_status', '0'),))
         request = DummyRequest(POST=POST,
                                user=User.fetch(email='user1@acme.com'))
         request.matchdict['id'] = recipe.id
         update_status_view(request)
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         self.assertEqual(0, recipe.status_id)
+
+    def test_vote(self):
+        recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
+        self.assertEqual(0, recipe.rating)
+        post = MultiDict((
+            ('recipe_id', recipe.id),
+            ('vote_value', '-1')))
+        request = DummyRequest(POST=post,
+            user=User.fetch(email='user1@acme.com'))
+        vote_view(request)
+        recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
+        self.assertEqual(-1, recipe.rating)
 
 class TestUserViews(unittest.TestCase):
 
