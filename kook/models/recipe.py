@@ -56,11 +56,16 @@ class Recipe(Entity):
         acl.append(STATUS_MAP[self.status_id])
         return acl
 
-    def add_vote(self, user_id, vote_value):
+    def add_vote(self, user, vote_value):
         new_rating = self.rating + vote_value
         self.rating = new_rating
-        record = VoteRecord(user_id, self.id, vote_value)
+        record = VoteRecord(user, self, vote_value)
         record.save()
+
+    def add_comment(self, user, text):
+        comment = Comment(user, self, text)
+        comment.save()
+
 
     @classmethod
     def multidict_to_dict(cls, multidict):
@@ -309,9 +314,9 @@ class VoteRecord(Entity):
     """
     A vote record for a recipe
     """
-    def __init__(self, user_id, recipe_id, vote_value):
-        self.user_id = user_id
-        self.recipe_id = recipe_id
+    def __init__(self, user, recipe, vote_value):
+        self.user = user
+        self.recipe = recipe
         self.vote_value = vote_value
         self.creation_time = datetime.now()
 
@@ -319,7 +324,15 @@ class VoteRecord(Entity):
     def fetch(cls, user_id, latest=True):
         query = DBSession.query(cls)
         if latest:
-            return query.filter(cls.user_id==user_id)\
+            return query.filter(cls.user.id==user_id)\
             .order_by(desc(cls.creation_time))\
             .first()
         return None
+
+class Comment(Entity):
+    def __init__(self, author, recipe, text):
+        self.author = author
+        self.recipe = recipe
+        self.text = text
+        self.creation_time = datetime.now()
+        self.update_time = None

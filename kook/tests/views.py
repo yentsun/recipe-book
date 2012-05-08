@@ -21,7 +21,7 @@ from kook.models.user import User, Group, Profile, RepRecord
 from kook.models.sqla_metadata import metadata
 from kook.views.recipe import (create_view, delete_view, index_view,
                                read_view, product_units_view, update_view,
-                               update_status_view, vote_view)
+                               update_status_view, vote_view, add_comment_view)
 from kook.views.user import register_view, update_profile_view
 
 def populate_test_data():
@@ -343,6 +343,20 @@ class TestRecipeViews(unittest.TestCase):
         vote_view(request)
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         self.assertEqual(-1, recipe.rating)
+
+    def test_add_comment_view(self):
+        recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
+        author = User.fetch(email='user2@acme.com')
+        post = MultiDict((
+            ('recipe_id', recipe.id),
+            ('text', u'Какой интересный рецепт!')))
+        request = DummyRequest(POST=post, user=author)
+        add_comment_view(request)
+        recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
+        self.assertEqual(1, len(recipe.comments))
+        comment = recipe.comments[0]
+        self.assertEqual(u'Какой интересный рецепт!', comment.text)
+        self.assertIs(author, comment.author)
 
 class TestUserViews(unittest.TestCase):
 

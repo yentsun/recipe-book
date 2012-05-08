@@ -2,7 +2,7 @@ from sqlalchemy.orm import relationship, mapper
 from sqlalchemy import (Column, Table, Unicode, Integer, String, Date,
                         DateTime, CHAR, ForeignKey, MetaData)
 from kook.models.recipe import (Recipe, Dish, Ingredient, Step, Product,
-                                AmountPerUnit, Unit, Tag, VoteRecord)
+                                AmountPerUnit, Unit, Tag, VoteRecord, Comment)
 from kook.models.user import User, Group, Profile, RepRecord
 
 metadata = MetaData()
@@ -98,18 +98,25 @@ vote_records = Table('vote_records', metadata,
     Column('vote_value', Integer),
     Column('creation_time', DateTime(), primary_key=True))
 
+comments = Table('comments', metadata,
+    Column('user_id', CHAR(36), ForeignKey('users.id'), primary_key=True),
+    Column('recipe_id', CHAR(36), ForeignKey('recipes.id'), primary_key=True),
+    Column('text', Unicode, nullable=False),
+    Column('creation_time', DateTime(), primary_key=True))
+
 #========
 # MAPPERS
 #========
 
 mapper(Recipe, recipes, properties={
-    'dish': relationship(Dish, lazy='join'),
+    'dish': relationship(Dish, lazy='join', uselist=False),
     'ingredients': relationship(Ingredient,
         lazy='subquery',
         cascade='all, delete, delete-orphan',
         order_by=ingredients.c.amount.desc()),
     'steps': relationship(Step, cascade='all, delete, delete-orphan',
         lazy='subquery', order_by=steps.c.number),
+    'comments': relationship(Comment),
     'author': relationship(User, lazy='joined', uselist=False)})
 
 mapper(Product, products, properties={
@@ -131,12 +138,19 @@ mapper(User, users, properties={
         cascade='all, delete, delete-orphan')})
 mapper(Dish, dishes, properties={
     'recipes': relationship(Recipe),
-    'tags': relationship(Tag, secondary=dish_tags)
-})
+    'tags': relationship(Tag, secondary=dish_tags)})
+
+mapper(VoteRecord, vote_records, properties={
+    'user': relationship(User, uselist=False),
+    'recipe': relationship(Recipe, uselist=False)})
+
+mapper(Comment, comments, properties={
+    'author': relationship(User, uselist=False),
+    'recipe': relationship(Recipe, uselist=False)})
+
 mapper(Step, steps)
 mapper(Tag, tags)
 mapper(Unit, units)
 mapper(Group, groups)
 mapper(Profile, profiles)
 mapper(RepRecord, rep_records)
-mapper(VoteRecord, vote_records)

@@ -130,10 +130,27 @@ def update_status_view(request):
         return {'status_id': new_status_id}
 
 def vote_view(request):
+    """
+    Process voting fro recipe request. Return new recipe rating.
+    Ajax only.
+    """
     if request.POST:
         id = request.POST.getone('recipe_id')
         vote_value = int(request.POST.getone('vote_value'))
         recipe = Recipe.fetch(id)
-        recipe.add_vote(request.user.id, vote_value)
+        recipe.add_vote(request.user, vote_value)
         recipe.save()
         return {'new_rating': recipe.rating}
+
+def add_comment_view(request):
+    """
+    Process recipe comment request. Return 'ok' or 'error'
+    Ajax only.
+    """
+    if request.POST:
+        id = request.POST.getone('recipe_id')
+        text = request.POST.getone('text')
+        recipe = Recipe.fetch(id)
+        recipe.add_comment(request.user, text)
+        recipe.save()
+        return {'status': 'ok'}
