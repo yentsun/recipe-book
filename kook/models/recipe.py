@@ -12,11 +12,15 @@ class Dish(Entity):
     """
     def __init__(self, title, description=None, tags=None):
         self.title = title
-        self.description = description
         self.tags = tags or []
+        self.description = description
 
     def __repr__(self):
         return self.title
+
+    @classmethod
+    def fetch_or_new(cls, title):
+        return cls.fetch(title) or cls(title)
 
 class Recipe(Entity):
     """
@@ -105,7 +109,7 @@ class Recipe(Entity):
                 errors['.'.join(keyparts)] = '; '.join(interpolate(msgs))
             return {'errors': errors,
                     'original_data': cstruct}
-        recipe = cls(dish=Dish(appstruct['dish_title']),
+        recipe = cls(dish=Dish.fetch_or_new(appstruct['dish_title']),
                      description=appstruct['description'],
                      creation_time=appstruct['creation_time'])
         for ingredient_entry in appstruct['ingredients']:
@@ -236,7 +240,7 @@ class Tag(Entity):
     def __init__(self, title):
         self.title = title
 
-    def __str__(self):
+    def __repr__(self):
         return self.title
 
 class Ingredient(Entity):

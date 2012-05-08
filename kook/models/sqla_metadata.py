@@ -87,9 +87,9 @@ profiles = Table('profiles', metadata,
     Column('real_name', String(200)))
 
 rep_records = Table('rep_records', metadata,
-    Column('user_id', CHAR(36), ForeignKey('users.id'), primary_key=True),
+    Column('user_id', CHAR(36), ForeignKey('users.id')),
     Column('rep_value', Integer),
-    Column('creation_time', DateTime()))
+    Column('creation_time', DateTime(), primary_key=True))
 
 #========
 # MAPPERS
@@ -122,7 +122,10 @@ mapper(User, users, properties={
     'favourite_dishes': relationship(Dish, secondary=user_favourites),
     'profile': relationship(Profile, uselist=False,
         cascade='all, delete, delete-orphan')})
-mapper(Dish, dishes)
+mapper(Dish, dishes, properties={
+    'recipes': relationship(Recipe),
+    'tags': relationship(Tag, secondary=dish_tags)
+})
 mapper(Step, steps)
 mapper(Tag, tags)
 mapper(Unit, units)

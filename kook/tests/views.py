@@ -16,7 +16,7 @@ from kook.mako_filters import failsafe_get
 
 from kook.models import DBSession
 from kook.models.recipe import (Recipe, Step, Product, Ingredient,
-                                Unit, AmountPerUnit, Dish)
+                                Unit, AmountPerUnit, Dish, Tag)
 from kook.models.user import User, Group, Profile, RepRecord
 from kook.models.sqla_metadata import metadata
 from kook.views.recipe import (create_view, delete_view, index_view,
@@ -70,6 +70,12 @@ def populate_test_data():
         else:
             print recipe
 
+    #add dishes
+
+    potato_salad = Dish(u'potato salad')
+    potato_salad.tags = [Tag(u'salad'), Tag(u'western')]
+    potato_salad.save()
+
 class TestRecipeViews(unittest.TestCase):
 
     def setUp(self):
@@ -88,6 +94,13 @@ class TestRecipeViews(unittest.TestCase):
     def tearDown(self):
         DBSession.remove()
         tearDown()
+
+    def test_dish(self):
+        recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
+        potato_salad = Dish.fetch(u'potato salad')
+        assert potato_salad
+        assert Tag(u'salad') in potato_salad.tags
+        assert recipe in potato_salad.recipes
 
     def test_recipe_index(self):
         all = Recipe.fetch_all()

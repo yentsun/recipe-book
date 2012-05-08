@@ -20,6 +20,10 @@ class Entity(object):
         DBSession.delete(self)
 
     @classmethod
+    def fetch(cls, primary):
+        return DBSession.query(cls).get(primary)
+
+    @classmethod
     def fetch_all(cls, **kwargs):
         return DBSession.query(cls).all()
 
