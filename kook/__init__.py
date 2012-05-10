@@ -44,7 +44,10 @@ def main(global_settings, **settings):
 
     config.add_static_view('static', 'static', cache_max_age=3600)
 
-    config.add_route('dashboard', '/')
+    config.add_route('index', '/')
+    config.add_route('dashboard', '/dashboard')
+    config.add_route('tag', '/tag/{tag}')
+
     config.add_route('read_recipe', '/recipe/{id}')
     config.add_route('create_recipe', '/create_recipe')
     config.add_route('update_recipe', '/update_recipe/{id}')
@@ -58,6 +61,9 @@ def main(global_settings, **settings):
     config.add_route('update_profile', '/update_profile')
     config.add_route('logout', '/logout')
 
+    config.add_view('kook.views.main.index_view',
+                    route_name='index',
+                    renderer=find_renderer('main/index.mako'))
     config.add_view('kook.views.recipe.index_view',
                     route_name='dashboard',
                     renderer=find_renderer('read/dashboard.mako'))

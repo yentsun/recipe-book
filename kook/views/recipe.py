@@ -7,8 +7,6 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 from pyramid.i18n import get_localizer
 from beaker.cache import cache_region, region_invalidate
-from babel.core import Locale
-from babel.dates import format_date
 
 from kook.models.recipe import Product, Recipe, Tag
 

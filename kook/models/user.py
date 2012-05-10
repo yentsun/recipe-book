@@ -40,6 +40,12 @@ class User(Entity):
         record.save()
 
     @property
+    def display_name(self):
+        return self.profile.nickname or\
+               self.profile.real_name or\
+               self.email
+
+    @property
     def gravatar_url(self):
         default = 'identicon'
         size = 20
@@ -97,6 +103,12 @@ class User(Entity):
         for instance in groups:
             strings.append(instance.title)
         return strings
+
+    @classmethod
+    def fetch_all(cls, limit=10):
+        users = DBSession.query(cls).limit(limit).all()
+        return sorted(users, key=lambda user: user.profile.rep,
+                      reverse=True)
 
 class Profile(Entity):
     """Profile for a user"""

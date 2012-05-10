@@ -6,22 +6,50 @@ from colander import Invalid, interpolate
 from sqlalchemy import desc
 from schemas import RecipeSchema
 from kook.models import Entity, DBSession
+from beaker.cache import cache_region
 
 class Dish(Entity):
     """
     Dish model
     """
-    def __init__(self, title, description=None, tags=None):
+    def __init__(self, title, description=None, tags=None, image=None):
         self.title = title
         self.tags = tags or []
         self.description = description
+        self.image = image
 
     def __repr__(self):
         return self.title
 
+    def fetch_image(self):
+        """
+        Fetch image from Google
+        """
+        import urllib
+        import urllib2
+        import json
+
+        query = {'q': self.title.encode('utf-8'),
+                 'v': '1.0',
+                 'imgsz': 'large',
+                 'rsz': 1}
+        url = 'https://ajax.googleapis.com/ajax/services/search/images?%s'\
+        % urllib.urlencode(query)
+        request = urllib2.Request(url, None, {'Referer': 'kook.loc'})
+        response = urllib2.urlopen(request)
+        print '------------making request...-----------------'
+        result = json.load(response)['responseData']['results'][0]
+        self.image = DishImage(result['url'], result['visibleUrl'])
+
     @classmethod
     def fetch_or_new(cls, title):
         return cls.fetch(title) or cls(title)
+
+    @classmethod
+    def fetch_all(cls, limit=10):
+        dishes = DBSession.query(cls).limit(limit).all()
+        return sorted(dishes, key=lambda dish: len(dish.recipes),
+                      reverse=True)
 
 class Recipe(Entity):
     """
@@ -65,7 +93,6 @@ class Recipe(Entity):
     def add_comment(self, user, text):
         comment = Comment(user, self, text)
         comment.save()
-
 
     @classmethod
     def multidict_to_dict(cls, multidict):
@@ -122,7 +149,10 @@ class Recipe(Entity):
                 errors['.'.join(keyparts)] = '; '.join(interpolate(msgs))
             return {'errors': errors,
                     'original_data': cstruct}
-        recipe = cls(dish=Dish.fetch_or_new(appstruct['dish_title']),
+        dish = Dish.fetch_or_new(appstruct['dish_title'])
+        if not dish.image:
+            dish.fetch_image()
+        recipe = cls(dish=dish,
                      description=appstruct['description'],
                      creation_time=appstruct['creation_time'])
         for ingredient_entry in appstruct['ingredients']:
@@ -196,14 +226,17 @@ class Recipe(Entity):
         return DBSession.query(cls).get(id)
 
     @classmethod
-    def fetch_all(cls, author_id=None, dish_title=None):
+    def fetch_all(cls, author_id=None, dish_title=None, limit=None,
+                  order_by='rating'):
 #        TODO index all relevant tables
         from kook.models.sqla_metadata import recipes
-        query = DBSession.query(cls)
+        query = DBSession.query(cls).order_by(desc(getattr(cls, order_by)))
         if author_id:
             query = query.filter(recipes.c.user_id==author_id)
         if dish_title:
             query = query.filter(recipes.c.dish_title==dish_title)
+        if limit:
+            query = query.limit(limit)
         return query.all()
 
 class Step(Entity):
@@ -267,12 +300,6 @@ class Ingredient(Entity):
     def __repr__(self) :
         return u'%s %d г' % (self.product.title, self.amount)
 
-    @classmethod
-    def dummy(cls):
-        """Create an empty object"""
-        dummy_product = Product('')
-        return cls(dummy_product, 0)
-
     @property
     def measured(self):
         if len(self.product.APUs) > 0 and self.unit:
@@ -296,6 +323,7 @@ class Ingredient(Entity):
 
     def string_unit_title(self):
         """Return unit title or empty string"""
+        #TODO maybe get rid of
         if self.unit is None:
             return ''
         else:
@@ -336,3 +364,11 @@ class Comment(Entity):
         self.text = text
         self.creation_time = datetime.now()
         self.update_time = None
+
+class DishImage(Entity):
+    """
+    Image for a dish
+    """
+    def __init__(self, url, credit=None):
+        self.url = url
+        self.credit = credit

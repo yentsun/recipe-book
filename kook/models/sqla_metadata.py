@@ -2,7 +2,8 @@ from sqlalchemy.orm import relationship, mapper
 from sqlalchemy import (Column, Table, Unicode, Integer, String, Date,
                         DateTime, CHAR, ForeignKey, MetaData)
 from kook.models.recipe import (Recipe, Dish, Ingredient, Step, Product,
-                                AmountPerUnit, Unit, Tag, VoteRecord, Comment)
+                                AmountPerUnit, Unit, Tag, VoteRecord, Comment,
+                                DishImage)
 from kook.models.user import User, Group, Profile, RepRecord
 
 metadata = MetaData()
@@ -104,12 +105,18 @@ comments = Table('comments', metadata,
     Column('text', Unicode, nullable=False),
     Column('creation_time', DateTime(), primary_key=True))
 
+dish_images = Table('dish_images', metadata,
+    Column('dish_title', Unicode, ForeignKey('dishes.title'), primary_key=True,
+           nullable=False),
+    Column('url', String, nullable=False),
+    Column('credit', Unicode))
+
 #========
 # MAPPERS
 #========
 
 mapper(Recipe, recipes, properties={
-    'dish': relationship(Dish, lazy='join', uselist=False),
+    'dish': relationship(Dish, uselist=False),
     'ingredients': relationship(Ingredient,
         lazy='subquery',
         cascade='all, delete, delete-orphan',
@@ -117,19 +124,18 @@ mapper(Recipe, recipes, properties={
     'steps': relationship(Step, cascade='all, delete, delete-orphan',
         lazy='subquery', order_by=steps.c.number),
     'comments': relationship(Comment),
-    'author': relationship(User, lazy='joined', uselist=False)})
+    'author': relationship(User, uselist=False)})
 
 mapper(Product, products, properties={
-    'APUs': relationship(AmountPerUnit, cascade='all, delete-orphan',
-        lazy='joined')})
+    'APUs': relationship(AmountPerUnit, cascade='all, delete-orphan')})
 
 mapper(AmountPerUnit, amount_per_unit, properties={
-    'unit': relationship(Unit, lazy='joined'),
+    'unit': relationship(Unit),
     'product': relationship(Product)})
 
 mapper(Ingredient, ingredients, properties={
-    'product': relationship(Product, uselist=False, lazy='joined'),
-    'unit': relationship(Unit, uselist=False, lazy='joined')})
+    'product': relationship(Product, uselist=False),
+    'unit': relationship(Unit, uselist=False)})
 
 mapper(User, users, properties={
     'groups': relationship(Group, secondary=user_groups),
@@ -138,6 +144,8 @@ mapper(User, users, properties={
         cascade='all, delete, delete-orphan')})
 mapper(Dish, dishes, properties={
     'recipes': relationship(Recipe),
+    'image': relationship(DishImage, uselist=False,
+                          cascade='all, delete, delete-orphan'),
     'tags': relationship(Tag, secondary=dish_tags)})
 
 mapper(VoteRecord, vote_records, properties={
@@ -154,3 +162,4 @@ mapper(Unit, units)
 mapper(Group, groups)
 mapper(Profile, profiles)
 mapper(RepRecord, rep_records)
+mapper(DishImage, dish_images)

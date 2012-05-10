@@ -26,3 +26,16 @@ td.amount .dropdown-menu{right:0; left:auto;}
 
 textarea{width:98%}
 .description{margin-bottom:1em}
+
+/*index*/
+#dish_slides .item{height:345px; width:450px; background-position:center;
+                   background-repeat:no-repeat}
+#dish_slides .caption{position:absolute; bottom:0; left:0;
+                      background:rgb(0, 0, 0);
+                      background:rgba(0, 0, 0, 0.5);
+                      padding:10px; color:#fff; width:430px}
+#dish_slides h3{font-size:200%}
+#best-recipes .icon{overflow:hidden; height:25px; width:25px}
+#best-recipes td{padding:4px}
+#search-query{font-size:180%; padding:.3em; height:auto; width:98%;
+              line-height:1em; margin-bottom:1em}

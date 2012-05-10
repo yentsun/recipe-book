@@ -16,7 +16,7 @@ from kook.mako_filters import failsafe_get
 
 from kook.models import DBSession
 from kook.models.recipe import (Recipe, Step, Product, Ingredient,
-                                Unit, AmountPerUnit, Dish, Tag)
+                                Unit, AmountPerUnit, Dish, Tag, DishImage)
 from kook.models.user import User, Group, Profile, RepRecord
 from kook.models.sqla_metadata import metadata
 from kook.views.recipe import (create_view, delete_view, index_view,
@@ -39,7 +39,8 @@ def populate_test_data():
         'email': 'user2@acme.com',
         'password': u'R52RO圣ṪF特J'})
     user2.groups = [Group('workers'), Group('clerks')]
-    user2.profile = Profile(rep=-10)
+    user2.profile = Profile(nickname='Butters', real_name='Leopold Stotch',
+                            rep=-10)
     user2.save()
 
     #add products with APUs
@@ -74,6 +75,9 @@ def populate_test_data():
 
     potato_salad = Dish(u'potato salad')
     potato_salad.tags = [Tag(u'salad'), Tag(u'western')]
+    potato_salad.image = DishImage('http://simplyrecipes.com/photos/'
+                                   'potato-salad-new.jpg',
+                                   'simplyrecipes.com')
     potato_salad.save()
 
 class TestRecipeViews(unittest.TestCase):
@@ -101,10 +105,15 @@ class TestRecipeViews(unittest.TestCase):
         assert potato_salad
         assert Tag(u'salad') in potato_salad.tags
         assert recipe in potato_salad.recipes
+        all_dishes = Dish.fetch_all()
+        self.assertEqual(3, len(all_dishes))
+        self.assertEqual('simplyrecipes.com', potato_salad.image.credit)
 
     def test_recipe_index(self):
         all = Recipe.fetch_all()
         self.assertEqual(3, len(all))
+        only_two = Recipe.fetch_all(limit=2)
+        self.assertEqual(2, len(only_two))
 
     def test_recipe_view(self):
         request = DummyRequest()
@@ -457,3 +466,7 @@ class TestUserViews(unittest.TestCase):
         datetime_format = '%Y-%m-%d %H:%M'
         self.assertEqual(datetime.now().strftime(datetime_format),
             record.creation_time.strftime(datetime_format))
+
+    def test_general(self):
+        butters = User.fetch(email='user2@acme.com')
+        self.assertEqual(butters.display_name, 'Butters')
