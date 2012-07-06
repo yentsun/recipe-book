@@ -18,6 +18,7 @@ $(function() {
             $(this).remove();
         });
     });
+    $('textarea').markItUp(mySettings);
     if (typeof error_data !== 'undefined') {
         var error_fields = error_data;
 
@@ -46,7 +47,6 @@ $(function() {
         } // end mark invalid data
     }
     $('#tags').chosen();
-    $('textarea').markItUp(mySettings);
 });
 
 function set_measure(cont, apu_unit_title, apu_unit_abbr, apu_amount) {
@@ -114,7 +114,8 @@ function clone_ingredient(container, data) {
 function clone_step(container, data) {
     var original = container.find('.step:last');
     var duplicate = original.clone();
-    duplicate.remove();
+    var textarea = duplicate.find('textarea');
+    textarea.markItUpRemove();
     var step_number_field =
         duplicate.find('input[name="step_number"]');
     var step_number = Number(step_number_field.val());
@@ -122,7 +123,7 @@ function clone_step(container, data) {
     duplicate.find('input:text').val('');
     step_number_field.val(step_number);
     duplicate.attr('id', 'step_'+step_number);
-    duplicate.find('textarea').text('').css('background', '#fff');
+    textarea.text('').css('background', '#fff');
     duplicate.appendTo(container);
     $(window).scrollTop(duplicate.position().top);
     if (data != undefined) {
@@ -133,7 +134,7 @@ function clone_step(container, data) {
             original.remove();
         }
     }
-    duplicate.find('textarea').markItUp(mySettings);
+    textarea.markItUp(mySettings);
 }
 
 function name_with_value_exists(name, value) {

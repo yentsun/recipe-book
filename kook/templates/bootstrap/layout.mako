@@ -23,7 +23,12 @@
     % endif
     <link rel="shortcut icon" href="/static/img/favicon.png">
 </head>
-<body>
+
+<body
+    % if hasattr(self,'body_id'):
+    id="${self.body_id()}"
+    % endif
+>
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container">
@@ -37,12 +42,16 @@
             <div class="nav-collapse">
                 <ul class="nav">
                     <li class="active"><a href="/">Главная</a></li>
-                    <li><a href="#about">Все рецепты</a></li>
+                    <li>
+                        <a href="${request.route_path('dashboard')}">
+                            Мои рецепты
+                        </a>
+                    </li>
                 </ul>
                 <ul class="nav pull-right">
                         % if request.user:
                         <li><a href="${request.route_path('update_profile')}">
-                            <img width=20 src="${request.user.gravatar_url}"
+                            <img width=20 src="${request.user.gravatar_url()}"
                                  alt="gravatar" height="20">
                             % if request.user.profile.nickname:
                             ${request.user.profile.nickname}
@@ -68,17 +77,7 @@
     </div>
 </div>
 <div class="container">
-    <div class="page-header">
-        <h1>${self.title()}
-            % if hasattr(self,'sub_title'):
-                <small>${self.sub_title()}</small>
-            % endif
-        </h1>
-        % if hasattr(self,'additional_buttons'):
-            ${self.additional_buttons()}
-        % endif
-    </div>
-    <div class="row">${next.body()}</div>
+    ${next.body()}
 </div> <!-- /container -->
 <script type="text/javascript"
         src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>

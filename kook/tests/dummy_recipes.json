@@ -1,6 +1,7 @@
 [
     {"dish_title": "Potato salad",
      "description": "The **fastest** way to cook potato salad",
+     "author_email": "user1@acme.com",
      "creation_time": "2012-05-03T00:00:00",
      "ingredients": [
          {
@@ -37,6 +38,7 @@
      ]
     },
     {"dish_title": "Spicy Chick Pea",
+     "author_email": "user1@acme.com",
      "description": "A good fall-back meal using ingredients that many pantries will often have lying in a dusty corner, but are also cheap to pick up.",
      "ingredients": [
          {
@@ -74,6 +76,7 @@
     },
     {"dish_title": "Cream Cheese Wontons",
      "description": "Makes 16 wontons or 24 small wontons",
+     "author_email": "user2@acme.com",
      "ingredients": [
          {
              "product_title": "cream cheese",

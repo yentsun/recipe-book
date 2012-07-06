@@ -7,11 +7,6 @@ from datetime import datetime
 def markdown(text):
     return markdown_(text, output_format='html5', safe_mode=True)
 
-def not_none(string):
-    if string is None or string == 'None':
-        return ''
-    return string
-
 def failsafe_get(object, atrr_path):
     #TODO maybe reverse-engineer Deform instead of using this
     if object:
@@ -25,9 +20,9 @@ def failsafe_get(object, atrr_path):
                 result = None
     else:
         result = None
-    return not_none(result)
+    return result
 
-def pretty_date(time=False):
+def pretty_time(time=False):
     """
     Get a datetime object or a int() Epoch timestamp and return a
     pretty string like 'an hour ago', 'Yesterday', '3 months ago',
@@ -48,7 +43,7 @@ def pretty_date(time=False):
     if day_diff < 0:
         return ''
 
-    if day_diff == 0:
+    if day_diff is 0:
         if second_diff < 10:
             return u'только что'
         if second_diff < 60:
@@ -60,7 +55,7 @@ def pretty_date(time=False):
         if second_diff < 7200:
             return u'час назад'
         if second_diff < 86400:
-            return str( second_diff / 3600 ) + u' часов назад'
+            return str( second_diff / 3600 ) + u' час. назад'
     if day_diff == 1:
         return u'вчера'
     if day_diff < 7:

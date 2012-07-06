@@ -1,12 +1,20 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-from pyramid.security import Everyone, Allow, Deny, ALL_PERMISSIONS
+from pyramid.security import Everyone, Allow, Deny
 from colander import Invalid, interpolate
 from sqlalchemy import desc
+from sqlalchemy.orm import relationship, mapper
+
+from kook.models.schemas import CommentSchema
+from kook.models.sqla_metadata import (ingredients, dishes, amount_per_unit,
+                                       products, steps, recipes, dish_tags,
+                                       vote_records, comments, tags, units, dish_images)
+from kook.security import RECIPE_BASE_ACL, AUTHOR_ACTIONS, VOTE_ACTIONS, COMMENT_BASE_ACL
+from kook.mako_filters import pretty_time, markdown
 from schemas import RecipeSchema
-from kook.models import Entity, DBSession
-from beaker.cache import cache_region
+from kook.models import (Entity, DBSession, UPVOTE, DOWNVOTE,
+                         DOWNVOTE_COST, UPVOTE_REP_CHANGE, DOWNVOTE_REP_CHANGE)
 
 class Dish(Entity):
     """
@@ -42,10 +50,6 @@ class Dish(Entity):
         self.image = DishImage(result['url'], result['visibleUrl'])
 
     @classmethod
-    def fetch_or_new(cls, title):
-        return cls.fetch(title) or cls(title)
-
-    @classmethod
     def fetch_all(cls, limit=10):
         dishes = DBSession.query(cls).limit(limit).all()
         return sorted(dishes, key=lambda dish: len(dish.recipes),
@@ -55,7 +59,7 @@ class Recipe(Entity):
     """
     Recipe model
     """
-    def __init__(self, dish, id=None, description=None, author=None,
+    def __init__(self, dish, author, id=None, description=None,
                  status_id=1, creation_time=None, rating=0):
         self.dish = dish
         self.id = id or self.generate_id()
@@ -65,34 +69,32 @@ class Recipe(Entity):
         self.rating = rating
         self.steps = []
         self.ingredients = []
+        self.comments = []
         self.creation_time = creation_time or datetime.now()
         self.update_time = None
 
     def __repr__(self):
         return u'%s from %s' % (self.dish.title, self.author.email)
 
-    @property
-    def __acl__(self):
-        """
-        Return acl minding recipe's status
-        """
-        STATUS_MAP = {
-            0: (Deny, Everyone, 'read'),
-            1: (Allow, Everyone, 'read')
-        }
-        acl = [(Allow, self.author.id, ALL_PERMISSIONS)]
-        acl.append(STATUS_MAP[self.status_id])
-        return acl
+    def attach_acl(self, prepend=None):
+        acl = prepend or []
+        acl.extend([
+            (Deny, self.author.id, VOTE_ACTIONS),
+            (Allow, self.author.id, AUTHOR_ACTIONS),
+        ])
+        acl.extend(RECIPE_BASE_ACL)
+        self.__acl__ = acl
 
     def add_vote(self, user, vote_value):
         new_rating = self.rating + vote_value
         self.rating = new_rating
+        if vote_value is UPVOTE:
+            self.author.add_rep(UPVOTE_REP_CHANGE, 'upvote', self)
+        if vote_value is DOWNVOTE:
+            self.author.add_rep(DOWNVOTE_REP_CHANGE, 'downvote', self)
+            user.add_rep(DOWNVOTE_COST, 'downvote', self)
         record = VoteRecord(user, self, vote_value)
         record.save()
-
-    def add_comment(self, user, text):
-        comment = Comment(user, self, text)
-        comment.save()
 
     @classmethod
     def multidict_to_dict(cls, multidict):
@@ -128,8 +130,11 @@ class Recipe(Entity):
         return dictionary
 
     @classmethod
-    def construct_from_dict(cls, cstruct, localizer=None):
+    def construct_from_dict(cls, cstruct, localizer=None,
+                            fetch_dish_image=False, author=None):
         recipe_schema = RecipeSchema()
+        if 'author_email' not in cstruct and author:
+            cstruct['author_email'] = author.email
         try:
             appstruct = recipe_schema.deserialize(cstruct)
         except Invalid, e:
@@ -149,12 +154,22 @@ class Recipe(Entity):
                 errors['.'.join(keyparts)] = '; '.join(interpolate(msgs))
             return {'errors': errors,
                     'original_data': cstruct}
-        dish = Dish.fetch_or_new(appstruct['dish_title'])
-        if not dish.image:
+
+        #create the dish first
+        dish = Dish.fetch(appstruct['dish_title']) or\
+               Dish(appstruct['dish_title'])
+        if not dish.image and fetch_dish_image:
             dish.fetch_image()
-        recipe = cls(dish=dish,
+
+        #get the author
+        author = User.fetch(email=appstruct['author_email'])
+
+        #create the recipe
+        recipe = cls(dish=dish, author=author,
                      description=appstruct['description'],
                      creation_time=appstruct['creation_time'])
+
+        #populate ingredient list
         for ingredient_entry in appstruct['ingredients']:
             if ingredient_entry['unit_title'] is None:
                 unit = None
@@ -166,11 +181,21 @@ class Recipe(Entity):
                 ingredient_entry['amount'],
                 unit
             ))
+
+        #populate step list
         for step_entry in appstruct['steps']:
             recipe.steps.append(Step(step_entry['number'],
                                      step_entry['text'],
                                      step_entry['time_value']))
         return recipe
+
+    @classmethod
+    def construct_from_multidict(cls, multidict, **kwargs):
+        dict = cls.multidict_to_dict(multidict)
+        return cls.construct_from_dict(dict,
+                                       kwargs.get('localizer'),
+                                       kwargs.get('fetch_dish_image'),
+                                       kwargs.get('author'))
 
     def to_dict(self):
         #TODO try to automate from model attribs
@@ -342,10 +367,10 @@ class VoteRecord(Entity):
     """
     A vote record for a recipe
     """
-    def __init__(self, user, recipe, vote_value):
+    def __init__(self, user, recipe, value):
         self.user = user
         self.recipe = recipe
-        self.vote_value = vote_value
+        self.value = value
         self.creation_time = datetime.now()
 
     @classmethod
@@ -358,12 +383,44 @@ class VoteRecord(Entity):
         return None
 
 class Comment(Entity):
-    def __init__(self, author, recipe, text):
+    """
+    Comment entity
+    """
+    def __init__(self, author, text):
         self.author = author
-        self.recipe = recipe
         self.text = text
         self.creation_time = datetime.now()
         self.update_time = None
+
+    def attach_acl(self):
+        acl = list([(Allow, self.author.id, AUTHOR_ACTIONS)])
+        acl.append(COMMENT_BASE_ACL)
+        self.__acl__ = acl
+
+
+    @property
+    def markdown_text(self):
+        return markdown(self.text)
+
+    @property
+    def pretty_time(self):
+        return pretty_time(self.creation_time)
+
+    @classmethod
+    def delete(cls, author_id, recipe_id, creation_time):
+        DBSession.query(cls).filter(
+            cls.user_id==author_id,
+            cls.recipe_id==recipe_id,
+            cls.creation_time==creation_time).delete()
+
+    @classmethod
+    def construct_from_dict(cls, cstruct, author):
+        schema = CommentSchema()
+        try:
+            appstruct = schema.deserialize(cstruct)
+        except Invalid, e:
+            return {'errors': e.asdict()}
+        return cls(author, appstruct['text'])
 
 class DishImage(Entity):
     """
@@ -372,3 +429,48 @@ class DishImage(Entity):
     def __init__(self, url, credit=None):
         self.url = url
         self.credit = credit
+
+#========
+# MAPPERS
+#========
+from kook.models.user import User
+
+mapper(Recipe, recipes, properties={
+    'dish': relationship(Dish, uselist=False),
+    'ingredients': relationship(Ingredient,
+        cascade='all, delete, delete-orphan',
+        order_by=ingredients.c.amount.desc()),
+    'steps': relationship(Step, cascade='all, delete, delete-orphan',
+        lazy='subquery', order_by=steps.c.number),
+    'comments': relationship(Comment, cascade='all, delete, delete-orphan',
+        order_by=comments.c.creation_time),
+    'author': relationship(User, uselist=False)})
+
+mapper(Product, products, properties={
+    'APUs': relationship(AmountPerUnit, cascade='all, delete-orphan')})
+
+mapper(AmountPerUnit, amount_per_unit, properties={
+    'unit': relationship(Unit),
+    'product': relationship(Product)})
+
+mapper(Ingredient, ingredients, properties={
+    'product': relationship(Product, uselist=False),
+    'unit': relationship(Unit, uselist=False)})
+
+mapper(Dish, dishes, properties={
+    'recipes': relationship(Recipe),
+    'image': relationship(DishImage, uselist=False),
+    'tags': relationship(Tag, secondary=dish_tags)})
+
+mapper(VoteRecord, vote_records, properties={
+    'user': relationship(User, uselist=False),
+    'recipe': relationship(Recipe, uselist=False)})
+
+mapper(Comment, comments, properties={
+    'recipe': relationship(Recipe, uselist=False),
+    'author': relationship(User, uselist=False)})
+
+mapper(Step, steps)
+mapper(Tag, tags)
+mapper(Unit, units)
+mapper(DishImage, dish_images)

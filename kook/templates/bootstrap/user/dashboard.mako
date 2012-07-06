@@ -1,5 +1,5 @@
 <%inherit file="../layout.mako"/>
-<%! from kook.mako_filters import pretty_date %>
+<%! from kook.mako_filters import pretty_time %>
 % if request.session.peek_flash():
     <% flash = request.session.pop_flash() %>
     % for message in flash:
@@ -73,8 +73,8 @@
                     ${recipe.author.email}
                     </td>
                     <td>
-                        ${pretty_date(recipe.update_time)} /
-                        ${pretty_date(recipe.creation_time)}
+##                        ${pretty_date(recipe.update_time)} /
+##                        ${pretty_date(recipe.creation_time)}
                     </td>
             </tr>
             % endfor

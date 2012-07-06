@@ -5,7 +5,7 @@ body{background:#f8f3df url('../img/papertop.jpg') repeat-x}
 .step_no, .time_value{margin-bottom:4px}
 .step_no, .amount input, .time_value{font-weight:bold}
 .amount input{margin-bottom:0}
-.time{margin-left:100px}
+#update_recipe .time{margin-left:100px}
 .input-prepend .add-on,
 .input-prepend.input-append
 .add-on:first-child{margin-right:-5px}
@@ -21,11 +21,8 @@ td.amount .dropdown-menu{right:0; left:auto;}
 /*recipe-list*/
 #recipe-list .edit{display:none}
 
-/*read recipe*/
-#ingredients, #steps{margin-bottom:1em}
-
-textarea{width:98%}
-.description{margin-bottom:1em}
+#update_recipe textarea{width:98%}
+#update_recipe .description{margin-bottom:1em}
 
 /*index*/
 #dish_slides .item{height:345px; width:450px; background-position:center;
@@ -39,3 +36,27 @@ textarea{width:98%}
 #best-recipes td{padding:4px}
 #search-query{font-size:180%; padding:.3em; height:auto; width:98%;
               line-height:1em; margin-bottom:1em}
+
+/*read recipe*/
+h1 .well{font-size:80%; padding:.8em .8em .9em .5em}
+#read_recipe #ingredients{font-size:130%; margin-bottom:1em}
+#read_recipe #ingredients li{line-height:1.8em}
+td.no .btn{font-weight:bold}
+#steps{margin:2em 0}
+#read_recipe #description{background:#000; color:#fff; padding:.5em 1em}
+#voting{font-size:200%; font-weight:bold; text-align:center;}
+h1.recipe-title{margin-left:100px}
+#rating_value{margin:.3em 0; padding:.2em}
+#comments{margin:3em 0 0 6em}
+#comments h3{color:#cca17c; text-align:right; margin-bottom:1em}
+#comment_text{width:80%; height:5em}
+#comment_list .item{overflow:hidden; border-top:1px dotted #cca17c;
+                    padding:1em 0}
+#comment_list .item p{margin-bottom:0; display:inline;}
+#comment_list .item .sig a{cursor:pointer}
+#comment_list .item .author{font-weight:bold}
+#comment_list .item .time{color:#cca17c; font-style:italic;}
+#comment_form{padding-top:1em; border-top:1px dotted #cca17c}
+#cant_comment{margin-top:2em}
+
+textarea{width:98%}

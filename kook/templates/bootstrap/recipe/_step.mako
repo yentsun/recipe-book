@@ -19,5 +19,5 @@
         </div>
     </div>
     <textarea id="initial_step" name="step_text"
-              cols="30" rows="5">${get(step, 'text')}</textarea>
+              cols="30" rows="5">${get(step, 'text') or ''}</textarea>
 </div>

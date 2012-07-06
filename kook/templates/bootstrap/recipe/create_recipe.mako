@@ -21,7 +21,7 @@
                 <div class="description">
                     <label for="description">Описание</label>
                     <textarea name="description" id="description" cols="30"
-                              rows="10">${get(data, 'description')}</textarea>
+                              rows="10">${get(data, 'description') or ''}</textarea>
                 </div>
 ##                <div class="tags">
 ##                    <label for="tags">Категории</label>

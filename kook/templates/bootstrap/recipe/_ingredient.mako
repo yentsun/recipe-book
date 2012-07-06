@@ -15,9 +15,9 @@
                    onkeyup="set_amount(this)"
                    data-multiplier="${get(ingredient, 'apu') or 1}">
             <input type="hidden" name="amount"
-                   value="${get(ingredient, 'amount')}">
+                   value="${get(ingredient, 'amount') or 0}">
             <input type="hidden" name="unit_title"
-                   value="${get(ingredient, 'unit_title')}">
+                   value="${get(ingredient, 'unit_title') or ''}">
             <span class="dropdown">
                 <a href="#" class="btn dropdown-toggle add-on"
                    data-toggle="dropdown">
@@ -30,7 +30,7 @@
                         грамм</a>
                     </li>
                     <span class="alt_measures">
-                    <% APUs = get(ingredient, 'product.APUs') %>
+                    <% APUs = get(ingredient, 'product.APUs') or [] %>
                     % if len(APUs) > 0:
                     <li class="divider"></li>
                     % for apu in APUs:

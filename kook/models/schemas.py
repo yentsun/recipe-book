@@ -56,7 +56,9 @@ class RecipeSchema(MappingSchema):
         Regex('[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'),
         missing=None)
     dish_title = SchemaNode(String(), validator=Length(3),
-                       preparer=normalize_string, msg=u'Неверныое название')
+                       preparer=normalize_string, msg=u'Неверное название')
+    author_email = SchemaNode(String(), preparer=normalize_string,
+                              validator=Email())
     description = SchemaNode(String(), validator=Length(3), missing=None)
     creation_time = SchemaNode(DateTime(), missing=None)
     steps = Steps()
@@ -79,3 +81,6 @@ class ProfileSchema(MappingSchema):
     real_name = SchemaNode(String(), missing='')
     birthday = SchemaNode(Date(), missing=None)
     location = SchemaNode(String(), missing='')
+
+class CommentSchema(MappingSchema):
+    text = SchemaNode(String(), validator=Length(15))

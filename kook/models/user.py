@@ -1,18 +1,32 @@
+import json
 import cryptacular.bcrypt
 from hashlib import md5
 from urllib import urlencode
 from datetime import date, datetime
 from colander import Invalid
 from sqlalchemy import desc
-from kook.models import Entity, DBSession
+from sqlalchemy.orm import mapper, relationship
+
+from kook.models import (Entity, DBSession, UPVOTE_REQUIRED_REP,
+                         DOWNVOTE_REQUIRED_REP)
+from kook.models.sqla_metadata import (profiles, rep_records, groups,
+                                       user_favourites, user_groups, users)
 from schemas import UserSchema, ProfileSchema, dont_check_current_nickname
 
 crypt = cryptacular.bcrypt.BCRYPTPasswordManager()
+
+PRIVGROUPS = {
+    'upvoters': UPVOTE_REQUIRED_REP,
+    'downvoters': DOWNVOTE_REQUIRED_REP
+}
 
 class Group(Entity):
 
     def __init__(self, title):
         self.title = title
+
+    def __repr__(self):
+        return self.title
 
 class User(Entity):
 
@@ -25,6 +39,11 @@ class User(Entity):
         self.profile = profile or Profile()
         self.favourite_titles = favourite_titles or []
 
+    def to_json(self):
+        dict = {'id': self.id,
+                'display_name': self.display_name}
+        return json.dumps(dict)
+
     def check_password(self, password):
         return crypt.check(self.password_hash, password)
 
@@ -33,11 +52,28 @@ class User(Entity):
         #TODO complete function
         return '000000'
 
-    def add_rep(self, rep_value):
-        new_rep = self.profile.rep + rep_value
-        self.profile.rep = new_rep
-        record = RepRecord(self.id, rep_value)
-        record.save()
+    def add_rep(self, rep_value, subject, obj=None):
+        got_rep = RepRecord.fetch(user_id=self.id, subject=subject, obj=obj)
+        if not got_rep:
+            new_rep = self.profile.rep + rep_value
+            self.profile.rep = new_rep
+            for group_title, rep_required in PRIVGROUPS.iteritems():
+                if new_rep >= rep_required:
+                    self.add_to_group(group_title)
+            record = RepRecord(self.id, rep_value, subject, obj)
+            record.save()
+
+    def add_to_group(self, group_title):
+        group = Group(group_title)
+        if group not in self.groups:
+            self.groups.append(Group.fetch(group_title) or group)
+
+    def last_vote(self, recipe_id):
+        return DBSession.query(VoteRecord)\
+                        .filter(VoteRecord.recipe_id==recipe_id)\
+                        .filter(VoteRecord.user_id==self.id)\
+                        .order_by(desc(VoteRecord.creation_time))\
+                        .first()
 
     @property
     def display_name(self):
@@ -45,10 +81,8 @@ class User(Entity):
                self.profile.real_name or\
                self.email
 
-    @property
-    def gravatar_url(self):
+    def gravatar_url(self, size=20):
         default = 'identicon'
-        size = 20
         url = 'http://www.gravatar.com/avatar/%s?%s' %\
               (md5(self.email).hexdigest(),
                urlencode({'d':default, 's':str(size)}))
@@ -152,16 +186,42 @@ class RepRecord(Entity):
     """
     A reputation record for a user
     """
-    def __init__(self, user_id, rep_value):
+    def __init__(self, user_id, rep_value, subject, obj=None):
         self.user_id = user_id
         self.rep_value = rep_value
+        self.subject = subject
         self.creation_time = datetime.now()
+        try:
+            self.object_id = obj.id
+        except AttributeError:
+            self.object_id = None
 
     @classmethod
-    def fetch(cls, user_id, latest=True):
+    def fetch(cls, user_id, subject=None, obj=None, latest=True):
         query = DBSession.query(cls)
+        if subject:
+            query = query.filter(cls.subject==subject)
+        if obj:
+            query = query.filter(cls.object_id==obj.id)
         if latest:
             return query.filter(cls.user_id==user_id)\
                         .order_by(desc(cls.creation_time))\
                         .first()
         return None
+
+#========
+# MAPPERS
+#========
+
+from kook.models.recipe import VoteRecord, Dish
+
+mapper(User, users, properties={
+    'groups': relationship(Group, secondary=user_groups),
+    'favourite_dishes': relationship(Dish, secondary=user_favourites),
+    'rep_records': relationship(RepRecord),
+    'profile': relationship(Profile, uselist=False,
+        cascade='all, delete, delete-orphan')})
+
+mapper(Group, groups)
+mapper(Profile, profiles)
+mapper(RepRecord, rep_records)

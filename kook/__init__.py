@@ -49,6 +49,10 @@ def main(global_settings, **settings):
     config.add_route('tag', '/tag/{tag}')
 
     config.add_route('read_recipe', '/recipe/{id}')
+    config.add_route('recipe_vote', '/recipe_vote')
+    config.add_route('post_comment', '/post_comment')
+    config.add_route('delete_comment',
+                     '/delete_comment/{recipe_id}/{creation_time}')
     config.add_route('create_recipe', '/create_recipe')
     config.add_route('update_recipe', '/update_recipe/{id}')
     config.add_route('delete_recipe', '/delete_recipe/{id}')
@@ -61,38 +65,68 @@ def main(global_settings, **settings):
     config.add_route('update_profile', '/update_profile')
     config.add_route('logout', '/logout')
 
+    #=======
+    # RECIPE
+    #=======
+
     config.add_view('kook.views.main.index_view',
                     route_name='index',
                     renderer=find_renderer('main/index.mako'))
+
     config.add_view('kook.views.recipe.index_view',
                     route_name='dashboard',
-                    renderer=find_renderer('read/dashboard.mako'))
+                    renderer=find_renderer('user/dashboard.mako'))
+
     config.add_view('kook.views.recipe.read_view',
                     route_name='read_recipe',
-                    renderer=find_renderer('read/read_recipe.mako'))
+                    renderer=find_renderer('recipe/read_recipe.mako'))
+
     config.add_view('kook.views.recipe.create_view',
                     route_name='create_recipe', permission='create',
-                    renderer=find_renderer('create_update/create_recipe.mako'))
+                    renderer=find_renderer('recipe/create_recipe.mako'))
+
     config.add_view('kook.views.recipe.update_view',
                     route_name='update_recipe', permission='update',
-                    renderer=find_renderer('create_update/update_recipe.mako'))
+                    renderer=find_renderer('recipe/update_recipe.mako'))
+
     config.add_view('kook.views.recipe.delete_view',
                     route_name='delete_recipe')
+
     config.add_view('kook.views.recipe.product_units_view',
                     route_name='product_units', renderer='json')
+
+    config.add_view('kook.views.recipe.vote_view', permission='vote',
+                    route_name='recipe_vote', renderer='json')
+
+    config.add_view('kook.views.recipe.comment_view', permission='comment',
+                    route_name='post_comment',
+                    renderer=find_renderer('recipe/comment.mako'))
+
+    config.add_view('kook.views.recipe.delete_comment_view',
+                    route_name='delete_comment', renderer='json')
+
     config.add_view('kook.views.recipe.update_status_view',
                     route_name='update_recipe_status', renderer='json')
+
+    #=====
+    # USER
+    #=====
+
     config.add_view('kook.views.user.register_view',
                     route_name='register_user',
                     renderer=find_renderer('user/register.mako'))
+
     config.add_view('kook.views.user.login_view',
                     route_name='login',
                     renderer=find_renderer('user/login.mako'))
+
     config.add_view('kook.views.user.logout_view',
                     route_name='logout')
+
     config.add_view('kook.views.user.update_profile_view',
                     route_name='update_profile',
                     renderer=find_renderer('user/update_profile.mako'))
+
     config.add_subscriber(handle_new_request, NewRequest)
     config.scan()
     return config.make_wsgi_app()

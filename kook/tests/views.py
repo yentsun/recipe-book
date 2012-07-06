@@ -8,20 +8,21 @@ import transaction
 from datetime import date, datetime
 from webob.multidict import MultiDict
 from pyramid.testing import DummyRequest, setUp, tearDown
-from pyramid.security import Everyone, Allow, ALL_PERMISSIONS
+from pyramid.security import Allow, ALL_PERMISSIONS, Deny
 from sqlalchemy import engine_from_config
 from pyramid_beaker import set_cache_regions_from_settings
 from paste.deploy.loadwsgi import appconfig
 from kook.mako_filters import failsafe_get
 
-from kook.models import DBSession
+from kook.models import DBSession, UPVOTE, DOWNVOTE_REP_CHANGE, UPVOTE_REP_CHANGE, DOWNVOTE_COST, DOWNVOTE
 from kook.models.recipe import (Recipe, Step, Product, Ingredient,
                                 Unit, AmountPerUnit, Dish, Tag, DishImage)
 from kook.models.user import User, Group, Profile, RepRecord
 from kook.models.sqla_metadata import metadata
+from kook.security import VOTE_ACTIONS
 from kook.views.recipe import (create_view, delete_view, index_view,
                                read_view, product_units_view, update_view,
-                               update_status_view, vote_view, add_comment_view)
+                               update_status_view, vote_view, comment_view, delete_comment_view)
 from kook.views.user import register_view, update_profile_view
 
 def populate_test_data():
@@ -31,16 +32,16 @@ def populate_test_data():
     user1 = User.construct_from_dict({
         'email': 'user1@acme.com',
         'password': u'题GZG例没%07Z'})
-    user1.groups = [Group('admins'), Group('bosses')]
+    user1.groups = [Group('admins'), Group('upvoters'), Group('registered')]
     user1.favourite_dishes = [Dish(u'potato salad')]
-    user1.profile = Profile(rep=100)
+    user1.profile = Profile(rep=120)
     user1.save()
     user2 = User.construct_from_dict({
         'email': 'user2@acme.com',
         'password': u'R52RO圣ṪF特J'})
-    user2.groups = [Group('workers'), Group('clerks')]
+    user2.groups = [Group('upvoters'), Group('registered')]
     user2.profile = Profile(nickname='Butters', real_name='Leopold Stotch',
-                            rep=-10)
+                            rep=10)
     user2.save()
 
     #add products with APUs
@@ -61,14 +62,12 @@ def populate_test_data():
     _here = os.path.dirname(__file__)
     json_data=open(os.path.join(_here, 'dummy_recipes.json'))
     dummy_recipes = json.load(json_data)
-    for num, recipe_dict in enumerate(dummy_recipes):
-        recipe = Recipe.construct_from_dict(recipe_dict)
-        if isinstance(recipe, Recipe):
-            recipe.author = user1
-            if num is 2:
-                recipe.author = user2
+    for recipe_dict in dummy_recipes:
+        recipe = Recipe.construct_from_dict(recipe_dict,
+                                            fetch_dish_image=False)
+        try:
             recipe.save()
-        else:
+        except AttributeError:
             print recipe
 
     #add dishes
@@ -177,8 +176,6 @@ class TestRecipeViews(unittest.TestCase):
         assert len(recipes) is not 0
         self.assertEqual(recipes[0].dish.title, u'сельдь под шубой')
         self.assertEqual(len(recipes[0].ingredients), 5)
-        self.assertEqual([(Allow, user.id, ALL_PERMISSIONS),
-                          (Allow, Everyone, 'read')], recipes[0].__acl__)
         potato = Product(u'картофель')
         potato_400g = Ingredient(potato, amount=400)
         assert potato in recipes[0].products
@@ -231,7 +228,8 @@ class TestRecipeViews(unittest.TestCase):
                           u'мелкими кубиками'),
             ('time_value', 2),
         ))
-        request = DummyRequest(POST=POST)
+        request = DummyRequest(POST=POST,
+                               user=User.fetch(email='user2@acme.com'))
         recipe_to_update = Recipe.fetch_all(dish_title=u'spicy chick pea')[0]
         request.matchdict['id'] = recipe_to_update.id
         update_view(request)
@@ -283,7 +281,8 @@ class TestRecipeViews(unittest.TestCase):
         self.assertEqual('[]', response)
 
     def test_recipe_to_json(self):
-        request = DummyRequest()
+        user = User.fetch(email='user1@acme.com')
+        request = DummyRequest(user=user)
         recipe_to_test = Recipe.fetch_all(
             dish_title=u'potato salad',
             author_id=User.fetch(email='user1@acme.com').id)[0]
@@ -311,12 +310,13 @@ class TestRecipeViews(unittest.TestCase):
     def test_recipe_acl(self):
         user = User.fetch(email='user1@acme.com')
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
-        assert (Allow, user.id, ALL_PERMISSIONS) in recipe.__acl__
+        recipe.attach_acl()
+        assert (Deny, user.id, VOTE_ACTIONS) in recipe.__acl__
 
     def test_failsafe_get(self):
         none = None
         res0 = failsafe_get(none, 'dish_title')
-        self.assertEqual('', res0)
+        self.assertIs(None, res0)
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         self.assertRaises(TypeError, failsafe_get(recipe, 'title'))
         res2 = failsafe_get(recipe, 'dish_title')
@@ -341,31 +341,119 @@ class TestRecipeViews(unittest.TestCase):
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         self.assertEqual(0, recipe.status_id)
 
-    def test_vote(self):
+    def test_author_vote(self):
+        user=User.fetch(email='user1@acme.com')
+        self.config.testing_securitypolicy(userid=user.id, permissive=False)
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         self.assertEqual(0, recipe.rating)
         post = MultiDict((
             ('recipe_id', recipe.id),
             ('vote_value', '-1')))
-        request = DummyRequest(POST=post,
-            user=User.fetch(email='user1@acme.com'))
+        request = DummyRequest(POST=post, user=user)
         vote_view(request)
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
-        self.assertEqual(-1, recipe.rating)
+        self.assertEqual(0, recipe.rating)
 
-    def test_add_comment_view(self):
+    def test_upvote(self):
+        user=User.fetch(email='user2@acme.com')
+        self.config.testing_securitypolicy(userid=user.id, permissive=True)
+        recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
+        post = MultiDict((
+            ('recipe_id', recipe.id),
+            ('vote_value', '1')))
+        request = DummyRequest(POST=post, user=user)
+        vote_view(request)
+        recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
+        self.assertEqual(1, recipe.rating)
+        self.assertEqual(120+UPVOTE_REP_CHANGE, recipe.author.profile.rep)
+        assert u'downvoters' in User.group_finder(user=recipe.author)
+        self.assertIs(user.last_vote(recipe.id).value, UPVOTE)
+
+    def test_downvote(self):
+        user=User.fetch(email='user2@acme.com')
+        self.config.testing_securitypolicy(userid=user.id, permissive=True)
+        recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
+        post = MultiDict((
+            ('recipe_id', recipe.id),
+            ('vote_value', '-1')))
+        request = DummyRequest(POST=post, user=user)
+        vote_view(request)
+        self.assertEqual(-1, recipe.rating)
+        self.assertEqual(120+DOWNVOTE_REP_CHANGE, recipe.author.profile.rep)
+        self.assertEqual(10+DOWNVOTE_COST, user.profile.rep)
+        self.assertIs(user.last_vote(recipe.id).value, DOWNVOTE)
+
+    def test_vote_sequence(self):
+        user=User.fetch(email='user2@acme.com')
+        self.config.testing_securitypolicy(userid=user.id, permissive=True)
+        recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
+        post_upvote = MultiDict((
+            ('recipe_id', recipe.id),
+            ('vote_value', '1')))
+        post_downvote = MultiDict((
+            ('recipe_id', recipe.id),
+            ('vote_value', '-1')))
+        request_upvote = DummyRequest(POST=post_upvote, user=user)
+        request_downvote = DummyRequest(POST=post_downvote, user=user)
+        vote_view(request_upvote)
+        vote_view(request_downvote)
+        vote_view(request_upvote)
+        vote_view(request_downvote)
+        vote_view(request_upvote)
+        self.assertEqual(1, recipe.rating)
+        self.assertEqual(120+UPVOTE_REP_CHANGE+DOWNVOTE_REP_CHANGE,
+                         recipe.author.profile.rep)
+        self.assertIs(user.last_vote(recipe.id).value, UPVOTE)
+
+    def test_comment_view(self):
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         author = User.fetch(email='user2@acme.com')
         post = MultiDict((
             ('recipe_id', recipe.id),
-            ('text', u'Какой интересный рецепт!')))
+            ('comment_text', u'Какой интересный рецепт!')))
         request = DummyRequest(POST=post, user=author)
-        add_comment_view(request)
-        recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
+        comment_view(request)
         self.assertEqual(1, len(recipe.comments))
         comment = recipe.comments[0]
         self.assertEqual(u'Какой интересный рецепт!', comment.text)
         self.assertIs(author, comment.author)
+
+        #test invalid comment
+        post = MultiDict((
+            ('recipe_id', recipe.id),
+            ('comment_text', u'т прнес?')))
+        request = DummyRequest(POST=post, user=author)
+        comment_view(request)
+        self.assertEqual(1, len(recipe.comments))
+
+        #test update comment
+        post = MultiDict((
+            ('recipe_id', recipe.id),
+            ('creation_time', comment.creation_time),
+            ('comment_text', u'Какой неинтересный рецепт!')))
+        request = DummyRequest(POST=post, user=author)
+        comment_view(request)
+        self.assertEqual(1, len(recipe.comments))
+        comment = recipe.comments[0]
+        self.assertEqual(u'Какой неинтересный рецепт!', comment.text)
+
+    def test_comment_delete(self):
+        recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
+        author = User.fetch(email='user2@acme.com')
+        post = MultiDict((
+            ('recipe_id', recipe.id),
+            ('comment_text', u'Какой интересный рецепт!')))
+        request = DummyRequest(POST=post, user=author)
+        comment_view(request)
+        assert len(recipe.comments) is 1
+        comment = recipe.comments[0]
+        request = DummyRequest(user=author)
+        request.matchdict['recipe_id'] = recipe.id
+        request.matchdict['creation_time'] = comment.creation_time
+        delete_comment_view(request)
+        transaction.commit()
+        recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
+        self.assertEqual(0, len(recipe.comments))
 
 class TestUserViews(unittest.TestCase):
 
@@ -442,13 +530,12 @@ class TestUserViews(unittest.TestCase):
     def test_user_groups(self):
         user=User.fetch(email='user1@acme.com')
         user2 = User.fetch(email='user2@acme.com')
-        self.assertEqual(2, len(user.groups))
+        self.assertEqual(3, len(user.groups))
         self.assertEqual(2, len(user2.groups))
         group_strings = User.group_finder(user=user)
         assert u'admins' in group_strings
-        assert u'bosses' in group_strings
-        assert u'workers' in User.group_finder(user=user2)
-        assert u'clerks' in User.group_finder(user=user2)
+        assert u'upvoters' in User.group_finder(user=user2)
+        assert u'registered' in User.group_finder(user=user2)
 
     def test_user_fav_dishes(self):
         potato_salad = Dish(u'potato salad')
@@ -457,12 +544,12 @@ class TestUserViews(unittest.TestCase):
 
     def test_user_rep(self):
         user1=User.fetch(email='user1@acme.com')
-        self.assertEqual(100, user1.profile.rep)
-        user1.add_rep(20)
-        user1.add_rep(-10)
+        self.assertEqual(120, user1.profile.rep)
+        user1.add_rep(20, 'test 1')
+        user1.add_rep(-10, 'test 2')
         record = RepRecord.fetch(user_id=user1.id)
-        self.assertEqual(-10, record.rep_value)
-        self.assertEqual(110, user1.profile.rep)
+        self.assertEqual(-10, record.rep_value,)
+        self.assertEqual(130, user1.profile.rep)
         datetime_format = '%Y-%m-%d %H:%M'
         self.assertEqual(datetime.now().strftime(datetime_format),
             record.creation_time.strftime(datetime_format))

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 <%inherit file="../layout.mako"/>
-<%! from kook.mako_filters import pretty_date %>
+<%! from kook.mako_filters import pretty_time %>
 % if request.session.peek_flash():
     <% flash = request.session.pop_flash() %>
     % for message in flash:
@@ -8,7 +8,7 @@
     % endfor
 % endif
 <%def name="title()">Главная</%def>
-<div class="span6 left">
+<div class="span5 left">
     <div id="dish_slides">
     % for dish in popular_dishes:
         <div class="item"
@@ -24,7 +24,7 @@
     % endfor
     </div>
 </div>
-<div class="span6 right">
+<div class="span7 right">
     <input placeholder="искать рецепт..." type="text" id="search-query">
     <h3>Лучшие рецепты</h3>
     <table id="best-recipes" class="table table-striped">
@@ -48,7 +48,7 @@
                     </a>
                 </td>
                 <td>
-                    <img src="${recipe.author.gravatar_url}" alt="">
+                    <img src="${recipe.author.gravatar_url()}" alt="">
                     ${recipe.author.display_name}
                     <strong>${recipe.author.profile.rep}</strong>
                 </td>
@@ -110,7 +110,7 @@
                 % for user in best_users:
                 <tr>
                     <td>
-                        <img src="${user.gravatar_url}" alt="">
+                        <img src="${user.gravatar_url()}" alt="">
                         ${user.display_name}
                         <strong>${user.profile.rep}</strong>
                     </td>
