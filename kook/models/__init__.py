@@ -68,11 +68,13 @@ class Entity(object):
         return str(uuid4())
 
 class RootFactory(object):
-    __acl__ = [(Allow, Everyone, ('read')),
-               (Allow, 'registered', ('create', 'update', 'delete',
-                                      'vote', 'comment')),
-               (Deny, Everyone, ('create', 'update', 'delete', 'vote')),
-               (Allow, 'admins', ALL_PERMISSIONS)]
+    __acl__ = [
+        (Allow, Everyone, ('read')),
+        (Allow, 'registered', ('create', 'update', 'delete',
+                               'vote', 'comment', 'dashboard')),
+        (Allow, 'admins', ALL_PERMISSIONS),
+        (Deny, Everyone, ALL_PERMISSIONS)
+    ]
 
     def __init__(self, request):
         pass  # pragma: no cover

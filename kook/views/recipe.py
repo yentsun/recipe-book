@@ -18,7 +18,6 @@ def common():
 
 def index_view(request):
     response = dict()
-    response['all_recipes'] = Recipe.fetch_all()
     response['user_recipes'] = Recipe.fetch_all(author_id=request.user.id)
     return response
 
@@ -73,12 +72,17 @@ def create_view(request):
 def delete_view(request):
     id = request.matchdict['id']
     recipe = Recipe.fetch(id=id)
+    recipe.attach_acl()
     if has_permission('delete', recipe, request):
         recipe.delete()
         request.session.flash(u'<div class="alert">Рецепт "%s" удален!</div>'
                               % recipe.dish.title)
         region_invalidate(common, 'long_term', 'common')
-        return HTTPFound('/?invalidate_cache=true')
+        return HTTPFound('/dashboard?invalidate_cache=true')
+    else:
+        request.session.flash(u'<div class="alert alert-error">'
+                              u'У вас нет прав удалять этот рецепт</div>')
+        return HTTPFound('/')
 
 def update_view(request):
     id = request.matchdict['id']

@@ -1,5 +1,9 @@
 <%inherit file="../layout.mako"/>
-<%! from kook.mako_filters import failsafe_get as get %>
+<%!
+    from kook.mako_filters import failsafe_get as get
+    from pyramid.security import (has_permission,
+                                  principals_allowed_by_permission)
+%>
 <%def name="title()">Обновление рецепта</%def>
 <%def name="sub_title()">${recipe.dish.title}</%def>
 % if request.session.peek_flash():
@@ -113,11 +117,13 @@ ${get(recipe, 'description')}</textarea>
     </div>
     <div class="navbar navbar-fixed-bottom">
         <fieldset class="navbar-inner"><div class="container">
+            % if has_permission('delete', recipe, request):
             <button type="button" class="btn btn-danger"
                     id="delete_recipe"
                     onclick="deleteRecipe('${recipe.id}');">
                 <i class="icon-remove icon-white"></i> удалить
             </button>
+            % endif
             <div class="btn-group pull-right">
                 <button type="button" class="btn"
                         id="clone_recipe" disabled>

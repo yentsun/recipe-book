@@ -12,74 +12,47 @@
         <a href="${request.route_path('create_recipe')}"
            class="btn btn-success btn-mini">
             <i class="icon-plus icon-white"></i> новый рецепт</a></div>
-    <h3>Мои рецепты <span class="badge">0</span></h3>
-    <table class="table table-striped" id="recipe-list">
-        <thead>
-        <tr>
-            <th>заголовок</th>
-            <th>дата</th>
-        </tr>
-        </thead>
-        <tbody>
-            ##      % for recipe in user_recipes:
-##        <tr>
-##          <td>
-##            <a title="открыть рецепт"
-##               href="${request.route_path('read_recipe',
-##                                          title=recipe.title,
-##                                          author_id=recipe.author.id)}">
-##                ${recipe.title}
-##            </a>
-##            <a title="обновить рецепт" class="btn btn-mini edit"
-##               href="${request.route_path('update_recipe', title=recipe.title,
-##                                          author_id=recipe.author.id)}">
-##                 <i class="icon-pencil"></i>
-##            </a>
-##          </td>
-##          <td>
-##              <img src="${recipe.author.gravatar_url}" alt="">
-##              ${recipe.author.email}
-##          </td>
-##        </tr>
-##      % endfor
-      </tbody>
-    </table>
-</div>
-<div class="span6">
-    <h3>Избранное  <span class="badge">0</span></h3>
+    <h3>Мои рецепты <span class="badge">${len(user_recipes)}</span></h3>
     <table class="table table-striped">
         <thead>
-        <tr><th>название</th><th></th><th></th></tr>
+        <tr><th></th><th></th><th></th></tr>
         </thead>
         <tbody>
-            % for recipe in all_recipes:
+            % for recipe in user_recipes:
             <tr>
+                <td>
+                    <strong class="label">
+                    ${recipe.rating}
+                    </strong>
+                </td>
                 <td>
                     <a title="открыть рецепт"
                        href="${request.route_path('read_recipe',
                                                   id=recipe.id)}">
-                    ${recipe.dish.title}
+                        <img width="25" src="${recipe.dish.image.url}"
+                             alt="">
+                        ${recipe.dish.title}: ${recipe.description}
                     </a>
-                % if request.user is recipe.author:
-                    <a title="обновить рецепт" class="btn btn-mini edit"
-                       href="${request.route_path('update_recipe',
-                                                  id=recipe.id)}">
-                       <i class="icon-pencil"></i>
-                    </a>
-                % endif
                 </td>
-                    <td>
-                        <img src="${recipe.author.gravatar_url}" alt="">
-                    ${recipe.author.email}
-                    </td>
-                    <td>
-##                        ${pretty_date(recipe.update_time)} /
-##                        ${pretty_date(recipe.creation_time)}
-                    </td>
+                <td>
+                    ${pretty_time(recipe.update_time) or\
+                      pretty_time(recipe.creation_time)}
+                </td>
+                <td>
+                    <a title="обновить рецепт" class="btn btn-mini edit"
+                           href="${request.route_path('update_recipe',
+                           id=recipe.id)}">
+                            <i class="icon-pencil"></i>
+                    </a>
+                </td>
             </tr>
             % endfor
         </tbody>
     </table>
+</div>
+<div class="span5">
+    <h3>Избранное  <span class="badge">0</span></h3>
+
 </div>
 <%def name="js()">
     <script type="text/javascript"

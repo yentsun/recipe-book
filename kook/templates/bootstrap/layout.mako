@@ -44,7 +44,7 @@
                     <li class="active"><a href="/">Главная</a></li>
                     <li>
                         <a href="${request.route_path('dashboard')}">
-                            Мои рецепты
+                            Моя страница
                         </a>
                     </li>
                 </ul>
@@ -60,6 +60,9 @@
                             % else:
                             ${request.user.email}
                             % endif
+                            <strong>
+                                ${request.user.profile.rep}
+                            </strong>
                         </a></li>
                         <li><a href="${request.route_path('logout')}">
                             <i class="icon-share icon-white"></i>

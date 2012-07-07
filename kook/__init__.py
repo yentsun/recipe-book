@@ -76,7 +76,7 @@ def main(global_settings, **settings):
                     renderer=find_renderer('main/index.mako'))
 
     config.add_view('kook.views.recipe.index_view',
-                    route_name='dashboard',
+                    route_name='dashboard', permission='dashboard',
                     renderer=find_renderer('user/dashboard.mako'))
 
     config.add_view('kook.views.recipe.read_view',

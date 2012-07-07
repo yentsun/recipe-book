@@ -41,7 +41,7 @@
                 % for recipe in dish.recipes:
                 <tr>
                     <td title="Рейтинг рецепта">
-                        <strong class="label label-success">
+                        <strong class="label">
                             ${recipe.rating}
                         </strong>
                     </td>
