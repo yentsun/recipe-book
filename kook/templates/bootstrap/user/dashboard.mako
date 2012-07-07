@@ -51,8 +51,32 @@
     </table>
 </div>
 <div class="span5">
-    <h3>Избранное  <span class="badge">0</span></h3>
-
+    <h3>Блюда  <span class="badge">${len(dishes)}</span></h3>
+    <table class="table table-striped">
+        <thead>
+        <tr><th></th><th></th><th></th></tr>
+        </thead>
+        <tbody>
+                % for dish in dishes:
+                <tr>
+                    <td>
+                        <img width="25" src="${dish.image.url}" alt="">
+                        ${dish.title}
+                        <small style="opacity:.5">
+                        ${', '.join([tag.title for tag in dish.tags])}
+                        </small>
+                    </td>
+                    <td>
+                        <a title="обновить блюдо" class="btn btn-mini edit"
+                           href="${request.route_path('update_dish',
+                                                       title=dish.title)}">
+                            <i class="icon-pencil"></i>
+                        </a>
+                    </td>
+                </tr>
+                % endfor
+        </tbody>
+    </table>
 </div>
 <%def name="js()">
     <script type="text/javascript"

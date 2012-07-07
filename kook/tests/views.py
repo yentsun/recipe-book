@@ -24,7 +24,7 @@ from kook.security import VOTE_ACTIONS
 from kook.views.recipe import (create_view, delete_view, index_view,
                                read_view, product_units_view, update_view,
                                update_status_view, vote_view, comment_view,
-                               delete_comment_view, read_dish)
+                               delete_comment_view, read_dish, update_dish)
 from kook.views.user import register_view, update_profile_view
 
 def populate_test_data():
@@ -467,6 +467,17 @@ class TestRecipeViews(unittest.TestCase):
         response = read_dish(request)
         dish = response['dish']
         self.assertEqual('potato salad', dish.title)
+
+    def test_update_dish_view(self):
+        POST = MultiDict((
+            ('description', u'A different description for potato salad'),
+            ('tag', u'salad'),
+            ))
+        request = DummyRequest(POST=POST)
+        request.matchdict['title'] = 'potato salad'
+        update_dish(request)
+        potato_salad = Dish.fetch('potato salad')
+        self.assertEqual([Tag('salad')], potato_salad.tags)
 
 class TestUserViews(unittest.TestCase):
 
