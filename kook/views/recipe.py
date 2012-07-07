@@ -9,7 +9,7 @@ from pyramid.i18n import get_localizer
 from beaker.cache import cache_region, region_invalidate
 from kook.models import UPVOTE, DOWNVOTE, UPVOTE_REQUIRED_REP, DOWNVOTE_REQUIRED_REP, form_msg
 
-from kook.models.recipe import Product, Recipe, Tag, Comment
+from kook.models.recipe import Product, Recipe, Tag, Comment, Dish
 
 @cache_region('long_term', 'common')
 def common():
@@ -20,6 +20,12 @@ def index_view(request):
     response = dict()
     response['all_recipes'] = Recipe.fetch_all()
     response['user_recipes'] = Recipe.fetch_all(author_id=request.user.id)
+    return response
+
+def read_dish(request):
+    title = request.matchdict['title']
+    dish = Dish.fetch(title)
+    response = {'dish':dish}
     return response
 
 def read_view(request):

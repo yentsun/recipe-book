@@ -136,7 +136,7 @@
             % if can_comment:
             <div id="comment_form">
             <textarea name="text" id="comment_text"
-                      placeholder="Напишите комментарий"
+                      placeholder="Ваш комментарий (не менее 15 символов)"
                       cols="60" rows="10"></textarea>
             <button class="btn"
                     onclick="post_comment('${recipe.id}')">

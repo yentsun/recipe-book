@@ -5,10 +5,11 @@ import json
 import unittest
 import transaction
 
-from datetime import date, datetime
+from datetime import date, datetime, time
 from webob.multidict import MultiDict
 from pyramid.testing import DummyRequest, setUp, tearDown
 from pyramid.security import Allow, ALL_PERMISSIONS, Deny
+from pyramid.httpexceptions import HTTPError
 from sqlalchemy import engine_from_config
 from pyramid_beaker import set_cache_regions_from_settings
 from paste.deploy.loadwsgi import appconfig
@@ -22,7 +23,8 @@ from kook.models.sqla_metadata import metadata
 from kook.security import VOTE_ACTIONS
 from kook.views.recipe import (create_view, delete_view, index_view,
                                read_view, product_units_view, update_view,
-                               update_status_view, vote_view, comment_view, delete_comment_view)
+                               update_status_view, vote_view, comment_view,
+                               delete_comment_view, read_dish)
 from kook.views.user import register_view, update_profile_view
 
 def populate_test_data():
@@ -138,6 +140,7 @@ class TestRecipeViews(unittest.TestCase):
                 self.assertEqual(ingredient.measured, 1)
         assert mix in recipe.steps
         self.assertEqual(datetime(2012, 5, 3), recipe.creation_time)
+        self.assertEqual(time(minute=36), recipe.total_time)
 
     def test_create_recipe_view(self):
         #testing post
@@ -406,6 +409,9 @@ class TestRecipeViews(unittest.TestCase):
         self.assertIs(user.last_vote(recipe.id).value, UPVOTE)
 
     def test_comment_view(self):
+        """
+
+        """
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         author = User.fetch(email='user2@acme.com')
         post = MultiDict((
@@ -423,7 +429,7 @@ class TestRecipeViews(unittest.TestCase):
             ('recipe_id', recipe.id),
             ('comment_text', u'т прнес?')))
         request = DummyRequest(POST=post, user=author)
-        comment_view(request)
+        self.assertRaises(HTTPError, comment_view, request)
         self.assertEqual(1, len(recipe.comments))
 
         #test update comment
@@ -454,6 +460,13 @@ class TestRecipeViews(unittest.TestCase):
         transaction.commit()
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         self.assertEqual(0, len(recipe.comments))
+
+    def test_dish_view(self):
+        request = DummyRequest()
+        request.matchdict['title'] = 'potato salad'
+        response = read_dish(request)
+        dish = response['dish']
+        self.assertEqual('potato salad', dish.title)
 
 class TestUserViews(unittest.TestCase):
 

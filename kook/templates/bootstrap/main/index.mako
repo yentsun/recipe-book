@@ -24,7 +24,7 @@
     % endfor
     </div>
 </div>
-<div class="span7 right">
+<div class="span6 right">
     <input placeholder="искать рецепт..." type="text" id="search-query">
     <h3>Лучшие рецепты</h3>
     <table id="best-recipes" class="table table-striped">
@@ -57,11 +57,11 @@
         </tbody>
     </table>
 </div>
-    <div class="span9">
+    <div class="span8">
         <div class="page-header">
             <h3>Категории</h3>
         </div>
-        <div class="span3">
+        <div class="span2">
             <ul>
                 <li><a href="${request.route_path('tag', tag=u'салаты')}">
                     салаты
@@ -83,7 +83,7 @@
                 </a></li>
             </ul>
         </div>
-        <div class="span3">
+        <div class="span2">
             <ul>
                 <li><a href="/">русская</a></li>
                 <li><a href="/">европейская</a></li>

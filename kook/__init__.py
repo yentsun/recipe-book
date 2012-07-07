@@ -48,6 +48,8 @@ def main(global_settings, **settings):
     config.add_route('dashboard', '/dashboard')
     config.add_route('tag', '/tag/{tag}')
 
+    config.add_route('read_dish', '/dish/{title}')
+
     config.add_route('read_recipe', '/recipe/{id}')
     config.add_route('recipe_vote', '/recipe_vote')
     config.add_route('post_comment', '/post_comment')
@@ -80,6 +82,10 @@ def main(global_settings, **settings):
     config.add_view('kook.views.recipe.read_view',
                     route_name='read_recipe',
                     renderer=find_renderer('recipe/read_recipe.mako'))
+
+    config.add_view('kook.views.recipe.read_dish',
+                    route_name='read_dish',
+                    renderer=find_renderer('recipe/read_dish.mako'))
 
     config.add_view('kook.views.recipe.create_view',
                     route_name='create_recipe', permission='create',

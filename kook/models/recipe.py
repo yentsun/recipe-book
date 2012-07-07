@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
+from datetime import datetime, time
 from pyramid.security import Everyone, Allow, Deny
 from colander import Invalid, interpolate
 from sqlalchemy import desc
@@ -240,6 +240,13 @@ class Recipe(Entity):
         return total
 
     @property
+    def total_time(self):
+        total = 0
+        for step in self.steps:
+            total += step.time_value
+        return time(minute=total)
+
+    @property
     def ordered_steps(self):
         ordered_steps = dict()
         for step in self.steps:
@@ -267,7 +274,7 @@ class Recipe(Entity):
 class Step(Entity):
     u"""Модель шага приготовления"""
 
-    def __init__(self, number, text, time_value=None, note=None):
+    def __init__(self, number, text, time_value=0, note=None):
         self.number = number
         self.text = text
         self.time_value = time_value
