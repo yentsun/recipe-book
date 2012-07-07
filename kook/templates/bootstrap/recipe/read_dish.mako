@@ -59,7 +59,9 @@
                             % if recipe.total_time.hour:
                             ${recipe.total_time.hour} ч
                             % endif
+                            % if recipe.total_time.minute:
                             ${recipe.total_time.minute} мин
+                            % endif
                         </span>
                     </td>
                     <td title="Кол-во игредиентов и шагов приготовления">
