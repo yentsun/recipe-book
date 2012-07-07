@@ -48,6 +48,12 @@ def update_dish(request):
         return HTTPFound(update_path)
     return response
 
+def tag(request):
+    title = request.matchdict['title']
+    tag = Tag.fetch(title)
+    dishes = Dish.fetch_all(tag_title=title)
+    response = {'tag':tag, 'dishes':dishes}
+    return response
 
 def read_view(request):
     id = request.matchdict['id']

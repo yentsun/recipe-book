@@ -63,22 +63,22 @@
         </div>
         <div class="span2">
             <ul>
-                <li><a href="${request.route_path('tag', tag=u'салаты')}">
+                <li><a href="${request.route_path('tag', title=u'салаты')}">
                     салаты
                 </a></li>
-                <li><a href="${request.route_path('tag', tag=u'супы')}">
+                <li><a href="${request.route_path('tag', title=u'супы')}">
                     супы
                 </a></li>
-                <li><a href="${request.route_path('tag', tag=u'гарниры')}">
+                <li><a href="${request.route_path('tag', title=u'гарниры')}">
                     гарниры
                 </a></li>
-                <li><a href="${request.route_path('tag', tag=u'основные блюда')}">
+                <li><a href="${request.route_path('tag', title=u'основные блюда')}">
                     основные блюда
                 </a></li>
-                <li><a href="${request.route_path('tag', tag=u'дессерты')}">
+                <li><a href="${request.route_path('tag', title=u'дессерты')}">
                     дессерты
                 </a></li>
-                <li><a href="${request.route_path('tag', tag=u'напитки')}">
+                <li><a href="${request.route_path('tag', title=u'напитки')}">
                     напитки
                 </a></li>
             </ul>

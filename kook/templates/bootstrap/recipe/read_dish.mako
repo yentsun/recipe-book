@@ -8,7 +8,7 @@
 <%def name="body_id()">read_dish</%def>
 <%def name="title()">${dish.title}</%def>
 <%def name="sub_title()">
-    ${','.join(dish.tags)}
+    ${', '.join([tag.title for tag in dish.tags])}
 </%def>
 <div class="page-header row">
     <h1 class="dish-title offset1">
@@ -46,7 +46,8 @@
                         </strong>
                     </td>
                     <td>
-                        <a title="открыть рецепт"
+                        <a class="description"
+                           title="открыть рецепт"
                            href="${request.route_path('read_recipe',
                                                       id=recipe.id)}">
                         ${recipe.description}

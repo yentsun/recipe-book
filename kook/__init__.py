@@ -46,7 +46,8 @@ def main(global_settings, **settings):
 
     config.add_route('index', '/')
     config.add_route('dashboard', '/dashboard')
-    config.add_route('tag', '/tag/{tag}')
+
+    config.add_route('tag', '/tag/{title}')
 
     config.add_route('read_dish', '/dish/{title}')
     config.add_route('update_dish', '/update_dish/{title}')
@@ -79,6 +80,10 @@ def main(global_settings, **settings):
     config.add_view('kook.views.recipe.index_view',
                     route_name='dashboard', permission='dashboard',
                     renderer=find_renderer('user/dashboard.mako'))
+
+    config.add_view('kook.views.recipe.tag',
+                    route_name='tag',
+                    renderer=find_renderer('recipe/tag.mako'))
 
     config.add_view('kook.views.recipe.read_view',
                     route_name='read_recipe',
