@@ -26,13 +26,9 @@
                     </strong>
                 </td>
                 <td>
-                    <a title="открыть рецепт"
-                       href="${request.route_path('read_recipe',
-                                                  id=recipe.id)}">
                         <img width="25" src="${recipe.dish.image.url}"
                              alt="">
                         ${recipe.dish.title}: ${recipe.description}
-                    </a>
                 </td>
                 <td>
                     ${pretty_time(recipe.update_time) or\
@@ -60,7 +56,9 @@
                 % for dish in dishes:
                 <tr>
                     <td>
+                        % if dish.image:
                         <img width="25" src="${dish.image.url}" alt="">
+                        % endif
                         ${dish.title}
                         <small style="opacity:.5">
                         ${', '.join([tag.title for tag in dish.tags])}

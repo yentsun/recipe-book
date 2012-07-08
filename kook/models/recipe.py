@@ -50,7 +50,7 @@ class Dish(Entity):
         self.image = DishImage(result['url'], result['visibleUrl'])
 
     @classmethod
-    def fetch_all(cls, limit=10, tag_title=None):
+    def fetch_all(cls, limit=None, tag_title=None):
         query = DBSession.query(cls)
         if tag_title:
             query = query.filter(Dish.tags.any(tags.c.title==tag_title))

@@ -69,6 +69,7 @@ def read_view(request):
                 'DOWNVOTE': DOWNVOTE,
                 'last_vote': last_vote,
                 'can_comment': has_permission('comment', recipe, request),
+                'can_update': has_permission('update', recipe, request),
                 'can_upvote': has_permission('upvote', recipe, request),
                 'can_downvote': has_permission('downvote', recipe, request)}
     return response

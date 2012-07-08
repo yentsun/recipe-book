@@ -26,7 +26,7 @@
     % endif
 </div>
 <div class="row">
-    <div class="span1">
+    <div class="span1" class="toolbox">
         <div id="voting" class="pull-left">
             % if last_vote and last_vote.value is UPVOTE:
             <button class="btn btn-success active" type="button"
@@ -64,7 +64,15 @@
                 <i class="icon-chevron-down"></i>
             </button>
             % endif
+
         </div>
+        % if can_update:
+        <a title="обновить рецепт" class="btn edit"
+           href="${request.route_path('update_recipe',
+           id=recipe.id)}">
+            <i class="icon-pencil"></i>
+        </a>
+        % endif
     </div>
     <div class="span5">
         <div>
