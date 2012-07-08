@@ -19,7 +19,9 @@
                            value="${get(data, 'dish_title')}">
                 </div>
                 <div class="description">
-                    <label for="description">Описание</label>
+                    <label for="description">
+                        Чем уникален этот рецепт?
+                    </label>
                     <textarea name="description" id="description" cols="30"
                               rows="10">${get(data, 'description') or ''}</textarea>
                 </div>
