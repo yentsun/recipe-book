@@ -22,8 +22,9 @@
                     <label for="description">
                         Чем уникален этот рецепт?
                     </label>
-                    <textarea name="description" id="description" cols="30"
-                              rows="10">${get(data, 'description') or ''}</textarea>
+                    <input class="span5" type="text" id="description"
+                           name="description"
+                           value="${get(data, 'description') or ''}">
                 </div>
 ##                <div class="tags">
 ##                    <label for="tags">Категории</label>

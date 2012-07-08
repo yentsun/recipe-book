@@ -12,7 +12,6 @@
         <div class="span12">${message | n}</div>
     % endfor
 % endif
-<%def name="additional_buttons()">
     <div class="btn-group pull-right">
         <a class="btn"
            href="${request.route_path('read_recipe', id=recipe.id,
@@ -25,7 +24,6 @@
             <i class="icon-eye-close"></i> скрыть
         </button>
     </div>
-</%def>
 <form class="span12" action="${update_recipe_path}" method="post">
     <div class="row">
         <div class="span6">
@@ -41,10 +39,9 @@
                     <label for="description">
                         Чем уникален этот рецепт?
                     </label>
-                    <textarea name="description" id="description"
-                              cols="30"
-                              rows="10">
-${get(recipe, 'description')}</textarea>
+                    <input class="span5" type="text" id="description"
+                           name="description"
+                           value="${get(recipe, 'description') or ''}">
                 </div>
 ##                <div class="tags">
 ##                    <label for="tags">Категории</label>
