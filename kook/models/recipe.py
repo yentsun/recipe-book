@@ -370,6 +370,9 @@ class AmountPerUnit(Entity):
         self.amount = amount
         self.unit = unit
 
+    def __repr__(self) :
+        return '%s %s' % (self.unit, self.amount)
+
     def measure(self, amount):
         return amount / self.amount
 

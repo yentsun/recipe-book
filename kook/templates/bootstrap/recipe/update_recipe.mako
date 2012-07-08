@@ -38,7 +38,9 @@
                            value="${get(recipe, 'dish.title')}"
                            data-title="${get(recipe, 'dish.title')}"></div>
                 <div class="description">
-                    <label for="description">Описание</label>
+                    <label for="description">
+                        В "двух словах": чем уникален этот рецепт?
+                    </label>
                     <textarea name="description" id="description"
                               cols="30"
                               rows="10">

@@ -25,7 +25,7 @@
     </div>
 </div>
 <div class="span6 right">
-    <input placeholder="искать рецепт..." type="text" id="search-query">
+    <input disabled placeholder="искать рецепт..." type="text" id="search-query">
     <h3>Лучшие рецепты</h3>
     <table id="best-recipes" class="table table-striped">
         <tbody>
@@ -75,8 +75,8 @@
                 <li><a href="${request.route_path('tag', title=u'основные блюда')}">
                     основные блюда
                 </a></li>
-                <li><a href="${request.route_path('tag', title=u'дессерты')}">
-                    дессерты
+                <li><a href="${request.route_path('tag', title=u'десерты')}">
+                    десерты
                 </a></li>
                 <li><a href="${request.route_path('tag', title=u'напитки')}">
                     напитки
@@ -85,21 +85,60 @@
         </div>
         <div class="span2">
             <ul>
-                <li><a href="/">русская</a></li>
-                <li><a href="/">европейская</a></li>
-                <li><a href="/">кавказская</a></li>
-                <li><a href="/">итальянская</a></li>
-                <li><a href="/">мексиканская</a></li>
-                <li><a href="/">азиатская</a></li>
+                <li>
+                    <a href="${request.route_path('tag', title=u'русская кухня')}">
+                        русская
+                    </a>
+                </li>
+                <li>
+                    <a href="${request.route_path('tag', title=u'европейская кухня')}">
+                        европейская
+                    </a>
+                </li>
+                <li>
+                    <a href="${request.route_path('tag', title=u'кавказская кухня')}">
+                        кавказская
+                    </a>
+                </li>
+                <li>
+                    <a href="${request.route_path('tag', title=u'латиноамериканская кухня')}">
+                        латиноамериканская
+                    </a>
+                </li>
+                <li>
+                    <a href="${request.route_path('tag', title=u'восточная кухня')}">
+                        восточная
+                    </a>
+                </li>
             </ul>
         </div>
         <div class="span2">
             <ul>
-                <li><a href="/">быстрые</a></li>
-                <li><a href="/">дешевые</a></li>
-                <li><a href="/">праздничные</a></li>
-                <li><a href="/">низкокалорийные</a></li>
-                <li><a href="/">высококалорийные</a></li>
+                <li>
+                    <a href="${request.route_path('tag', title=u'быстрое')}">
+                        быстрые
+                    </a>
+                </li>
+                <li>
+                    <a href="${request.route_path('tag', title=u'дешевое')}">
+                        дешевые
+                    </a>
+                </li>
+                <li>
+                    <a href="${request.route_path('tag', title=u'праздничное')}">
+                        праздничные
+                    </a>
+                </li>
+                <li>
+                    <a href="${request.route_path('tag', title=u'низкокалорийное')}">
+                        низкокалорийные
+                    </a>
+                </li>
+                <li>
+                    <a href="${request.route_path('tag', title=u'высококалорийное')}">
+                        высококалорийные
+                    </a>
+                </li>
             </ul>
         </div>
     </div>

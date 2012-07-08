@@ -42,11 +42,13 @@
             <div class="nav-collapse">
                 <ul class="nav">
                     <li class="active"><a href="/">Главная</a></li>
+                    % if request.user:
                     <li>
                         <a href="${request.route_path('dashboard')}">
                             Моя страница
                         </a>
                     </li>
+                    % endif
                 </ul>
                 <ul class="nav pull-right">
                         % if request.user:
