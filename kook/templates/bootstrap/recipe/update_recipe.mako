@@ -39,7 +39,7 @@
                            data-title="${get(recipe, 'dish.title')}"></div>
                 <div class="description">
                     <label for="description">
-                        В "двух словах": чем уникален этот рецепт?
+                        Чем уникален этот рецепт?
                     </label>
                     <textarea name="description" id="description"
                               cols="30"
