@@ -66,14 +66,23 @@
                 <li><a href="${request.route_path('tag', title=u'салаты')}">
                     салаты
                 </a></li>
-                <li><a href="${request.route_path('tag', title=u'супы')}">
-                    супы
+                <li><a href="${request.route_path('tag', title=u'закуски')}">
+                    закуски
+                </a></li>
+                <li><a href="${request.route_path('tag', title=u'первые блюда')}">
+                    первые блюда
+                </a></li>
+                <li><a href="${request.route_path('tag', title=u'основные блюда')}">
+                    основные блюда
                 </a></li>
                 <li><a href="${request.route_path('tag', title=u'гарниры')}">
                     гарниры
                 </a></li>
-                <li><a href="${request.route_path('tag', title=u'основные блюда')}">
-                    основные блюда
+                <li><a href="${request.route_path('tag', title=u'заправки')}">
+                    заправки
+                </a></li>
+                <li><a href="${request.route_path('tag', title=u'выпечка')}">
+                    выпечка
                 </a></li>
                 <li><a href="${request.route_path('tag', title=u'десерты')}">
                     десерты
@@ -86,8 +95,8 @@
         <div class="span2">
             <ul>
                 <li>
-                    <a href="${request.route_path('tag', title=u'русская кухня')}">
-                        русская
+                    <a href="${request.route_path('tag', title=u'славянская кухня')}">
+                        славянская
                     </a>
                 </li>
                 <li>
@@ -103,6 +112,11 @@
                 <li>
                     <a href="${request.route_path('tag', title=u'латиноамериканская кухня')}">
                         латиноамериканская
+                    </a>
+                </li>
+                <li>
+                    <a href="${request.route_path('tag', title=u'азиатская кухня')}">
+                        азиатская
                     </a>
                 </li>
                 <li>
@@ -135,8 +149,8 @@
                     </a>
                 </li>
                 <li>
-                    <a href="${request.route_path('tag', title=u'высококалорийное')}">
-                        высококалорийные
+                    <a href="${request.route_path('tag', title=u'вегетарианская кухня')}">
+                        вегетарианская кухня
                     </a>
                 </li>
             </ul>
