@@ -12,6 +12,12 @@
         <div class="span12">${message | n}</div>
     % endfor
 % endif
+<div class="page-header">
+    <h1 class="recipe-title"> ${self.title()}
+        % if hasattr(self,'sub_title'):
+                <small>${self.sub_title()}</small>
+        % endif
+    </h1>
     <div class="btn-group pull-right">
         <a class="btn"
            href="${request.route_path('read_recipe', id=recipe.id,
@@ -24,6 +30,7 @@
             <i class="icon-eye-close"></i> скрыть
         </button>
     </div>
+</div>
 <form class="span12" action="${update_recipe_path}" method="post">
     <div class="row">
         <div class="span6">
@@ -160,7 +167,12 @@
                 '${product.title}',
         % endfor
     ];
-        % if errors:
-            var error_data = ${errors | n};
-        % endif
+    var dishes = [
+        % for dish in dishes:
+                '${dish.title}',
+        % endfor
+    ];
+    % if errors:
+    var error_data = ${errors | n};
+    % endif
 </script>

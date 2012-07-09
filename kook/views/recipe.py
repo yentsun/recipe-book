@@ -14,6 +14,7 @@ from kook.models.recipe import Product, Recipe, Tag, Comment, Dish
 @cache_region('long_term', 'common')
 def common():
     return {'products': Product.fetch_all(),
+            'dishes': Dish.fetch_all(),
             'tags': Tag.fetch_all()}
 
 def index_view(request):

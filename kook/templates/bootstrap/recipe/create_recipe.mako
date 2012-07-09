@@ -7,6 +7,32 @@
         <div class="span12">${message | n}</div>
     % endfor
 % endif
+<div class="page-header">
+    <h1 class="recipe-title"> ${self.title()}
+        % if hasattr(self,'sub_title'):
+                <small>${self.sub_title()}</small>
+        % endif
+    </h1>
+    <div class="page-header">
+        <h1 class="recipe-title"> ${self.title()}
+            % if hasattr(self,'sub_title'):
+                    <small>${self.sub_title()}</small>
+            % endif
+        </h1>
+        <div class="btn-group pull-right">
+            <a class="btn"
+               href="${request.route_path('read_recipe', id=recipe.id,
+               author_id=request.user.id)}">
+                <i class="icon-eye-open"></i> посмотреть на сайте
+            </a>
+            <button id="toggle-status" class="btn btn-warning"
+                    data-toggle="button" data-original-title="Скрытый рецепт не
+                будет виден никому кроме вас">
+                <i class="icon-eye-close"></i> скрыть
+            </button>
+        </div>
+    </div>
+</div>
 <form class="span12" action="${create_recipe_path}" method="post">
     <div class="row">
         <div id="general_steps" class="span6">
@@ -108,6 +134,11 @@
     var products = [
         % for product in products:
                 '${product.title}',
+        % endfor
+    ];
+    var dishes = [
+        % for dish in dishes:
+                '${dish.title}',
         % endfor
     ];
     % if errors:

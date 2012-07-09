@@ -10,6 +10,7 @@ $(function() {
     var product_name_inputs = $('.product_title input');
     product_name_inputs.attr('autocomplete', 'off')
         .typeahead({source:products});
+    $('#dish_title').attr('autocomplete', 'off').typeahead({source:dishes});
     product_name_inputs.live('change', function(){
         repopulate_measures($(this));
     });
