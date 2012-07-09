@@ -30,6 +30,9 @@
     </div>
     <div class="span5">
         <img width="470" src="${dish.image.url}" alt="">
+        <div id="photo_credit">
+            Фото: ${dish.image.credit or dish.image.get_credit()}
+        </div>
     </div>
     <div class="span6">
         <div id="description">${dish.description | markdown}</div>

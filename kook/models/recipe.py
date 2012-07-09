@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime, timedelta
+from urlparse import urlparse
 from pyramid.security import Everyone, Allow, Deny
 from colander import Invalid, interpolate
 from sqlalchemy import desc
@@ -442,6 +443,34 @@ class DishImage(Entity):
     def __init__(self, url, credit=None):
         self.url = url
         self.credit = credit
+
+    def get_credit(self):
+        """
+        Get domain name from url string.
+        Taken from http://stackoverflow.com/a/1069780/216042
+        """
+        import pkg_resources
+        file_name = pkg_resources.resource_filename(
+            'kook',
+            'static/txt/effective_tld_names.dat.txt')
+        with open(file_name) as tldFile:
+            tlds = [line.strip() for line in tldFile if line[0] not in "/\n"]
+
+        urlElements = urlparse(self.url)[1].split('.')
+
+        for i in range(-len(urlElements),0):
+            lastIElements = urlElements[i:]
+            candidate = ".".join(lastIElements) # abcde.co.uk, co.uk, uk
+            wildcardCandidate = ".".join(["*"]+lastIElements[1:]) # *.co.uk, *.uk, *
+            exceptionCandidate = "!"+candidate
+
+            # match tlds:
+            if (exceptionCandidate in tlds):
+                return ".".join(urlElements[i:])
+            if (candidate in tlds or wildcardCandidate in tlds):
+                return ".".join(urlElements[i-1:])
+
+        raise ValueError("Domain not in global list of TLDs")
 
 #========
 # MAPPERS

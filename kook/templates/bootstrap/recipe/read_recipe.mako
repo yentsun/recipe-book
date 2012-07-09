@@ -78,7 +78,9 @@
         <div>
             <img width="470" src="${recipe.dish.image.url}" alt="">
         </div>
-        <div id="description"></div>
+        <div id="photo_credit">
+            Фото: ${recipe.dish.image.credit or recipe.dish.image.get_credit()}
+        </div>
     </div>
     <div class="span3">
         <section id="ingredients">
