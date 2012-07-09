@@ -27,7 +27,7 @@ if sys.version_info[:3] < (2,5,0):
     requires.append('pysqlite')
 
 setup(name='kook',
-      version='0.5.1',
+      version='0.6.5-templ',
       description='a robust recipe inventory storing and sharing',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[
