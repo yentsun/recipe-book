@@ -8,7 +8,7 @@
 <%def name="body_id()">read_recipe</%def>
 <%def name="title()">${recipe.dish.title}</%def>
 <%def name="sub_title()">
-    — рецепт от
+    — ${recipe.description} от
     <span class="well">
         <img src="${recipe.author.gravatar_url(30)}" alt="юзерпик">
     ${recipe.author.display_name}
@@ -78,7 +78,7 @@
         <div>
             <img width="470" src="${recipe.dish.image.url}" alt="">
         </div>
-        <div id="description">${recipe.description | markdown, n}</div>
+        <div id="description"></div>
     </div>
     <div class="span3">
         <section id="ingredients">
