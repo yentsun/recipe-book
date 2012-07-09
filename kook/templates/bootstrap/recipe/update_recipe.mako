@@ -13,7 +13,7 @@
     % endfor
 % endif
 <div class="page-header">
-    <h1 class="recipe-title"> ${self.title()}
+    <h1> ${self.title()}
         % if hasattr(self,'sub_title'):
                 <small>${self.sub_title()}</small>
         % endif
