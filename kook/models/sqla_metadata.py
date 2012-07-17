@@ -1,5 +1,5 @@
 from sqlalchemy import (Column, Table, Unicode, Integer, String, Date,
-                        DateTime, CHAR, ForeignKey, MetaData)
+                        DateTime, CHAR, FLOAT, ForeignKey, MetaData)
 
 metadata = MetaData()
 
@@ -29,14 +29,14 @@ amount_per_unit = Table('amount_per_unit', metadata,
         primary_key=True, nullable=False),
     Column('unit_title', Unicode, ForeignKey('units.title'),
         primary_key=True, nullable=False),
-    Column('amount', Integer, nullable=False))
+    Column('amount', FLOAT, nullable=False))
 
 ingredients = Table('ingredients', metadata,
     Column('recipe_id', CHAR(36), ForeignKey('recipes.id'),
         primary_key=True),
     Column('product_title', Unicode, ForeignKey('products.title'),
         primary_key=True),
-    Column('amount', Integer, nullable=False),
+    Column('amount', FLOAT, nullable=False),
     Column('unit_title', Unicode, ForeignKey('units.title')))
 
 steps = Table('steps', metadata,

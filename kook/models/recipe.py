@@ -330,7 +330,7 @@ class Ingredient(Entity):
 
     def __init__(self, product, amount, unit=None):
         self.product = product
-        self.amount = int(amount)
+        self.amount = float(amount)
         self.unit = unit
 
     def __repr__(self) :

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from colander import (SchemaNode, MappingSchema, SequenceSchema,
-                      String, Int, Length, Range, Email, All, Function,
-                      Date, DateTime, Regex, null)
+                      String, Int, Float, Decimal, Length, Range, Email, All,
+                      Function, Date, DateTime, Regex, null)
 
 def normalize_string(string):
     """Remove whitespace and bring the string to lowercase"""
@@ -34,7 +34,7 @@ def dont_check_current_nickname(node, kw):
 class IngredientSchema(MappingSchema):
     product_title = SchemaNode(String(), validator=Length(3),
                                preparer=normalize_string)
-    amount = SchemaNode(Int(), validator=Range(1))
+    amount = SchemaNode(Decimal())
     unit_title = SchemaNode(String(), validator=Length(3), missing=None)
 
 class Ingredients(SequenceSchema):

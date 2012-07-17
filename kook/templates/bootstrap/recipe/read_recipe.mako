@@ -88,7 +88,7 @@
             <ul>
                 % for ingredient in recipe.ingredients:
                 <li>${ingredient.product.title},
-                    ${ingredient.measured}
+                    ${"{:g}".format(ingredient.measured)}
                     % if ingredient.unit:
                     <span title="${ingredient.unit.title}">
                         ${ingredient.unit.abbr}
