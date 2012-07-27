@@ -10,8 +10,10 @@ from sqlalchemy.orm import relationship, mapper, backref
 from kook.models.schemas import CommentSchema
 from kook.models.sqla_metadata import (ingredients, dishes, amount_per_unit,
                                        products, steps, recipes, dish_tags,
-                                       vote_records, comments, tags, units, dish_images)
-from kook.security import RECIPE_BASE_ACL, AUTHOR_ACTIONS, VOTE_ACTIONS, COMMENT_BASE_ACL
+                                       vote_records, comments, tags, units,
+                                       dish_images)
+from kook.security import (RECIPE_BASE_ACL, AUTHOR_ACTIONS, VOTE_ACTIONS,
+                           COMMENT_BASE_ACL)
 from kook.mako_filters import pretty_time, markdown
 from schemas import RecipeSchema
 from kook.models import (Entity, DBSession, UPVOTE, DOWNVOTE,
@@ -82,11 +84,11 @@ class Recipe(Entity):
 
     def attach_acl(self, prepend=None):
         acl = prepend or []
+        acl.extend(RECIPE_BASE_ACL)
         acl.extend([
             (Deny, self.author.id, VOTE_ACTIONS),
             (Allow, self.author.id, AUTHOR_ACTIONS),
         ])
-        acl.extend(RECIPE_BASE_ACL)
         self.__acl__ = acl
 
     def add_vote(self, user, vote_value):
@@ -408,7 +410,7 @@ class Comment(Entity):
 
     def attach_acl(self):
         acl = list([(Allow, self.author.id, AUTHOR_ACTIONS)])
-        acl.append(COMMENT_BASE_ACL)
+        acl.extend(COMMENT_BASE_ACL)
         self.__acl__ = acl
 
 
