@@ -48,6 +48,11 @@
                             Моя страница
                         </a>
                     </li>
+                    <li>
+                        <a href="${request.route_path('products')}">
+                            Продукты
+                        </a>
+                    </li>
                     % endif
                 </ul>
                 <ul class="nav pull-right">

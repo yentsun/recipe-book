@@ -69,6 +69,18 @@ def main(global_settings, **settings):
     config.add_route('update_profile', '/update_profile')
     config.add_route('logout', '/logout')
 
+    #========
+    # PRODUCT
+    #========
+
+    config.add_route('products', '/products')
+    config.add_view('kook.views.product.index', route_name='products',
+                     renderer=find_renderer('product/index.mako'))
+
+    config.add_route('update_product', '/update_product/{title}')
+    config.add_view('kook.views.product.update', route_name='update_product',
+                     renderer=find_renderer('product/update.mako'))
+
     #=======
     # RECIPE
     #=======

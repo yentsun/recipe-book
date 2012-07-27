@@ -44,6 +44,9 @@ class Entity(object):
     def save(self):
         DBSession.merge(self)
 
+    def add(self):
+        DBSession.add(self)
+
     def delete(self):
         DBSession.delete(self)
 
@@ -53,7 +56,10 @@ class Entity(object):
 
     @classmethod
     def fetch_all(cls, **kwargs):
-        return DBSession.query(cls).all()
+        query = DBSession.query(cls)
+        if 'order' in kwargs:
+            query = query.order_by(getattr(cls, kwargs['order']))
+        return query.all()
 
     @classmethod
     def multidict_to_dict(cls, multidict):

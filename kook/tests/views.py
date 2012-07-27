@@ -25,6 +25,8 @@ from kook.views.recipe import (create_view, delete_view, index_view,
                                read_view, product_units_view, update_view,
                                update_status_view, vote_view, comment_view,
                                delete_comment_view, read_dish, update_dish, tag)
+from kook.views.product import (delete as delete_product,
+                                update as update_product)
 from kook.views.user import register_view, update_profile_view
 
 def populate_test_data():
@@ -275,8 +277,8 @@ class TestRecipeViews(unittest.TestCase):
         response = product_units_view(request)
         response = json.dumps(response)
         self.assertEqual(
-            '[{"amount": 8000, "abbr": "bkt.", "title": "bucket"}, '
-            '{"amount": 100, "abbr": "pcs.", "title": "piece"}]', response)
+            '[{"amount": 8000.0, "abbr": "bkt.", "title": "bucket"}, '
+            '{"amount": 100.0, "abbr": "pcs.", "title": "piece"}]', response)
 
         request.matchdict['product_title'] = u'batato'
         response = product_units_view(request)
@@ -294,9 +296,9 @@ class TestRecipeViews(unittest.TestCase):
         recipe = response['recipe']
         recipe_json = json.dumps(recipe.to_dict())
         self.assertEqual(
-            '{"ingredients": [{"amount": 300, "unit_title": "piece", '
-            '"product_title": "potato"}, {"amount": 40, "unit_title": "", '
-            '"product_title": "lemon juice"}, {"amount": 30, "unit_title": "", '
+            '{"ingredients": [{"amount": 300.0, "unit_title": "piece", '
+            '"product_title": "potato"}, {"amount": 40.0, "unit_title": "", '
+            '"product_title": "lemon juice"}, {"amount": 30.0, "unit_title": "", '
             '"product_title": "olive oil (extra virgin)"}], '
             '"steps": [{"text": "Place potatoes in a large saucepan or '
             'Dutch oven and cover with lightly salted water. Bring to a boil '
@@ -485,6 +487,24 @@ class TestRecipeViews(unittest.TestCase):
         response = tag(request)
         self.assertEqual(1, len(response['dishes']))
         self.assertEqual('potato salad', response['dishes'][0].title)
+
+    def test_delete_product(self):
+        request = DummyRequest()
+        request.matchdict['title'] = u'potato'
+        delete_product(request)
+        recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
+        assert Product(u'potato') not in recipe.products
+        self.assertEqual(2, len(recipe.ingredients))
+
+    def test_update_product(self):
+        POST = MultiDict((('title', 'botato'),))
+        request = DummyRequest(POST=POST)
+        request.matchdict['title'] = u'potato'
+        update_product(request)
+        recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
+        assert Product(u'potato') not in recipe.products
+        assert Product(u'botato') in recipe.products
+
 
 class TestUserViews(unittest.TestCase):
 

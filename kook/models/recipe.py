@@ -5,7 +5,7 @@ from urlparse import urlparse
 from pyramid.security import Everyone, Allow, Deny
 from colander import Invalid, interpolate
 from sqlalchemy import desc
-from sqlalchemy.orm import relationship, mapper
+from sqlalchemy.orm import relationship, mapper, backref
 
 from kook.models.schemas import CommentSchema
 from kook.models.sqla_metadata import (ingredients, dishes, amount_per_unit,
@@ -489,7 +489,8 @@ mapper(Recipe, recipes, properties={
     'author': relationship(User, uselist=False)})
 
 mapper(Product, products, properties={
-    'APUs': relationship(AmountPerUnit, cascade='all, delete-orphan')})
+    'ingredients': relationship(Ingredient, cascade='all', passive_updates=False),
+    'APUs': relationship(AmountPerUnit, cascade='all', passive_updates=False)})
 
 mapper(AmountPerUnit, amount_per_unit, properties={
     'unit': relationship(Unit),
