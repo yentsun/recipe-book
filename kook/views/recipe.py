@@ -114,37 +114,47 @@ def create_update(request):
                      'recipe': recipe})
 
     if request.POST:
-        result = Recipe.construct_from_multidict(request.POST, recipe,
+
+        #if json file received
+        if 'json_upload' in request.POST:
+            input_file = request.POST['file'].file
+            input_file.seek(0)
+            data = json.load(input_file)
+            recipe = Recipe.dummy(author=request.user, dict_=data)
+            response['recipe'] = recipe
+        #if recipe creation/update received
+        else:
+            result = Recipe.construct_from_multidict(request.POST, recipe,
                                                  localizer=localizer,
                                                  fetch_dish_image=True)
-        if allowed:
-            try:
-                if id:
-                    recipe.delete()
-                    result.update_time = datetime.now()
-                result.save()
-                region_invalidate(common, 'long_term', 'common')
-                request.session.flash(u'<div class="alert alert-success">'
-                                      u'Рецепт обновлен!</div>')
+            if allowed:
                 try:
-                    next_path = request.route_url('update_recipe',
+                    if id:
+                        recipe.delete()
+                        result.update_time = datetime.now()
+                    result.save()
+                    region_invalidate(common, 'long_term', 'common')
+                    request.session.flash(u'<div class="alert alert-success">'
+                                      u'Рецепт обновлен!</div>')
+                    try:
+                        next_path = request.route_url('update_recipe',
                                                    id=result.id)
-                except:
-                    pass
-                return HTTPFound(next_path)
+                    except:
+                        pass
+                    return HTTPFound(next_path)
 
-            except AttributeError:
-                recipe.revert()
-                request.session.flash(u'<div class="alert alert-error">'
+                except AttributeError:
+                    recipe.revert()
+                    request.session.flash(u'<div class="alert alert-error">'
                                         u'Ошибка при обновлении рецепта!'
                                       u'</div>')
-                response['errors'] = json.dumps(result['errors'])
-                response['data'] = result['original_data']
-        else:
-            request.session.flash(
+                    response['errors'] = json.dumps(result['errors'])
+                    response['data'] = result['original_data']
+            else:
+                request.session.flash(
                     u'<div class="alert alert-error">'
                     u'У вас нет прав на добавление/обновление этого рецепта!</div>'
-            )
+                )
     return response
 
 def product_units_view(request):

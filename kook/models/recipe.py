@@ -104,10 +104,19 @@ class Recipe(Entity):
         record.save()
 
     @classmethod
-    def dummy(cls, author):
-        dummy = Recipe(Dish(), author)
-        dummy.ingredients = [Ingredient.dummy()]
-        dummy.steps = [Step.dummy()]
+    def dummy(cls, author, dict_=None):
+        if dict_:
+            dummy = Recipe(Dish(dict_['dish_title']), author)
+            dummy.ingredients = list(Ingredient(Product(ingredient.get('product_title')),
+                                                ingredient.get('amount', 0)) \
+                                     for ingredient in dict_['ingredients'])
+            dummy.steps = list(Step(step['no'], step['text']) \
+                                    for step in dict_['steps'])
+        else:
+            dummy = Recipe(Dish(), author)
+            dummy.ingredients = [Ingredient.dummy()]
+            dummy.steps = [Step.dummy()]
+
         return dummy
 
 
