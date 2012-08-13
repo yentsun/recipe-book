@@ -75,30 +75,6 @@ def read_view(request):
                 'can_downvote': has_permission('downvote', recipe, request)}
     return response
 
-def create_view(request):
-    response = common()
-    localizer = get_localizer(request)
-    response['create_recipe_path'] = '/create_recipe'
-    response['data'] = None
-    if request.POST:
-        result = Recipe.construct_from_multidict(request.POST,
-                                                 localizer=localizer,
-                                                 author = request.user,
-                                                 fetch_dish_image=True)
-        if isinstance(result, Recipe):
-            result.save()
-            region_invalidate(common, 'long_term', 'common')
-            request.session.flash(u'<div class="alert alert-success">'\
-                                  u'Рецепт "%s" добавлен!'\
-                                  u'</div>' % result.dish.title)
-            return HTTPFound('/?invalidate_cache=true')
-        else:
-            request.session.flash(u'<div class="alert alert-error">'
-                                  u'Ошибка при добавлении рецепта!</div>')
-            response['errors'] = json.dumps(result['errors'])
-            response['data'] = result['original_data']
-    return response
-
 def delete_view(request):
     id = request.matchdict['id']
     recipe = Recipe.fetch(id=id)
@@ -114,45 +90,61 @@ def delete_view(request):
                               u'У вас нет прав удалять этот рецепт</div>')
         return HTTPFound('/')
 
-def update_view(request):
-    id = request.matchdict['id']
+def create_update(request):
+    id = None
+    if 'id' in request.matchdict:
+        id = request.matchdict['id']
     response = common()
     localizer = get_localizer(request)
+
     try:
-        update_path = request.current_route_url(id=id)
+        next_path = request.current_route_url(id=id)
     except ValueError:
-        update_path = '/'
-    recipe = Recipe.fetch(id)
-    recipe.attach_acl()
-    response.update({'update_recipe_path': update_path,
+        next_path = '/'
+
+    if id:
+        recipe = Recipe.fetch(id)
+        recipe.attach_acl()
+        allowed = has_permission('update', recipe, request)
+    else:
+        recipe = Recipe.dummy(author=request.user)
+        allowed = True
+
+    response.update({'update_recipe_path': next_path,
                      'recipe': recipe})
+
     if request.POST:
-        result = Recipe.construct_from_multidict(request.POST,
-                                                 author = request.user,
-                                                 localizer=localizer)
-        try:
-            if has_permission('update', recipe, request):
-                result.id = recipe.id
-                result.author = recipe.author
-                result.id = recipe.id
-                result.creation_time = recipe.creation_time
-                result.update_time = datetime.now()
-                recipe.delete()
+        result = Recipe.construct_from_multidict(request.POST, recipe,
+                                                 localizer=localizer,
+                                                 fetch_dish_image=True)
+        if allowed:
+            try:
+                if id:
+                    recipe.delete()
+                    result.update_time = datetime.now()
                 result.save()
                 region_invalidate(common, 'long_term', 'common')
                 request.session.flash(u'<div class="alert alert-success">'
                                       u'Рецепт обновлен!</div>')
-                return HTTPFound(update_path)
-            else:
-                request.session.flash(
+                try:
+                    next_path = request.route_url('update_recipe',
+                                                   id=result.id)
+                except:
+                    pass
+                return HTTPFound(next_path)
+
+            except AttributeError:
+                recipe.revert()
+                request.session.flash(u'<div class="alert alert-error">'
+                                        u'Ошибка при обновлении рецепта!'
+                                      u'</div>')
+                response['errors'] = json.dumps(result['errors'])
+                response['data'] = result['original_data']
+        else:
+            request.session.flash(
                     u'<div class="alert alert-error">'
-                    u'У вас нет прав на обновление этого рецепта! %s</div>'
-                )
-        except AttributeError:
-            request.session.flash(u'<div class="alert alert-error">'
-                                  u'Ошибка при обновлении рецепта!</div>')
-            response['errors'] = json.dumps(result['errors'])
-            response['data'] = result['original_data']
+                    u'У вас нет прав на добавление/обновление этого рецепта!</div>'
+            )
     return response
 
 def product_units_view(request):

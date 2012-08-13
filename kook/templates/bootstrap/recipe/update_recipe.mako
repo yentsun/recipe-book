@@ -4,8 +4,8 @@
     from pyramid.security import (has_permission,
                                   principals_allowed_by_permission)
 %>
-<%def name="title()">Обновление рецепта</%def>
-<%def name="sub_title()">${recipe.dish.title}</%def>
+<%def name="title()">Создание / Обновление рецепта</%def>
+<%def name="sub_title()">${recipe.dish.title or ''}</%def>
 % if request.session.peek_flash():
     <% flash = request.session.pop_flash() %>
     % for message in flash:
@@ -136,7 +136,7 @@
                     <i class="icon-plus"></i> клонировать</button>
                 <button type="submit" class="btn btn-success"
                         id="submit_recipe">
-                    <i class="icon-ok icon-white"></i> обновить</button></div>
+                    <i class="icon-ok icon-white"></i> готово</button></div>
         </div></fieldset></div>
 </form>
 <%def name="js()">

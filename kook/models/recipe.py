@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import division
 from datetime import datetime, timedelta
 from urlparse import urlparse
 from pyramid.security import Everyone, Allow, Deny
@@ -23,7 +24,7 @@ class Dish(Entity):
     """
     Dish model
     """
-    def __init__(self, title, description=None, tags=None, image=None):
+    def __init__(self, title=None, description=None, tags=None, image=None):
         self.title = title
         self.tags = tags or []
         self.description = description
@@ -66,7 +67,7 @@ class Recipe(Entity):
     Recipe model
     """
     def __init__(self, dish, author, id=None, description=None,
-                 status_id=1, creation_time=None, rating=0):
+                 status_id=1, creation_time=None, rating=0, update_time=None):
         self.dish = dish
         self.id = id or self.generate_id()
         self.description = description
@@ -77,18 +78,18 @@ class Recipe(Entity):
         self.ingredients = []
         self.comments = []
         self.creation_time = creation_time or datetime.now()
-        self.update_time = None
+        self.update_time = update_time
 
     def __repr__(self):
         return u'%s from %s' % (self.dish.title, self.author.email)
 
     def attach_acl(self, prepend=None):
         acl = prepend or []
-        acl.extend(RECIPE_BASE_ACL)
         acl.extend([
             (Deny, self.author.id, VOTE_ACTIONS),
             (Allow, self.author.id, AUTHOR_ACTIONS),
         ])
+        acl.extend(RECIPE_BASE_ACL)
         self.__acl__ = acl
 
     def add_vote(self, user, vote_value):
@@ -101,6 +102,14 @@ class Recipe(Entity):
             user.add_rep(DOWNVOTE_COST, 'downvote', self)
         record = VoteRecord(user, self, vote_value)
         record.save()
+
+    @classmethod
+    def dummy(cls, author):
+        dummy = Recipe(Dish(), author)
+        dummy.ingredients = [Ingredient.dummy()]
+        dummy.steps = [Step.dummy()]
+        return dummy
+
 
     @classmethod
     def multidict_to_dict(cls, multidict):
@@ -136,11 +145,9 @@ class Recipe(Entity):
         return dictionary
 
     @classmethod
-    def construct_from_dict(cls, cstruct, localizer=None,
+    def construct_from_dict(cls, cstruct, recipe, localizer=None,
                             fetch_dish_image=False, author=None):
         recipe_schema = RecipeSchema()
-        if 'author_email' not in cstruct and author:
-            cstruct['author_email'] = author.email
         try:
             appstruct = recipe_schema.deserialize(cstruct)
         except Invalid, e:
@@ -167,13 +174,11 @@ class Recipe(Entity):
         if not dish.image and fetch_dish_image:
             dish.fetch_image()
 
-        #get the author
-        author = User.fetch(email=appstruct['author_email'])
-
         #create the recipe
-        recipe = cls(dish=dish, author=author,
+        recipe = cls(dish=dish, id=recipe.id, author=recipe.author,
                      description=appstruct['description'],
-                     creation_time=appstruct['creation_time'])
+                     creation_time=recipe.creation_time,
+                     update_time=recipe.update_time)
 
         #populate ingredient list
         for ingredient_entry in appstruct['ingredients']:
@@ -196,9 +201,9 @@ class Recipe(Entity):
         return recipe
 
     @classmethod
-    def construct_from_multidict(cls, multidict, **kwargs):
+    def construct_from_multidict(cls, multidict, recipe=None, **kwargs):
         dict = cls.multidict_to_dict(multidict)
-        return cls.construct_from_dict(dict,
+        return cls.construct_from_dict(dict, recipe,
                                        kwargs.get('localizer'),
                                        kwargs.get('fetch_dish_image'),
                                        kwargs.get('author'))
@@ -306,6 +311,10 @@ class Product(Entity):
     def fetch(cls, title):
         return DBSession.query(Product).filter(Product.title==title).first()
 
+    @classmethod
+    def dummy(cls):
+        return cls('')
+
 class Unit(Entity):
     """Measure unit"""
 
@@ -332,23 +341,25 @@ class Ingredient(Entity):
 
     def __init__(self, product, amount, unit=None):
         self.product = product
-        self.amount = float(amount)
+        self.amount = amount
         self.unit = unit
 
     def __repr__(self) :
         return u'%s %d г' % (self.product.title, self.amount)
 
+    @classmethod
+    def dummy(cls):
+        return cls(Product.dummy(), None)
+
     @property
     def measured(self):
+        """Return str formatted measured amount or float amount"""
+        result = self.amount
         if len(self.product.APUs) > 0 and self.unit:
             for apu in self.product.APUs:
                 if apu.unit.title == self.unit.title:
-                    return self.amount / apu.amount
-        else:
-            if self.amount:
-                return self.amount
-            else:
-                return ''
+                    result = '{:g}'.format(self.amount / apu.amount)
+        return result
 
     @property
     def apu(self):

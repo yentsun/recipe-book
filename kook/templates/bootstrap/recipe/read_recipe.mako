@@ -11,7 +11,7 @@
     — ${recipe.description} от
     <span class="well">
         <img src="${recipe.author.gravatar_url(30)}" alt="юзерпик">
-    ${recipe.author.display_name}
+        ${recipe.author.display_name}
         <strong>${recipe.author.profile.rep}</strong>
         </span>
 </%def>
@@ -88,7 +88,7 @@
             <ul>
                 % for ingredient in recipe.ingredients:
                 <li>${ingredient.product.title},
-                    ${"{:g}".format(ingredient.measured)}
+                    ${ingredient.measured}
                     % if ingredient.unit:
                     <span title="${ingredient.unit.title}">
                         ${ingredient.unit.abbr}

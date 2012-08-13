@@ -15,16 +15,18 @@ from pyramid_beaker import set_cache_regions_from_settings
 from paste.deploy.loadwsgi import appconfig
 from kook.mako_filters import failsafe_get
 
-from kook.models import DBSession, UPVOTE, DOWNVOTE_REP_CHANGE, UPVOTE_REP_CHANGE, DOWNVOTE_COST, DOWNVOTE
+from kook.models import (DBSession, UPVOTE, DOWNVOTE_REP_CHANGE,
+                         UPVOTE_REP_CHANGE, DOWNVOTE_COST, DOWNVOTE)
 from kook.models.recipe import (Recipe, Step, Product, Ingredient,
                                 Unit, AmountPerUnit, Dish, Tag, DishImage)
 from kook.models.user import User, Group, Profile, RepRecord
 from kook.models.sqla_metadata import metadata
 from kook.security import VOTE_ACTIONS
-from kook.views.recipe import (create_view, delete_view, index_view,
-                               read_view, product_units_view, update_view,
-                               update_status_view, vote_view, comment_view,
-                               delete_comment_view, read_dish, update_dish, tag)
+from kook.views.recipe import (create_update as create_update_recipe,
+                               delete_view, index_view, read_view,
+                               product_units_view, update_status_view,
+                               vote_view, comment_view, delete_comment_view,
+                               read_dish, update_dish, tag)
 from kook.views.product import (delete as delete_product,
                                 update as update_product)
 from kook.views.user import register_view, update_profile_view
@@ -32,7 +34,6 @@ from kook.views.user import register_view, update_profile_view
 def populate_test_data():
 
     #add users
-
     user1 = User.construct_from_dict({
         'email': 'user1@acme.com',
         'password': u'题GZG例没%07Z'})
@@ -49,7 +50,6 @@ def populate_test_data():
     user2.save()
 
     #add products with APUs
-
     potato = Product(title=u'potato')
     piece = Unit(u'piece', u'pcs.')
     bucket = Unit(u'bucket', u'bkt.')
@@ -62,12 +62,12 @@ def populate_test_data():
     carrot.save()
 
     #add recipes
-
     _here = os.path.dirname(__file__)
     json_data=open(os.path.join(_here, 'dummy_recipes.json'))
     dummy_recipes = json.load(json_data)
     for recipe_dict in dummy_recipes:
-        recipe = Recipe.construct_from_dict(recipe_dict,
+        recipe = Recipe.dummy(author=User.fetch(email=recipe_dict['author_email']))
+        recipe = Recipe.construct_from_dict(recipe_dict, recipe,
                                             fetch_dish_image=False)
         try:
             recipe.save()
@@ -75,7 +75,6 @@ def populate_test_data():
             print recipe
 
     #add dishes
-
     potato_salad = Dish(u'potato salad')
     potato_salad.tags = [Tag(u'salad'), Tag(u'western')]
     potato_salad.image = DishImage('http://simplyrecipes.com/photos/'
@@ -136,15 +135,26 @@ class TestRecipeViews(unittest.TestCase):
         self.assertEqual(recipe.ingredients[0].apu, 100)
         self.assertEqual(recipe.ingredients[1].apu, 1)
         assert potato_300g in recipe.ingredients
-        self.assertEqual(recipe.ingredients[0].measured, 3)
+        self.assertEqual(recipe.ingredients[0].measured, '3')
         for ingredient in recipe.ingredients:
             if ingredient.product.title == u'лук':
                 self.assertEqual(ingredient.measured, 1)
         assert mix in recipe.steps
-        self.assertEqual(datetime(2012, 5, 3), recipe.creation_time)
+        datetime_format = '%Y-%m-%d %H:%M'
+        self.assertEqual(datetime.now().strftime(datetime_format),
+                         recipe.creation_time.strftime(datetime_format))
         self.assertEqual(time(minute=36), recipe.total_time)
 
-    def test_create_recipe_view(self):
+    def test_ingredient_amounts(self):
+        request = DummyRequest()
+        recipe_to_test = Recipe.fetch_all(dish_title=u'spicy chick pea')[0]
+        request.matchdict['id'] = recipe_to_test.id
+        response = read_view(request)
+        recipe = response['recipe']
+        self.assertEqual(recipe.ingredients[2].amount, 5.5)
+        self.assertEqual(recipe.ingredients[2].measured, 5.5)
+
+    def test_create_recipe(self):
         #testing post
         POST = MultiDict((
             ('dish_title', u'Сельдь под шубой '),
@@ -176,7 +186,7 @@ class TestRecipeViews(unittest.TestCase):
         ))
         user=User.fetch(email='user1@acme.com')
         request = DummyRequest(POST=POST, user=user)
-        create_view(request)
+        create_update_recipe(request)
         recipes = Recipe.fetch_all(dish_title=u'сельдь под шубой')
         assert len(recipes) is not 0
         self.assertEqual(recipes[0].dish.title, u'сельдь под шубой')
@@ -189,9 +199,8 @@ class TestRecipeViews(unittest.TestCase):
         self.assertEqual(60, recipes[0].ordered_steps[1].time_value)
 
         #testing initial output
-
-        request = DummyRequest()
-        response = create_view(request)
+        request = DummyRequest(user=user)
+        response = create_update_recipe(request)
         assert potato in response['products']
 
     def test_create_invalid_recipe(self):
@@ -207,10 +216,10 @@ class TestRecipeViews(unittest.TestCase):
             ))
         request = DummyRequest(POST=POST,
                                user=User.fetch(email='user1@acme.com'))
-        create_view(request)
+        create_update_recipe(request)
         assert len(Recipe.fetch_all(dish_title=u'Уникальное блюдо')) is 0
 
-    def test_update_recipe_view(self):
+    def test_update_recipe(self):
         POST = MultiDict((
             ('dish_title', u'Spicy Chick Pee'),
             ('description', u'A not-so-good fall-back meal'),
@@ -237,7 +246,7 @@ class TestRecipeViews(unittest.TestCase):
                                user=User.fetch(email='user2@acme.com'))
         recipe_to_update = Recipe.fetch_all(dish_title=u'spicy chick pea')[0]
         request.matchdict['id'] = recipe_to_update.id
-        update_view(request)
+        create_update_recipe(request)
         assert len(Recipe.fetch_all(dish_title=u'spicy chick pea')) is 0
         recipe_new = Recipe.fetch_all(dish_title=u'spicy chick pee')[0]
         assert recipe_new is not None
@@ -334,7 +343,7 @@ class TestRecipeViews(unittest.TestCase):
         APUs = failsafe_get(ingredient1, 'product.APUs')
         self.assertEqual(2, len(APUs))
         measured = failsafe_get(ingredient1, 'measured')
-        self.assertEqual(3, measured)
+        self.assertEqual('3', measured)
 
     def test_update_status(self):
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]

@@ -57,7 +57,7 @@ def main(global_settings, **settings):
     config.add_route('post_comment', '/post_comment')
     config.add_route('delete_comment',
                      '/delete_comment/{recipe_id}/{creation_time}')
-    config.add_route('create_recipe', '/create_recipe')
+    config.add_route('create_recipe', '/update_recipe')
     config.add_route('update_recipe', '/update_recipe/{id}')
     config.add_route('delete_recipe', '/delete_recipe/{id}')
     config.add_route('product_units', '/product_units/{product_title}')
@@ -109,12 +109,12 @@ def main(global_settings, **settings):
                     route_name='update_dish',
                     renderer=find_renderer('recipe/update_dish.mako'))
 
-    config.add_view('kook.views.recipe.create_view',
-                    route_name='create_recipe', permission='create',
-                    renderer=find_renderer('recipe/create_recipe.mako'))
+    config.add_view('kook.views.recipe.create_update',
+                    route_name='update_recipe', permission='create',
+                    renderer=find_renderer('recipe/update_recipe.mako'))
 
-    config.add_view('kook.views.recipe.update_view',
-                    route_name='update_recipe', permission='update',
+    config.add_view('kook.views.recipe.create_update',
+                    route_name='create_recipe', permission='create',
                     renderer=find_renderer('recipe/update_recipe.mako'))
 
     config.add_view('kook.views.recipe.delete_view',

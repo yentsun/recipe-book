@@ -10,12 +10,12 @@
     <td class="amount">
         <div class="input-append">
             <input type="text" name="measured_amount" style="width:30px"
-                   value="${'{:g}'.format(get(ingredient, 'measured') or\
-                                          get(ingredient, 'amount'))}"
+                   value="${get(ingredient, 'measured') or\
+                            get(ingredient, 'amount')}"
                    onkeyup="set_amount(this)"
                    data-multiplier="${get(ingredient, 'apu') or 1}">
             <input type="hidden" name="amount"
-                   value="${'{:g}'.format(get(ingredient, 'amount'))}">
+                   value="${get(ingredient, 'amount')}">
             <input type="hidden" name="unit_title"
                    value="${get(ingredient, 'unit_title') or ''}">
             <span class="dropdown">
@@ -26,7 +26,7 @@
                     </span><b class="caret"></b></a>
                 <ul class="dropdown-menu">
                     <li><a onclick="set_measure(this, '', 'г', 1)"
-                           data-estimated_amount="${'{:g}'.format(get(ingredient, 'amount'))}">
+                           data-estimated_amount="${get(ingredient, 'amount')}">
                         грамм</a>
                     </li>
                     <span class="alt_measures">

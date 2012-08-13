@@ -50,6 +50,9 @@ class Entity(object):
     def delete(self):
         DBSession.delete(self)
 
+    def revert(self):
+        DBSession.rollback()
+
     @classmethod
     def fetch(cls, primary, **kwargs):
         return DBSession.query(cls).get(primary)
