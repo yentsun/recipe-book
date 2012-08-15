@@ -387,6 +387,11 @@ class Ingredient(Entity):
         else:
             return self.unit.title
 
+    @classmethod
+    def fetch_all(cls, product_title):
+        return DBSession.query(Ingredient)\
+                        .filter(ingredients.c.product_title==product_title)
+
 class AmountPerUnit(Entity):
 
     def __init__(self, amount, unit):
@@ -511,8 +516,10 @@ mapper(Recipe, recipes, properties={
     'author': relationship(User, uselist=False)})
 
 mapper(Product, products, properties={
-    'ingredients': relationship(Ingredient, cascade='all', passive_updates=False),
-    'APUs': relationship(AmountPerUnit, cascade='all', passive_updates=False)})
+    'ingredients': relationship(Ingredient, cascade='all',
+                                passive_updates=False),
+    'APUs': relationship(AmountPerUnit, cascade='all, delete, delete-orphan',
+                         passive_updates=False)})
 
 mapper(AmountPerUnit, amount_per_unit, properties={
     'unit': relationship(Unit),

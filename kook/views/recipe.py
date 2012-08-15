@@ -91,9 +91,8 @@ def delete_view(request):
         return HTTPFound('/')
 
 def create_update(request):
-    id = None
-    if 'id' in request.matchdict:
-        id = request.matchdict['id']
+    id = request.matchdict.get('id', None)
+    fetch_image = request.matchdict.get('fetch_image', True)
     response = common()
     localizer = get_localizer(request)
 
@@ -126,7 +125,7 @@ def create_update(request):
         else:
             result = Recipe.construct_from_multidict(request.POST, recipe,
                                                  localizer=localizer,
-                                                 fetch_dish_image=True)
+                                                 fetch_dish_image=fetch_image)
             if allowed:
                 try:
                     if id:
