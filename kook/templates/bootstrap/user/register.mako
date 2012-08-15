@@ -10,20 +10,21 @@
     <div class="row">
         <div class="span5">
             <fieldset class="well">
-                <legend></legend>
-                <div class="email">
-                    <label for="email">E-mail</label>
-                    <input class="span5" type="text" id="email"
-                           name="email" value="">
-                </div>
-                <div class="password">
-                    <label for="password">Пароль</label>
-                    <input class="span5" type="password" id="password"
-                           name="password" value="">
-                </div>
-                <button type="submit" class="btn btn-success pull-right">
-                    <i class="icon-ok icon-white"></i> готово
-                </button>
+                Регистрация временно по приглашениям!
+##                <legend></legend>
+##                <div class="email">
+##                    <label for="email">E-mail</label>
+##                    <input class="span5" type="text" id="email"
+##                           name="email" value="">
+##                </div>
+##                <div class="password">
+##                    <label for="password">Пароль</label>
+##                    <input class="span5" type="password" id="password"
+##                           name="password" value="">
+##                </div>
+##                <button type="submit" class="btn btn-success pull-right">
+##                    <i class="icon-ok icon-white"></i> готово
+##                </button>
             </fieldset>
         </div>
     </div>
