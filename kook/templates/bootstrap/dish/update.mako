@@ -1,3 +1,6 @@
+<%!
+    from pyramid.security import has_permission
+%>
 <%inherit file="../layout.mako"/>
 <%def name="title()">Обновление блюда</%def>
 <%def name="sub_title()">${dish.title}</%def>
@@ -7,6 +10,13 @@
         <div class="span12">${message | n}</div>
     % endfor
 % endif
+<div class="page-header">
+    <h1> ${self.title()}
+        % if hasattr(self,'sub_title'):
+                <small>${self.sub_title()}</small>
+        % endif
+    </h1>
+</div>
 <form class="span12" action="${update_dish_path}" method="post">
     <div class="row">
         <div class="span6">
@@ -15,8 +25,8 @@
                 <div class="dish_title">
                     <label for="dish_title">Название</label>
                     <input class="span5" type="text" id="dish_title"
-                           name="dish_title"
-                           value="${dish.title}" disabled>
+                           name="title"
+                           value="${dish.title}">
                 </div>
                 <div class="description">
                     <label for="description">Описание</label>
@@ -46,6 +56,13 @@
     </div>
     <div class="navbar navbar-fixed-bottom">
         <fieldset class="navbar-inner"><div class="container">
+            % if has_permission('delete', 'dish', request):
+            <button type="button" class="btn btn-danger"
+                    id="delete_dish"
+                    onclick="deleteDish('${dish.title}');">
+                <i class="icon-remove icon-white"></i> удалить
+            </button>
+            % endif
             <div class="btn-group pull-right">
                 <button type="submit" class="btn btn-success"
                         id="submit_dish">

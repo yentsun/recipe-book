@@ -530,9 +530,9 @@ mapper(Ingredient, ingredients, properties={
     'unit': relationship(Unit, uselist=False)})
 
 mapper(Dish, dishes, properties={
-    'recipes': relationship(Recipe),
-    'image': relationship(DishImage, uselist=False),
-    'tags': relationship(Tag, secondary=dish_tags)})
+    'recipes': relationship(Recipe, passive_updates=False),
+    'image': relationship(DishImage, uselist=False, passive_updates=False),
+    'tags': relationship(Tag, secondary=dish_tags, passive_updates=False)})
 
 mapper(VoteRecord, vote_records, properties={
     'user': relationship(User, uselist=False),

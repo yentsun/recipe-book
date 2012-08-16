@@ -484,8 +484,9 @@ class TestRecipeViews(unittest.TestCase):
         dish = response['dish']
         self.assertEqual('potato salad', dish.title)
 
-    def test_update_dish_view(self):
+    def test_update_dish_info(self):
         POST = MultiDict((
+            ('title', u'potato salad'),
             ('description', u'A different description for potato salad'),
             ('tag', u'salad'),
             ))
@@ -494,6 +495,19 @@ class TestRecipeViews(unittest.TestCase):
         update_dish(request)
         potato_salad = Dish.fetch('potato salad')
         self.assertEqual([Tag('salad')], potato_salad.tags)
+
+    def test_update_dish_title(self):
+        POST = MultiDict((
+            ('title', u'batata salad'),
+            ('description', u'A different description for potato salad'),
+            ('tag', u'salad'),
+            ))
+        request = DummyRequest(POST=POST)
+        request.matchdict['title'] = 'potato salad'
+        update_dish(request)
+        batata_salad = Dish.fetch('batata salad')
+        self.assertEqual([Tag('salad')], batata_salad.tags)
+        assert Dish.fetch('potato salad') is None
 
     def test_tag_view(self):
         request = DummyRequest()
