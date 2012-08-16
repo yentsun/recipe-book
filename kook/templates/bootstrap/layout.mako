@@ -49,6 +49,11 @@
                         </a>
                     </li>
                     <li>
+                        <a href="${request.route_path('dishes')}">
+                            Блюда
+                        </a>
+                    </li>
+                    <li>
                         <a href="${request.route_path('products')}">
                             Продукты
                         </a>

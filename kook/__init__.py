@@ -49,9 +49,6 @@ def main(global_settings, **settings):
 
     config.add_route('tag', '/tag/{title}')
 
-    config.add_route('read_dish', '/dish/{title}')
-    config.add_route('update_dish', '/update_dish/{title}')
-
     config.add_route('read_recipe', '/recipe/{id}')
     config.add_route('recipe_vote', '/recipe_vote')
     config.add_route('post_comment', '/post_comment')
@@ -68,6 +65,26 @@ def main(global_settings, **settings):
     config.add_route('login', '/login')
     config.add_route('update_profile', '/update_profile')
     config.add_route('logout', '/logout')
+
+    #=====
+    # DISH
+    #=====
+
+    config.add_route('dishes', '/dishes')
+    config.add_view('kook.views.dish.index', route_name='dishes',
+                     renderer=find_renderer('dish/index.mako'))
+
+    config.add_route('read_dish', '/dish/{title}')
+    config.add_view('kook.views.dish.read', route_name='read_dish',
+                     renderer=find_renderer('dish/read.mako'))
+
+    config.add_route('create_dish', '/update_dish')
+    config.add_view('kook.views.dish.update', route_name='create_dish',
+                     renderer=find_renderer('dish/update.mako'))
+
+    config.add_route('update_dish', '/update_dish/{title}')
+    config.add_view('kook.views.dish.update', route_name='update_dish',
+                     renderer=find_renderer('dish/update.mako'))
 
     #========
     # PRODUCT
@@ -100,14 +117,6 @@ def main(global_settings, **settings):
     config.add_view('kook.views.recipe.read_view',
                     route_name='read_recipe',
                     renderer=find_renderer('recipe/read_recipe.mako'))
-
-    config.add_view('kook.views.recipe.read_dish',
-                    route_name='read_dish',
-                    renderer=find_renderer('recipe/read_dish.mako'))
-
-    config.add_view('kook.views.recipe.update_dish',
-                    route_name='update_dish',
-                    renderer=find_renderer('recipe/update_dish.mako'))
 
     config.add_view('kook.views.recipe.create_update',
                     route_name='update_recipe', permission='create',

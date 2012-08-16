@@ -26,7 +26,8 @@ from kook.views.recipe import (create_update as create_update_recipe,
                                delete_view, index_view, read_view,
                                product_units_view, update_status_view,
                                vote_view, comment_view, delete_comment_view,
-                               read_dish, update_dish, tag)
+                               tag)
+from kook.views.dish import (read as read_dish, update as update_dish)
 from kook.views.product import (delete as delete_product,
                                 update as update_product)
 from kook.views.user import register_view, update_profile_view
