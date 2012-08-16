@@ -489,12 +489,15 @@ class TestRecipeViews(unittest.TestCase):
             ('title', u'potato salad'),
             ('description', u'A different description for potato salad'),
             ('tag', u'salad'),
+            ('image_url', u'http://example.com/image.jpg'),
             ))
         request = DummyRequest(POST=POST)
         request.matchdict['title'] = 'potato salad'
         update_dish(request)
         potato_salad = Dish.fetch('potato salad')
         self.assertEqual([Tag('salad')], potato_salad.tags)
+        self.assertEqual(u'http://example.com/image.jpg',
+                         potato_salad.image.url)
 
     def test_update_dish_title(self):
         POST = MultiDict((

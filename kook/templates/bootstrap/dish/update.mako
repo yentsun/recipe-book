@@ -11,9 +11,9 @@
     % endfor
 % endif
 <div class="page-header">
-    <h1> ${self.title()}
+    <h1>${self.title()}
         % if hasattr(self,'sub_title'):
-                <small>${self.sub_title()}</small>
+        <small>${self.sub_title()}</small>
         % endif
     </h1>
 </div>
@@ -49,9 +49,19 @@
                     % endfor
                     </select>
                 </div>
+                <div class="image_url">
+                    <label for="image_url">Адрес изображения</label>
+                    <input class="span5" type="text" id="image_url"
+                           name="image_url"
+                           value="${dish.image.url}">
+                </div>
             </fieldset>
         </div>
         <div class="span6">
+            <div id="image">
+                <h3>Изображение</h3>
+                <img style="max-width:530px" src="${dish.image.url}" alt="">
+            </div>
         </div>
     </div>
     <div class="navbar navbar-fixed-bottom">
