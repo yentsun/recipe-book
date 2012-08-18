@@ -49,14 +49,11 @@ def main(global_settings, **settings):
 
     config.add_route('tag', '/tag/{title}')
 
-    config.add_route('read_recipe', '/recipe/{id}')
     config.add_route('recipe_vote', '/recipe_vote')
     config.add_route('post_comment', '/post_comment')
     config.add_route('delete_comment',
                      '/delete_comment/{recipe_id}/{creation_time}')
-    config.add_route('create_recipe', '/update_recipe')
-    config.add_route('update_recipe', '/update_recipe/{id}')
-    config.add_route('delete_recipe', '/delete_recipe/{id}')
+
     config.add_route('product_units', '/product_units/{product_title}')
     config.add_route('update_recipe_status',
                      '/update_recipe_status/{id}')
@@ -98,9 +95,26 @@ def main(global_settings, **settings):
     config.add_view('kook.views.product.update', route_name='update_product',
                      renderer=find_renderer('product/update.mako'))
 
+    #=====
+    # UNIT
+    #=====
+
+    config.add_route('create_unit', '/create_unit')
+    config.add_view('kook.views.unit.create', route_name='create_unit',
+                     renderer=find_renderer('unit/update.mako'))
+
+    config.add_route('update_unit', '/update_unit/{title}')
+    config.add_view('kook.views.unit.update', route_name='update_unit',
+                     renderer=find_renderer('unit/update.mako'))
+
     #=======
     # RECIPE
     #=======
+
+    config.add_route('read_recipe', '/recipe/{id}')
+    config.add_route('create_recipe', '/update_recipe')
+    config.add_route('update_recipe', '/update_recipe/{id}')
+    config.add_route('delete_recipe', '/delete_recipe/{id}')
 
     config.add_view('kook.views.main.index_view',
                     route_name='index',

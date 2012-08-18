@@ -31,7 +31,7 @@ from kook.views.dish import (read as read_dish, update as update_dish)
 from kook.views.product import (delete as delete_product,
                                 update as update_product)
 from kook.views.apu import create as create_APU, update as update_APU
-from kook.views.unit import update as update_unit
+from kook.views.unit import update as update_unit, create as create_unit
 from kook.views.user import register_view, update_profile_view
 
 def populate_test_data():
@@ -575,6 +575,15 @@ class TestRecipeViews(unittest.TestCase):
         assert AmountPerUnit(90, Unit(u'piece')) in potato.APUs
         assert AmountPerUnit(100, Unit(u'piece')) not in potato.APUs
 
+    def test_create_unit(self):
+        POST = MultiDict((
+            ('title', u'spoon'),
+            ('abbr', u'sp.'),
+            ))
+        request = DummyRequest(POST=POST)
+        create_unit(request)
+        assert Unit.fetch('spoon') is not None
+
     def test_update_unit(self):
         POST = MultiDict((
             ('title', u'piece_'),
@@ -586,6 +595,17 @@ class TestRecipeViews(unittest.TestCase):
         potato = Product.fetch(u'potato')
         assert AmountPerUnit(100, Unit(u'piece_')) in potato.APUs
         assert AmountPerUnit(100, Unit(u'piece')) not in potato.APUs
+
+    def test_update_unit_abbr(self):
+        POST = MultiDict((
+            ('title', u'piece'),
+            ('abbr', u'pc.'),
+            ))
+        request = DummyRequest(POST=POST)
+        request.matchdict['title'] = u'piece'
+        update_unit(request)
+        potato = Product.fetch(u'potato')
+        self.assertEqual(u'pc.', potato.APUs[1].unit.abbr)
 
 class TestUserViews(unittest.TestCase):
 
