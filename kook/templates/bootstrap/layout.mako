@@ -55,7 +55,7 @@
                     </li>
                     <li>
                         <a href="${request.route_path('products')}">
-                            Продукты
+                            Продукты и меры
                         </a>
                     </li>
                     % endif

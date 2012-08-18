@@ -399,7 +399,7 @@ class AmountPerUnit(Entity):
         self.unit = unit
 
     def __repr__(self) :
-        return '%s %s' % (self.unit, self.amount)
+        return '%s %s' % (self.unit.title, '{:g}'.format(self.amount))
 
     def measure(self, amount):
         return amount / self.amount
@@ -525,6 +525,10 @@ mapper(AmountPerUnit, amount_per_unit, properties={
     'unit': relationship(Unit),
     'product': relationship(Product)})
 
+mapper(Unit, units, properties={
+    'APUs': relationship(AmountPerUnit, cascade='all', passive_updates=False)
+})
+
 mapper(Ingredient, ingredients, properties={
     'product': relationship(Product, uselist=False),
     'unit': relationship(Unit, uselist=False)})
@@ -544,5 +548,4 @@ mapper(Comment, comments, properties={
 
 mapper(Step, steps)
 mapper(Tag, tags)
-mapper(Unit, units)
 mapper(DishImage, dish_images)

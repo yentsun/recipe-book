@@ -8,7 +8,7 @@ import transaction
 from datetime import date, datetime, time
 from webob.multidict import MultiDict
 from pyramid.testing import DummyRequest, setUp, tearDown
-from pyramid.security import Allow, ALL_PERMISSIONS, Deny
+from pyramid.security import Deny
 from pyramid.httpexceptions import HTTPError
 from sqlalchemy import engine_from_config
 from pyramid_beaker import set_cache_regions_from_settings
@@ -30,6 +30,8 @@ from kook.views.recipe import (create_update as create_update_recipe,
 from kook.views.dish import (read as read_dish, update as update_dish)
 from kook.views.product import (delete as delete_product,
                                 update as update_product)
+from kook.views.apu import create as create_APU, update as update_APU
+from kook.views.unit import update as update_unit
 from kook.views.user import register_view, update_profile_view
 
 def populate_test_data():
@@ -504,6 +506,7 @@ class TestRecipeViews(unittest.TestCase):
             ('title', u'batata salad'),
             ('description', u'A different description for potato salad'),
             ('tag', u'salad'),
+            ('image_url', u'http://example.com/image.jpg'),
             ))
         request = DummyRequest(POST=POST)
         request.matchdict['title'] = 'potato salad'
@@ -547,13 +550,49 @@ class TestRecipeViews(unittest.TestCase):
         assert Product(u'batata') in recipe.products
         assert Product.fetch(u'potato') is None
 
+    def test_create_APU(self):
+        POST = MultiDict((
+            ('unit_title', u'spoon'),
+            ('product_title', u'lemon juice'),
+            ('amount', u'30.5')
+        ))
+        request = DummyRequest(POST=POST)
+        create_APU(request)
+        lemon_juice = Product.fetch(u'lemon juice')
+        assert AmountPerUnit(30.5, Unit(u'spoon')) in lemon_juice.APUs
+
+    def test_update_APU(self):
+        POST = MultiDict((
+            ('unit_title', u'piece'),
+            ('product_title', u'potato'),
+            ('amount', u'90')
+        ))
+        request = DummyRequest(POST=POST)
+        request.matchdict['unit_title'] = u'piece'
+        request.matchdict['product_title'] = u'potato'
+        update_APU(request)
+        potato = Product.fetch(u'potato')
+        assert AmountPerUnit(90, Unit(u'piece')) in potato.APUs
+        assert AmountPerUnit(100, Unit(u'piece')) not in potato.APUs
+
+    def test_update_unit(self):
+        POST = MultiDict((
+            ('title', u'piece_'),
+            ('abbr', u'pc.'),
+            ))
+        request = DummyRequest(POST=POST)
+        request.matchdict['title'] = u'piece'
+        update_unit(request)
+        potato = Product.fetch(u'potato')
+        assert AmountPerUnit(100, Unit(u'piece_')) in potato.APUs
+        assert AmountPerUnit(100, Unit(u'piece')) not in potato.APUs
 
 class TestUserViews(unittest.TestCase):
 
     def setUp(self):
         settings = appconfig('config:testing.ini',
                              'main',
-                             relative_to='/home/yentsun/www/kook')
+                              relative_to='/home/yentsun/www/kook')
         self.config = setUp(settings=settings)
         engine = engine_from_config(settings)
         set_cache_regions_from_settings(settings)

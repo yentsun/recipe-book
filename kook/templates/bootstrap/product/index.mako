@@ -39,7 +39,7 @@
 </div>
 <div class="span5">
     <div class="pull-right">
-    <a href="${request.route_path('create_recipe')}"
+    <a href="${request.route_path('create_unit')}"
        class="btn btn-success btn-mini">
         <i class="icon-plus icon-white"></i> новая мера</a></div>
     <h3>Меры  <span class="badge">${len(units)}</span></h3>
@@ -54,8 +54,8 @@
                         ${unit.title}
                     </td>
                     <td>
-                        <a title="обновить блюдо" class="btn btn-mini edit"
-                           href="${request.route_path('update_dish',
+                        <a title="обновить меру" class="btn btn-mini edit"
+                           href="${request.route_path('update_unit',
                            title=unit.title)}">
                             <i class="icon-pencil"></i>
                         </a>
