@@ -20,7 +20,6 @@ def common():
 def index_view(request):
     response = dict()
     response['user_recipes'] = Recipe.fetch_all(author_id=request.user.id)
-    response['dishes'] = Dish.fetch_all()
     return response
 
 def tag(request):
