@@ -19,7 +19,8 @@ def common():
 
 def index_view(request):
     response = dict()
-    response['user_recipes'] = Recipe.fetch_all(author_id=request.user.id)
+    response['user_recipes'] = Recipe.fetch_all(author_id=request.user.id,
+                                                order_by='update_time')
     return response
 
 def tag(request):
