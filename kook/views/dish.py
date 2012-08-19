@@ -28,6 +28,7 @@ def update(request):
         if title != dish.title:
             dish.title = title
         dish.image.url = request.POST.getone('image_url')
+        dish.image.credit = request.POST.getone('image_credit')
         dish.description = request.POST.getone('description')
         tag_titles = request.POST.getall('tag')
         dish.tags = [Tag.fetch(title) for title in tag_titles]

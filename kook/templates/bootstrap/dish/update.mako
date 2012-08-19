@@ -55,6 +55,12 @@
                            name="image_url"
                            value="${dish.image.url}">
                 </div>
+                <div class="image_credit">
+                    <label for="image_credit">Авторство изображения</label>
+                    <input class="span5" type="text" id="image_credit"
+                           name="image_credit"
+                           value="${dish.image.credit}">
+                </div>
             </fieldset>
         </div>
         <div class="span6">
