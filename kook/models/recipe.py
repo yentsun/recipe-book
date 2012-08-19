@@ -334,6 +334,10 @@ class Unit(Entity):
     @classmethod
     def fetch(cls, title):
         return DBSession.query(cls).filter(cls.title==title).first()
+    
+    @classmethod
+    def dummy(cls):
+        return Unit('', '')
 
 class Tag(Entity):
     """
