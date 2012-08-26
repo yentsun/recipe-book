@@ -1,3 +1,6 @@
+<%!
+    from pyramid.security import has_permission
+%>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -48,16 +51,20 @@
                             Моя страница
                         </a>
                     </li>
+                        % if has_permission('manage_dishes', request.root, request):
                     <li>
                         <a href="${request.route_path('dishes')}">
                             Блюда
                         </a>
                     </li>
+                        % endif
+                        % if has_permission('manage_products', request.root, request):
                     <li>
                         <a href="${request.route_path('products')}">
                             Продукты и меры
                         </a>
                     </li>
+                         % endif
                     % endif
                 </ul>
                 <ul class="nav pull-right">

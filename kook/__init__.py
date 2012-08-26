@@ -69,6 +69,7 @@ def main(global_settings, **settings):
 
     config.add_route('dishes', '/dishes')
     config.add_view('kook.views.dish.index', route_name='dishes',
+                     permission='manage_dishes',
                      renderer=find_renderer('dish/index.mako'))
 
     config.add_route('read_dish', '/dish/{title}')
@@ -77,10 +78,12 @@ def main(global_settings, **settings):
 
     config.add_route('create_dish', '/update_dish')
     config.add_view('kook.views.dish.update', route_name='create_dish',
+                     permission='manage_dishes',
                      renderer=find_renderer('dish/update.mako'))
 
     config.add_route('update_dish', '/update_dish/{title}')
     config.add_view('kook.views.dish.update', route_name='update_dish',
+                     permission='manage_dishes',
                      renderer=find_renderer('dish/update.mako'))
 
     #========
@@ -89,10 +92,12 @@ def main(global_settings, **settings):
 
     config.add_route('products', '/products')
     config.add_view('kook.views.product.index', route_name='products',
+                     permission='manage_products',
                      renderer=find_renderer('product/index.mako'))
 
     config.add_route('update_product', '/update_product/{title}')
     config.add_view('kook.views.product.update', route_name='update_product',
+                     permission='manage_products',
                      renderer=find_renderer('product/update.mako'))
 
     #=====
@@ -101,10 +106,12 @@ def main(global_settings, **settings):
 
     config.add_route('create_unit', '/create_unit')
     config.add_view('kook.views.unit.create', route_name='create_unit',
+                     permission='manage_products',
                      renderer=find_renderer('unit/update.mako'))
 
     config.add_route('update_unit', '/update_unit/{title}')
     config.add_view('kook.views.unit.update', route_name='update_unit',
+                     permission='manage_products',
                      renderer=find_renderer('unit/update.mako'))
 
     #=======
