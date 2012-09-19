@@ -65,8 +65,7 @@
                         ${recipe.dish.title}: ${recipe.description}
                 </td>
                 <td>
-                    ${pretty_time(recipe.update_time) or\
-                      pretty_time(recipe.creation_time)}
+                    ${pretty_time(recipe.creation_time)}
                 </td>
                 <td>
                     <a title="обновить рецепт" class="btn btn-mini edit"
