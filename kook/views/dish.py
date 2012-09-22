@@ -4,7 +4,7 @@ from pyramid.httpexceptions import HTTPFound
 from kook.models.recipe import Tag, Dish
 
 def index(request):
-    return {'dishes': Dish.fetch_all()}
+    return {'dishes': Dish.fetch_all(order_by='title')}
 
 def read(request):
     title = request.matchdict['title']

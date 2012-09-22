@@ -509,6 +509,7 @@ class TestRecipeViews(unittest.TestCase):
             ('title', u'batata salad'),
             ('description', u'A different description for potato salad'),
             ('tag', u'salad'),
+            ('image_credit', ''),
             ('image_url', u'http://example.com/image.jpg'),
             ))
         request = DummyRequest(POST=POST)

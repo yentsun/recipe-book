@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from urlparse import urlparse
 from pyramid.security import Everyone, Allow, Deny
 from colander import Invalid, interpolate
-from sqlalchemy import desc
+from sqlalchemy import desc, asc
 from sqlalchemy.orm import relationship, mapper, backref
 
 from kook.models.schemas import CommentSchema
@@ -54,13 +54,19 @@ class Dish(Entity):
         self.image = DishImage(result['url'], result['visibleUrl'])
 
     @classmethod
-    def fetch_all(cls, limit=None, tag_title=None):
-        query = DBSession.query(cls)
+    def fetch_all(cls, limit=None, tag_title=None, order_by='recipe_count'):
+        query = DBSession.query(cls).limit(limit)
         if tag_title:
-            query = query.filter(Dish.tags.any(tags.c.title==tag_title))
-        dishes = query.limit(limit).all()
-        return sorted(dishes, key=lambda dish: len(dish.recipes),
-                      reverse=True)
+            query = query.filter(cls.tags.any(tags.c.title==tag_title))
+        if order_by is not 'recipe_count':
+            if order_by is 'title':
+                dishes = query.order_by(cls.title).all()
+            else:
+                dishes = query.order_by(desc(getattr(cls, order_by))).all()
+        else:
+            dishes = sorted(query.all(), key=lambda dish: len(dish.recipes),
+                                           reverse=True)
+        return dishes
 
 class Recipe(Entity):
     """
