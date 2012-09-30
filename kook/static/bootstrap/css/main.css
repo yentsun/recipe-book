@@ -68,3 +68,5 @@ textarea{width:98%}
 
 .thumbnail .img{height:179px; background-position:center; background-size:100%;
                 background-repeat:no-repeat;}
+
+input.amount{width:30px}

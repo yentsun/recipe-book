@@ -65,14 +65,6 @@ class Entity(object):
         return query.all()
 
     @classmethod
-    def multidict_to_dict(cls, multidict):
-        pass
-
-    @classmethod
-    def construct_from_dict(cls, cstruct, **kwargs):
-        pass
-
-    @classmethod
     def generate_id(cls):
         return str(uuid4())
 

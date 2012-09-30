@@ -3,12 +3,11 @@
 from __future__ import division
 from datetime import datetime, timedelta
 from urlparse import urlparse
-from pyramid.security import Everyone, Allow, Deny
+from pyramid.security import Allow, Deny
 from colander import Invalid, interpolate
-from sqlalchemy import desc, asc
-from sqlalchemy.orm import relationship, mapper, backref
+from sqlalchemy import desc
+from sqlalchemy.orm import relationship, mapper
 
-from kook.models.schemas import CommentSchema
 from kook.models.sqla_metadata import (ingredients, dishes, amount_per_unit,
                                        products, steps, recipes, dish_tags,
                                        vote_records, comments, tags, units,
@@ -16,9 +15,10 @@ from kook.models.sqla_metadata import (ingredients, dishes, amount_per_unit,
 from kook.security import (RECIPE_BASE_ACL, AUTHOR_ACTIONS, VOTE_ACTIONS,
                            COMMENT_BASE_ACL)
 from kook.mako_filters import pretty_time, markdown
-from schemas import RecipeSchema
+from kook.models.schemas import RecipeSchema, CommentSchema
 from kook.models import (Entity, DBSession, UPVOTE, DOWNVOTE,
-                         DOWNVOTE_COST, UPVOTE_REP_CHANGE, DOWNVOTE_REP_CHANGE)
+                         DOWNVOTE_COST, UPVOTE_REP_CHANGE,
+                         DOWNVOTE_REP_CHANGE)
 
 class Dish(Entity):
     """
@@ -322,13 +322,67 @@ class Product(Entity):
     def __repr__(self) :
         return self.title
 
+    def update_from_multidict(self, multidict, localizer=None):
+        dict = self.multidict_to_dict(multidict)
+        return self.update_from_dict(dict, localizer)
+
+    @classmethod
+    def multidict_to_dict(cls, multidict):
+        dictionary = {'title': multidict.getone('title'),
+                      'APUs': []}
+        amounts = multidict.getall('amount')
+        unit_titles = multidict.getall('unit_title')
+        for unit_title, amount in zip(unit_titles, amounts):
+            dictionary['APUs'].append({
+                'amount': amount,
+                'unit_title': unit_title
+            })
+        return dictionary
+
+    def update_from_dict(self, cstruct, localizer):
+        from kook.models.schemas import ProductSchema
+        product_schema = ProductSchema()
+        try:
+            appstruct = product_schema.deserialize(cstruct)
+        except Invalid, e:
+            errors = {}
+            for path in e.paths():
+                keyparts = []
+                msgs = []
+                for exc in path:
+                    if exc.msg:
+                        msgs.extend(exc.messages())
+                    keyname = exc._keyname()
+                    if keyname:
+                        keyparts.append(keyname)
+                    if localizer:
+                        msgs = [localizer.translate(s, domain='kook')
+                                for s in msgs]
+                errors['.'.join(keyparts)] = '; '.join(interpolate(msgs))
+            return {'errors': errors,
+                    'original_data': cstruct}
+
+        self.title = appstruct['title']
+
+        #populate APU list
+        for APU_entry in appstruct['APUs']:
+            unit = Unit.fetch(APU_entry['unit_title']) or\
+                   Unit(APU_entry['unit_title'])
+            amount = APU_entry['amount']
+            apu = AmountPerUnit.fetch((self.title, unit.title)) or\
+                  AmountPerUnit(amount, unit)
+            apu.amount = amount
+            self.APUs.append(apu)
+
     @classmethod
     def fetch(cls, title):
         return DBSession.query(Product).filter(Product.title==title).first()
 
     @classmethod
     def dummy(cls):
-        return cls('')
+        dummy = cls('')
+        dummy.APUs = [AmountPerUnit('', Unit(''))]
+        return dummy
 
 class Unit(Entity):
     """Measure unit"""
@@ -413,6 +467,10 @@ class AmountPerUnit(Entity):
 
     def measure(self, amount):
         return amount / self.amount
+
+    @classmethod
+    def dummy(cls):
+        return cls('', Unit(''))
 
 class VoteRecord(Entity):
     """

@@ -554,6 +554,43 @@ class TestRecipeViews(unittest.TestCase):
         assert Product(u'batata') in recipe.products
         assert Product.fetch(u'potato') is None
 
+    def test_create_product_with_apu(self):
+        POST = MultiDict((
+            ('title', u'cucumber'),
+            ('unit_title', u'piece'),
+            ('amount', '100'),
+            ('unit_title', u'bucket'),
+            ('amount', '900'),
+        ))
+        request = DummyRequest(POST=POST)
+        update_product(request)
+        cucumber = Product.fetch(u'cucumber')
+        assert cucumber
+        self.assertEqual(2, len(cucumber.APUs))
+        for apu in cucumber.APUs:
+            if apu.unit.title == u'piece':
+                self.assertEqual(100, apu.amount)
+
+    def test_update_product_with_apu(self):
+        POST = MultiDict((
+            ('title', u'potato'),
+            ('unit_title', u'piece'),
+            ('amount', '100'),
+            ('unit_title', u'bucket'),
+            ('amount', '900'),
+        ))
+        request = DummyRequest(POST=POST)
+        request.matchdict['title'] = u'potato'
+        update_product(request)
+        potato = Product.fetch(u'potato')
+        assert potato
+        self.assertEqual(2, len(potato.APUs))
+        for apu in potato.APUs:
+            if apu.unit.title == u'piece':
+                self.assertEqual(100, apu.amount)
+            if apu.unit.title == u'bucket':
+                self.assertEqual(900, apu.amount)
+
     def test_create_APU(self):
         POST = MultiDict((
             ('unit_title', u'spoon'),

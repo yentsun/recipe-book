@@ -26,9 +26,9 @@ units = Table('units', metadata,
 
 amount_per_unit = Table('amount_per_unit', metadata,
     Column('product_title', Unicode, ForeignKey('products.title'),
-        primary_key=True, nullable=False),
+            primary_key=True, nullable=False),
     Column('unit_title', Unicode, ForeignKey('units.title'),
-        primary_key=True, nullable=False),
+            primary_key=True, nullable=False),
     Column('amount', FLOAT, nullable=False))
 
 ingredients = Table('ingredients', metadata,

@@ -82,3 +82,15 @@ class ProfileSchema(MappingSchema):
 
 class CommentSchema(MappingSchema):
     text = SchemaNode(String(), validator=Length(15))
+
+class APUSchema(MappingSchema):
+    unit_title = SchemaNode(String(), validator=Length(3), missing=None)
+    amount = SchemaNode(Float(), validator=Range(0.00001))
+
+class APUs(SequenceSchema):
+    apu = APUSchema()
+
+class ProductSchema(MappingSchema):
+    title = SchemaNode(String(), validator=Length(3),
+                       preparer=normalize_string, msg=u'Неверное название')
+    APUs = APUs()
