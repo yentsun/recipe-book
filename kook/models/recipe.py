@@ -438,11 +438,13 @@ class Ingredient(Entity):
     def measured(self):
         """Return str formatted measured amount or float amount"""
         result = self.amount
-        if len(self.product.APUs) > 0 and self.unit:
-            for apu in self.product.APUs:
-                if apu.unit.title == self.unit.title:
-                    result = self.amount / apu.amount
-        return locale.format('%g', result)
+        if result:
+            if len(self.product.APUs) > 0 and self.unit:
+                for apu in self.product.APUs:
+                    if apu.unit.title == self.unit.title:
+                        result = self.amount / apu.amount
+            result = locale.format('%g', result)
+        return result
 
     @property
     def apu(self):
@@ -476,7 +478,10 @@ class AmountPerUnit(Entity):
         return '%s %s' % (self.unit.title, '{:g}'.format(self.amount))
 
     def measure(self, amount):
-        return amount / self.amount
+        if amount and self.amount:
+            return amount / self.amount
+        else:
+            return 0
 
     @classmethod
     def dummy(cls):

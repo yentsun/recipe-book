@@ -4,8 +4,7 @@
 <tr class="product_amount removable">
     <td class="product_title">
         <input type="text" name="product_title" class="span4"
-               value="${get(ingredient, 'product_title') or\
-                        ingredient.product.title}"
+               value="${get(ingredient, 'product_title')}"
                data-provide="typeahead">
     </td>
     <td class="amount">
