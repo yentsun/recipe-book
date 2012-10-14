@@ -1,6 +1,7 @@
 <%inherit file="../layout.mako"/>
 <%!
     from kook.mako_filters import failsafe_get as get
+    from kook.models.recipe import Ingredient
     from pyramid.security import (has_permission,
                                   principals_allowed_by_permission)
 %>
@@ -107,11 +108,15 @@
                         <%include file="_ingredient.mako"
                                   args="ingredient=ingredient"/>
                         % endfor
-                    % else:
+                    % elif len(recipe.ingredients):
                         % for ingredient in recipe.ingredients:
                         <%include file="_ingredient.mako"
                                   args="ingredient=ingredient"/>
                         % endfor
+                    % else:
+                        <% dummy = Ingredient.dummy() %>
+                         <%include file="_ingredient.mako"
+                                   args="ingredient=dummy"/>
                     % endif
                     </tbody></table>
                 <button type="button" class="btn pull-right"

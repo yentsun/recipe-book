@@ -7,9 +7,10 @@ from pyramid.httpexceptions import HTTPFound, HTTPError
 from pyramid.security import has_permission, Deny
 from pyramid.i18n import get_localizer
 from beaker.cache import cache_region, region_invalidate
-from kook.models import UPVOTE, DOWNVOTE, UPVOTE_REQUIRED_REP, DOWNVOTE_REQUIRED_REP, form_msg
+from kook.models import (UPVOTE, DOWNVOTE, UPVOTE_REQUIRED_REP,
+                         DOWNVOTE_REQUIRED_REP, form_msg)
 
-from kook.models.recipe import Product, Recipe, Tag, Comment, Dish
+from kook.models.recipe import Product, Recipe, Tag, Comment, Dish, Ingredient
 
 @cache_region('long_term', 'common')
 def common():
