@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from colander import (SchemaNode, MappingSchema, SequenceSchema,
-                      String, Int, Float, Length, Range, Email, All,
+                      String, Int, Decimal, Length, Range, Email, All,
                       Function, Date, DateTime, Regex, null)
 
 def normalize_string(string):
@@ -34,7 +34,7 @@ def dont_check_current_nickname(node, kw):
 class IngredientSchema(MappingSchema):
     product_title = SchemaNode(String(), validator=Length(3),
                                preparer=normalize_string)
-    amount = SchemaNode(Float(), validator=Range(0.00001))
+    amount = SchemaNode(Decimal(), validator=Range(0.00001))
     unit_title = SchemaNode(String(), validator=Length(3), missing=None)
 
 class Ingredients(SequenceSchema):
@@ -85,7 +85,7 @@ class CommentSchema(MappingSchema):
 
 class APUSchema(MappingSchema):
     unit_title = SchemaNode(String(), validator=Length(3), missing=None)
-    amount = SchemaNode(Float(), validator=Range(0.00001))
+    amount = SchemaNode(Decimal(), validator=Range(0.00001))
 
 class APUs(SequenceSchema):
     apu = APUSchema()

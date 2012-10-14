@@ -87,8 +87,7 @@
             <h3>Ингредиенты:</h3><br>
             <ul>
                 % for ingredient in recipe.ingredients:
-                <li>${ingredient.product.title},
-                    ${ingredient.measured}
+                <li>${ingredient.product.title} &mdash; ${ingredient.measured}
                     % if ingredient.unit:
                     <span title="${ingredient.unit.title}">
                         ${ingredient.unit.abbr}

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import division
+import locale
 from datetime import datetime, timedelta
 from urlparse import urlparse
 from pyramid.security import Allow, Deny
@@ -19,6 +20,16 @@ from kook.models.schemas import RecipeSchema, CommentSchema
 from kook.models import (Entity, DBSession, UPVOTE, DOWNVOTE,
                          DOWNVOTE_COST, UPVOTE_REP_CHANGE,
                          DOWNVOTE_REP_CHANGE)
+
+locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
+
+def to_localized_decimal(input_):
+    output_ = input_
+    try:
+        output_ = locale.atof(input_)
+    except ValueError:
+        pass
+    return output_
 
 class Dish(Entity):
     """
@@ -139,7 +150,7 @@ class Recipe(Entity):
         in zip(product_titles, amounts, unit_titles):
             dictionary['ingredients'].append({
                 'product_title': product_title,
-                'amount': amount,
+                'amount': to_localized_decimal(amount),
                 'unit_title': unit_title
             })
         steps_numbers = multidict.getall('step_number')
@@ -161,7 +172,7 @@ class Recipe(Entity):
 
     @classmethod
     def construct_from_dict(cls, cstruct, recipe, localizer=None,
-                            fetch_dish_image=False, author=None):
+                            fetch_dish_image=False):
         recipe_schema = RecipeSchema()
         try:
             appstruct = recipe_schema.deserialize(cstruct)
@@ -220,8 +231,7 @@ class Recipe(Entity):
         dict = cls.multidict_to_dict(multidict)
         return cls.construct_from_dict(dict, recipe,
                                        kwargs.get('localizer'),
-                                       kwargs.get('fetch_dish_image'),
-                                       kwargs.get('author'))
+                                       kwargs.get('fetch_dish_image'))
 
     def to_dict(self):
         #TODO try to automate from model attribs
@@ -431,8 +441,8 @@ class Ingredient(Entity):
         if len(self.product.APUs) > 0 and self.unit:
             for apu in self.product.APUs:
                 if apu.unit.title == self.unit.title:
-                    result = '{:g}'.format(self.amount / apu.amount)
-        return result
+                    result = self.amount / apu.amount
+        return locale.format('%g', result)
 
     @property
     def apu(self):

@@ -1,5 +1,5 @@
 $(function() {
-    var ingredient_container = $('#ingredients tbody');
+    var ingredient_container = $('#ingredients').find('tbody');
     var step_container = $('#steps');
     $('#add_ingredient_fields').click(function(){
         clone_ingredient(ingredient_container);
@@ -40,7 +40,7 @@ $(function() {
                     element_field_name = 'step_text';
                 $('.'+field_group+' .removable').eq(element_no)
                     .find('[name='+element_field_name+']')
-                    .css('background', '#F2DEDE')
+                    .addClass('error')
                     .attr('data-original-title',
                           error_fields[field_params])
                     .tooltip({placement:'top'});
@@ -62,12 +62,17 @@ function set_measure(cont, apu_unit_title, apu_unit_abbr, apu_amount) {
 function set_amount(cont) {
     cont = $(cont);
     var parent = cont.parents('.amount');
-    var current_value = cont.val();
+    var current_value = cont.val().replace(',','.'); //TODO needs grace
     var multiplier = cont.attr('data-multiplier');
+    var new_amount = 0;
     if (multiplier != undefined) {
-        var new_amount = current_value * multiplier;
+        new_amount = current_value * multiplier;
     } else
-        var new_amount = current_value;
+        new_amount = current_value;
+    if (isNaN(new_amount))
+        cont.addClass('error');
+    else
+        cont.removeClass('error');
     parent.find('[name=amount]').val(new_amount);
 }
 
