@@ -70,4 +70,4 @@ textarea{width:98%}
                 background-repeat:no-repeat;}
 
 input.amount{width:30px}
-input.error{background: #F2DEDE}
+input.error, textarea.error{background: #F2DEDE}

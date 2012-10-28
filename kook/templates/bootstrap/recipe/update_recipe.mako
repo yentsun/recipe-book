@@ -106,17 +106,23 @@
                     % if data and data['ingredients']:
                         % for ingredient in data['ingredients']:
                         <%include file="_ingredient.mako"
-                                  args="ingredient=ingredient"/>
+                                  args="product_title=ingredient['product_title'],
+                                        amount=ingredient['amount']"/>
                         % endfor
                     % elif len(recipe.ingredients):
                         % for ingredient in recipe.ingredients:
                         <%include file="_ingredient.mako"
-                                  args="ingredient=ingredient"/>
+                                  args="product_title=ingredient.product.title,
+                                        amount=ingredient.amount,
+                                        unit_title=ingredient.unit and ingredient.unit.title or '',
+                                        unit_abbr=ingredient.unit and ingredient.unit.abbr or u'г',
+                                        apu=ingredient.apu,
+                                        APUs=ingredient.product.APUs,
+                                        measured_amount=ingredient.measured"/>
                         % endfor
                     % else:
-                        <% dummy = Ingredient.dummy() %>
                          <%include file="_ingredient.mako"
-                                   args="ingredient=dummy"/>
+                                   args="product_title='', amount=''"/>
                     % endif
                     </tbody></table>
                 <button type="button" class="btn pull-right"

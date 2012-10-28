@@ -443,17 +443,20 @@ class Ingredient(Entity):
                 for apu in self.product.APUs:
                     if apu.unit.title == self.unit.title:
                         result = self.amount / apu.amount
-            result = locale.format('%g', result)
+            try:
+                result = locale.format('%g', result)
+            except TypeError:
+                pass
         return result
 
     @property
     def apu(self):
-        if self.unit is not None:
+        result = 1
+        if self.unit:
             for apu in self.product.APUs:
                 if apu.unit.title == self.unit.title:
-                    return apu.amount
-        else:
-            return 1
+                    result = apu.amount
+        return result
 
     def string_unit_title(self):
         """Return unit title or empty string"""
