@@ -66,8 +66,16 @@ textarea{width:98%}
 #recipe-list h3{margin-bottom:1em}
 #recipe-list .description{max-width:500px; display:block;}
 
-.thumbnail .img{height:179px; background-position:center; background-size:100%;
-                background-repeat:no-repeat;}
+/*dish thumbs*/
+.thumbnail .img{height:179px; background-position:center top;
+                background-size:100%; background-repeat:no-repeat;}
+.thumbnail{position:relative}
+.thumbnail .badge{position:absolute; top:8px; right:8px}
+.thumbnail .badge:HOVER{text-decoration:none}
+.caption h4{height:1.3em; overflow:hidden}
+.caption{position:relative}
+.fade-out{position:absolute; width:80px; height:30px; bottom:0; right:10px;
+          background:url(../img/fade.png) right repeat-y}
 
 input.amount{width:30px}
 input.error, textarea.error{background: #F2DEDE}

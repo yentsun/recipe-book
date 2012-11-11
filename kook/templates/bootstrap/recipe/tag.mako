@@ -15,19 +15,17 @@
     <div class="span12">
         <ul class="thumbnails">
             % for dish in dishes:
-            <li class="span3">
+            <li class="span3" title="${dish.title}">
                 <a href="${request.route_path('read_dish', title=dish.title)}"
                    class="thumbnail">
                     <div class="img"
                          style="background-image:url(${dish.image.url})">
-
+                         <span class="badge" title="Всего рецептов блюда">
+                            ${len(dish.recipes)}
+                         </span>
                     </div>
                     <div class="caption">
-                        <h4>${dish.title}
-                            <span class="badge">
-                                ${len(dish.recipes)}
-                            </span>
-                        </h4>
+                        <h4>${dish.title}</h4>
                     </div>
                 </a>
             </li>
@@ -42,6 +40,8 @@
             src="/static/bootstrap/js/read_recipe.js"></script>
     <script type="text/javascript"
             src="/static/bootstrap/js/jquery.jeditable.mini.js"></script>
+    <script type="text/javascript"
+            src="/static/bootstrap/js/tag.js"></script>
 </%def>
 % if request.user:
 <script type="text/javascript">
