@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 <%inherit file="../layout.mako"/>
 <%! from kook.mako_filters import pretty_time %>
+<div class="row-fluid">
 % if request.session.peek_flash():
     <% flash = request.session.pop_flash() %>
     % for message in flash:
@@ -8,8 +9,7 @@
     % endfor
 % endif
 <%def name="title()">Главная</%def>
-<div class="span5 left">
-    <div id="dish_slides">
+<div id="dish_slides" class="span6">
     % for dish in popular_dishes:
         <div class="item"
              style="background-image:url(${dish.image.url})">
@@ -22,11 +22,10 @@
             </div>
         </div>
     % endfor
-    </div>
 </div>
-<div class="span6 right">
+<div class="span6">
     <input disabled placeholder="искать рецепт..." type="text" id="search-query">
-    <h3>Лучшие рецепты</h3>
+    <div class="page-header"><h3>Лучшие рецепты</h3></div>
     <table id="best-recipes" class="table table-striped">
         <tbody>
             % for recipe in best_recipes:
@@ -57,11 +56,13 @@
         </tbody>
     </table>
 </div>
-    <div class="span8">
+</div>
+<div class="row-fluid">
+    <div class="span9">
         <div class="page-header">
             <h3>Категории</h3>
         </div>
-        <div class="span2">
+        <div class="span3">
             <ul>
                 <li><a href="${request.route_path('tag', title=u'салаты')}">
                     салаты
@@ -92,7 +93,7 @@
                 </a></li>
             </ul>
         </div>
-        <div class="span2">
+        <div class="span3">
             <ul>
                 <li>
                     <a href="${request.route_path('tag', title=u'славянская кухня')}">
@@ -126,7 +127,7 @@
                 </li>
             </ul>
         </div>
-        <div class="span2">
+        <div class="span3">
             <ul>
                 <li>
                     <a href="${request.route_path('tag', title=u'быстрое')}">
@@ -156,9 +157,11 @@
             </ul>
         </div>
     </div>
-<div class="span3">
-    <h3>топ 10 поваров</h3>
-    <table id="best-users" class="table table-striped">
+    <div class="span3">
+        <div class="page-header">
+            <h3>топ 10 поваров</h3>
+        </div>
+        <table id="best-users" class="table table-striped">
         <tbody>
                 % for user in best_users:
                 <tr>
@@ -171,6 +174,7 @@
                 % endfor
         </tbody>
     </table>
+</div>
 </div>
 <%def name="js()">
     <script type="text/javascript"

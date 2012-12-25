@@ -1,6 +1,17 @@
 body{background:#f8f3df url('../img/papertop.jpg') repeat-x}
+#main{margin-top:60px}
+
+@media (min-width: 768px) and (max-width: 979px) {
+    #main{margin-top:10px}
+}
+
+@media (max-width: 767px) {
+    #main{margin-top:10px}
+}
+
 .step{margin-bottom:4em}
-.step_no{width:20px}
+.number_set{margin-right:1em}
+.step_no{width:200px}
 .time_value{width:30px}
 .step_no, .time_value{margin-bottom:4px}
 .step_no, .amount input, .time_value{font-weight:bold}
@@ -25,12 +36,13 @@ td.amount .dropdown-menu{right:0; left:auto;}
 #update_recipe .description{margin-bottom:1em}
 
 /*index*/
-#dish_slides .item{height:345px; width:450px; background-position:center;
+#dish_slides{margin-bottom:20px; overflow:hidden; height:430px}
+#dish_slides .item{height:100%; width:100%; background-position:center;
                    background-repeat:no-repeat}
 #dish_slides .caption{position:absolute; bottom:0; left:0;
                       background:rgb(0, 0, 0);
                       background:rgba(0, 0, 0, 0.5);
-                      padding:10px; color:#fff; width:430px}
+                      padding:10px; color:#fff; width:100%}
 #dish_slides h3{font-size:200%}
 #best-recipes .icon{overflow:hidden; height:25px; width:25px}
 #best-recipes td{padding:4px}
@@ -58,10 +70,12 @@ h1.recipe-title{margin-left:100px}
 #comment_list .item .time{color:#cca17c; font-style:italic;}
 #comment_form{padding-top:1em; border-top:1px dotted #cca17c}
 #cant_comment{margin-top:2em}
-
+#voting, #edit{width:45px; text-align:center; margin-left:20px}
 textarea{width:98%}
 
 /*read dish*/
+#dish_title{line-height:.7em}
+#dish_image{margin-bottom:1em}
 #recipe-list{margin-top:2em}
 #recipe-list h3{margin-bottom:1em}
 #recipe-list .description{max-width:500px; display:block;}
@@ -78,4 +92,4 @@ textarea{width:98%}
           background:url(../img/fade.png) right repeat-y}
 
 input.amount{width:30px}
-input.error, textarea.error{background: #F2DEDE}
+input.error, textarea.error{background:#F2DEDE}

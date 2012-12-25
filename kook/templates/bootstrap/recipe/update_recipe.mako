@@ -32,8 +32,8 @@
         </button>
     </div>
 </div>
-<form class="span12" action="${update_recipe_path}" method="post">
-    <div class="row">
+<form action="${update_recipe_path}" method="post">
+    <div class="row-fluid">
         <div class="span6">
             <fieldset class="well">
                 <legend>Название</legend>
@@ -92,7 +92,7 @@
             </fieldset>
         </div>
         <div class="span6">
-            <fieldset class="well ingredients" id="ingredients">
+            <fieldset class="well" id="ingredients">
                 <legend>Ингредиенты</legend>
                 <table class="table table-striped">
                     <thead>

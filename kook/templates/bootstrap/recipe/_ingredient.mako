@@ -3,12 +3,12 @@
              unit_abbr=u'г', apu=1, APUs=[]"/>
 <tr class="product_amount removable">
     <td class="product_title">
-        <input type="text" name="product_title" class="span4"
+        <input type="text" name="product_title" class="span12"
                value="${product_title}" data-provide="typeahead">
     </td>
     <td class="amount">
         <div class="input-append">
-            <input type="text" name="measured_amount" style="width:30px"
+            <input type="text" name="measured_amount" style="width:60px"
                    value="${measured_amount or amount}"
                    onkeyup="set_amount(this)"
                    data-multiplier="${apu}">

@@ -10,34 +10,32 @@
 <%def name="sub_title()">
     ${', '.join([tag.title for tag in dish.tags])}
 </%def>
-<div class="page-header row">
-    <h1 class="dish-title offset1">
+<div class="page-header">
+    <h1 id="dish-title" class="">
         ${self.title()}
         <span class="badge badge-inverse" title="Количество рецептов">
             ${len(dish.recipes)}
         </span>
         % if hasattr(self,'sub_title'):
-                <small>${self.sub_title()}</small>
+        <br>
+        <small>${self.sub_title()}</small>
         % endif
 
     </h1>
 </div>
-<div class="row">
-    <div class="span1">
-        <button class="btn pull-right" title="добавить в любимые блюда">
-            <i class="icon icon-heart"></i>
-        </button>
-    </div>
-    <div class="span5">
-        <img width="470" src="${dish.image.url}" alt="">
+<div class="row-fluid">
+    <div id="dish_image" class="span6">
+        <img width="100%" src="${dish.image.url}" alt="">
         <div id="photo_credit">
             Фото: ${dish.image.credit or dish.image.get_credit()}
         </div>
     </div>
-    <div class="span6">
+    <div id="dish_secription" class="span6">
         <div id="description">${dish.description | markdown}</div>
     </div>
-    <div class="span11 offset1" id="recipe-list">
+</div>
+<div class="row-fluid">
+    <div class="span12" id="recipe-list">
         <h3>Рецепты</h3>
         <table class="table table-striped">
             <tbody>

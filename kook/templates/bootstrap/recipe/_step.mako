@@ -3,12 +3,12 @@
 <div class="step removable" id="step_${get(step, 'number')}">
     <div class="topline">
         <a class="close remove">&times;</a>
-        <div class="input-prepend number_set" style="width:90px">
+        <div class="input-prepend number_set">
             <label for="step${get(step, 'number')}" class="add-on">Шаг №</label>
             <input id="step${get(step, 'number')}" class="step_no" type="text"
                    name="step_number" value="${get(step, 'number') or 1}">
         </div>
-        <div class="input-prepend input-append time_set" style="width:95px">
+        <div class="input-prepend input-append time_set">
             <label for="timevalue_${get(step, 'number')}" class="add-on">
                 <i class="icon-time"></i>
             </label>

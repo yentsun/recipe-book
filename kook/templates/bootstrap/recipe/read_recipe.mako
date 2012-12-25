@@ -25,9 +25,9 @@
         ${self.additional_buttons()}
     % endif
 </div>
-<div class="row">
-    <div class="span1" class="toolbox">
-        <div id="voting" class="pull-left">
+<div class="row-fluid">
+    <div class="span1" id="toolbox">
+        <div id="voting" class="">
             % if last_vote and last_vote.value is UPVOTE:
             <button class="btn btn-success active" type="button"
                     data-toggle="button"
@@ -64,25 +64,27 @@
                 <i class="icon-chevron-down"></i>
             </button>
             % endif
-
         </div>
         % if can_update:
-        <a title="обновить рецепт" class="btn edit"
-           href="${request.route_path('update_recipe',
-           id=recipe.id)}">
-            <i class="icon-pencil"></i>
-        </a>
+        <div id="edit">
+            <a title="обновить рецепт" class="btn edit"
+               href="${request.route_path('update_recipe',
+                                          id=recipe.id)}">
+                <i class="icon-pencil"></i>
+            </a>
+        </div>
         % endif
+
     </div>
-    <div class="span5">
+    <div class="span6">
         <div>
-            <img width="470" src="${recipe.dish.image.url}" alt="">
+            <img width="100%" src="${recipe.dish.image.url}" alt="">
         </div>
         <div id="photo_credit">
             Фото: ${recipe.dish.image.credit or recipe.dish.image.get_credit()}
         </div>
     </div>
-    <div class="span3">
+    <div class="span5">
         <section id="ingredients">
             <h3>Ингредиенты:</h3><br>
             <ul>
@@ -100,7 +102,9 @@
             </ul>
         </section>
     </div>
-    <div class="span8 offset1">
+</div>
+<div class="row-fluid">
+    <div class="span6 offset1">
         <div id="steps"><h3>Приготовление:</h3><br>
             <table class="table table-striped" cellpadding="0" cellspacing="0">
                 % for step in recipe.steps:
