@@ -48,6 +48,7 @@ td.amount .dropdown-menu{right:0; left:auto;}
 #best-recipes td{padding:4px}
 #search-query{font-size:180%; padding:.3em; height:auto; width:98%;
               line-height:1em; margin-bottom:1em}
+#cats div{border:1px solid red}
 
 /*read recipe*/
 h1 .well{font-size:80%; padding:.8em .8em .9em .5em}

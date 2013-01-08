@@ -57,12 +57,12 @@
     </table>
 </div>
 </div>
-<div class="row-fluid">
-    <div class="span9">
+<div id="cats_leaders" class="row-fluid">
+    <div id="cats" class="span9">
         <div class="page-header">
             <h3>Категории</h3>
         </div>
-        <div class="span3">
+        <div class="span4">
             <ul>
                 <li><a href="${request.route_path('tag', title=u'салаты')}">
                     салаты
@@ -93,7 +93,7 @@
                 </a></li>
             </ul>
         </div>
-        <div class="span3">
+        <div class="span4">
             <ul>
                 <li>
                     <a href="${request.route_path('tag', title=u'славянская кухня')}">
@@ -127,7 +127,7 @@
                 </li>
             </ul>
         </div>
-        <div class="span3">
+        <div class="span4">
             <ul>
                 <li>
                     <a href="${request.route_path('tag', title=u'быстрое')}">
@@ -157,7 +157,7 @@
             </ul>
         </div>
     </div>
-    <div class="span3">
+    <div id="leaders" class="span3">
         <div class="page-header">
             <h3>топ 10 поваров</h3>
         </div>
