@@ -37,17 +37,17 @@
         <div class="span6">
             <fieldset class="well">
                 <legend>Название</legend>
-                <div class="dish_title">
-                    <label for="dish_title">Название</label>
-                    <input class="span5" type="text" id="dish_title"
+                <div class="dish_title" class="span9">
+                    <label for="dish_title">Название блюда</label>
+                    <input type="text" id="dish_title"
                            name="dish_title"
                            value="${get(recipe, 'dish.title')}"
                            data-title="${get(recipe, 'dish.title')}"></div>
-                <div class="description">
+                <div class="description" class="span9">
                     <label for="description">
-                        Чем уникален этот рецепт?
+                        Описание рецепта
                     </label>
-                    <input class="span5" type="text" id="description"
+                    <input type="text" id="description"
                            name="description"
                            value="${get(recipe, 'description') or ''}">
                 </div>

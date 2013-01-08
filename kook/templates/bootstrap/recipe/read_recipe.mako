@@ -16,7 +16,7 @@
         </span>
 </%def>
 <div class="page-header">
-    <h1 class="recipe-title"> ${self.title()}
+    <h1 id="recipe_title"> ${self.title()}
         % if hasattr(self,'sub_title'):
                 <small>${self.sub_title()}</small>
         % endif
@@ -25,7 +25,7 @@
         ${self.additional_buttons()}
     % endif
 </div>
-<div class="row-fluid">
+<div class="row-fluid" id="photo_ingredients">
     <div class="span1" id="toolbox">
         <div id="voting" class="">
             % if last_vote and last_vote.value is UPVOTE:
@@ -76,7 +76,7 @@
         % endif
 
     </div>
-    <div class="span6">
+    <div id="photo" class="span6">
         <div>
             <img width="100%" src="${recipe.dish.image.url}" alt="">
         </div>

@@ -1,14 +1,7 @@
 body{background:#f8f3df url('../img/papertop.jpg') repeat-x}
 #main{margin-top:60px}
 
-@media (min-width: 768px) and (max-width: 979px) {
-    #main{margin-top:10px}
-}
-
-@media (max-width: 767px) {
-    #main{margin-top:10px}
-}
-
+/*update recipe*/
 .step{margin-bottom:4em}
 .number_set{margin-right:1em}
 .step_no{width:200px}
@@ -28,10 +21,10 @@ blockquote{border-left-color:#6B4A28}
 .step .topline{overflow:hidden}
 td.amount{width:150px}
 td.amount .dropdown-menu{right:0; left:auto;}
+.dish_title input, .description input{width:90%}
 
 /*recipe-list*/
 #recipe-list .edit{display:none}
-
 #update_recipe textarea{width:98%}
 #update_recipe .description{margin-bottom:1em}
 
@@ -56,9 +49,9 @@ h1 .well{font-size:80%; padding:.8em .8em .9em .5em}
 #read_recipe #ingredients li{line-height:1.8em}
 td.no .btn{font-weight:bold}
 #steps{margin:2em 0}
+#photo{margin-bottom:2em}
 #photo_credit{background:#000; color:#fff; padding:.5em 1em}
 #voting{font-size:200%; font-weight:bold; text-align:center; margin-bottom:1em}
-h1.recipe-title{margin-left:100px}
 #rating_value{margin:.3em 0; padding:.2em}
 #comments{margin:3em 0 0 6em}
 #comments h3{color:#cca17c; text-align:right; margin-bottom:1em}
@@ -73,6 +66,8 @@ h1.recipe-title{margin-left:100px}
 #cant_comment{margin-top:2em}
 #voting, #edit{width:45px; text-align:center; margin-left:20px}
 textarea{width:98%}
+#photo_ingredients{position:relative}
+#recipe_title{padding-left:8%}
 
 /*read dish*/
 #dish_title{line-height:.7em}
@@ -94,3 +89,15 @@ textarea{width:98%}
 
 input.amount{width:30px}
 input.error, textarea.error{background:#F2DEDE}
+
+/*handheld landscape*/
+@media (min-width: 768px) and (max-width: 979px) {
+    #main{margin-top:10px}
+
+}
+/*handheld portrait*/
+@media (max-width: 767px) {
+    #main{margin-top:10px}
+    #toolbox{position:absolute; width:30px; top:20px; left:0}
+    #recipe_title{padding-left:0}
+}
