@@ -7,13 +7,13 @@
 %>
 <%def name="body_id()">read_recipe</%def>
 <%def name="title()">${recipe.dish.title}</%def>
-<div class="page-header span7">
-    <h1 id="recipe_title">
+<div class="page-header">
+    <h1 id="recipe_title" class="">
         ${self.title()}
         <br>
         <small>
             ${recipe.description} от
-            <span id="author">
+            <span id="author" class="well pull-right">
                 <img src="${recipe.author.gravatar_url(23)}" alt="юзерпик">
                 ${recipe.author.display_name}
                 <strong>${recipe.author.profile.rep}</strong>

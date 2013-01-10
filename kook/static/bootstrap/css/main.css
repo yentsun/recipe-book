@@ -43,6 +43,8 @@ td.amount .dropdown-menu{right:0; left:auto;}
               line-height:1em; margin-bottom:1em}
 
 /*read recipe*/
+.page-header{width:57%}
+#author{padding:.8em .8em .9em .5em; font-size:80%; margin-top:-1.5em}
 #read_recipe #ingredients{font-size:130%; margin-bottom:1em}
 #read_recipe #ingredients li{line-height:1.8em}
 td.no .btn{font-weight:bold}
@@ -65,7 +67,7 @@ td.no .btn{font-weight:bold}
 #voting, #edit{width:45px; text-align:center; margin-left:20px}
 textarea{width:98%}
 #photo_ingredients{position:relative; clear:both}
-#recipe_title{padding-left:10%}
+#recipe_title{padding-left:15%}
 
 /*read dish*/
 #dish_title{line-height:.7em}
@@ -98,4 +100,5 @@ input.error, textarea.error{background:#F2DEDE}
     #main{margin-top:10px}
     #toolbox{position:absolute; width:30px; top:20px; left:0}
     #recipe_title{padding-left:0}
+    .page-header{width:100%}
 }
