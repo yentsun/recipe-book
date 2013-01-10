@@ -41,10 +41,8 @@ td.amount .dropdown-menu{right:0; left:auto;}
 #best-recipes td{padding:4px}
 #search-query{font-size:180%; padding:.3em; height:auto; width:98%;
               line-height:1em; margin-bottom:1em}
-#cats div{border:1px solid red}
 
 /*read recipe*/
-h1 .well{font-size:80%; padding:.8em .8em .9em .5em}
 #read_recipe #ingredients{font-size:130%; margin-bottom:1em}
 #read_recipe #ingredients li{line-height:1.8em}
 td.no .btn{font-weight:bold}
@@ -66,8 +64,8 @@ td.no .btn{font-weight:bold}
 #cant_comment{margin-top:2em}
 #voting, #edit{width:45px; text-align:center; margin-left:20px}
 textarea{width:98%}
-#photo_ingredients{position:relative}
-#recipe_title{padding-left:8%}
+#photo_ingredients{position:relative; clear:both}
+#recipe_title{padding-left:10%}
 
 /*read dish*/
 #dish_title{line-height:.7em}

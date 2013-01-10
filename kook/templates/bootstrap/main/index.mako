@@ -127,7 +127,7 @@
                 </li>
             </ul>
         </div>
-        <div class="span4">
+        <div class="span3">
             <ul>
                 <li>
                     <a href="${request.route_path('tag', title=u'быстрое')}">

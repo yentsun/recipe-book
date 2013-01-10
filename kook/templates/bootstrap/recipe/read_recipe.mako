@@ -7,19 +7,18 @@
 %>
 <%def name="body_id()">read_recipe</%def>
 <%def name="title()">${recipe.dish.title}</%def>
-<%def name="sub_title()">
-    — ${recipe.description} от
-    <span class="well">
-        <img src="${recipe.author.gravatar_url(30)}" alt="юзерпик">
-        ${recipe.author.display_name}
-        <strong>${recipe.author.profile.rep}</strong>
-        </span>
-</%def>
-<div class="page-header">
-    <h1 id="recipe_title"> ${self.title()}
-        % if hasattr(self,'sub_title'):
-                <small>${self.sub_title()}</small>
-        % endif
+<div class="page-header span7">
+    <h1 id="recipe_title">
+        ${self.title()}
+        <br>
+        <small>
+            ${recipe.description} от
+            <span id="author">
+                <img src="${recipe.author.gravatar_url(23)}" alt="юзерпик">
+                ${recipe.author.display_name}
+                <strong>${recipe.author.profile.rep}</strong>
+            </span>
+        </small>
     </h1>
     % if hasattr(self,'additional_buttons'):
         ${self.additional_buttons()}
