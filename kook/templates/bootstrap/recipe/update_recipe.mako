@@ -15,7 +15,7 @@
 <div class="page-header">
     <h1>
         ${self.title()}<br>
-        <small>${recipe.dish.title}</small>
+        <small>${recipe.dish.title or u'новый рецепт'}</small>
     </h1>
     <div class="btn-group pull-right">
         <a class="btn"
