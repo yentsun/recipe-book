@@ -12,8 +12,8 @@
         ${self.title()}
         <br>
         <small>
-            ${recipe.description} от
-            <span id="author" class="well pull-right">
+            ${recipe.description}
+            <span id="author" class="well pull-right" title="Рецепт от...">
                 <img src="${recipe.author.gravatar_url(23)}" alt="юзерпик">
                 ${recipe.author.display_name}
                 <strong>${recipe.author.profile.rep}</strong>

@@ -6,7 +6,6 @@
                                   principals_allowed_by_permission)
 %>
 <%def name="title()">Создание / Обновление рецепта</%def>
-<%def name="sub_title()">${recipe.dish.title or ''}</%def>
 % if request.session.peek_flash():
     <% flash = request.session.pop_flash() %>
     % for message in flash:
@@ -14,10 +13,9 @@
     % endfor
 % endif
 <div class="page-header">
-    <h1> ${self.title()}
-        % if hasattr(self,'sub_title'):
-                <small>${self.sub_title()}</small>
-        % endif
+    <h1>
+        ${self.title()}<br>
+        <small>${recipe.dish.title}</small>
     </h1>
     <div class="btn-group pull-right">
         <a class="btn"
