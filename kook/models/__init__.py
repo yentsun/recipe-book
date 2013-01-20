@@ -17,6 +17,13 @@ DOWNVOTE_COST = -1
 UPVOTE_REQUIRED_REP = 15
 DOWNVOTE_REQUIRED_REP = 125
 
+FRACTIONS = {
+    0.5: u'½',
+    0.33: u'⅓',
+    0.25: u'¼',
+    0.2: u'⅕'
+}
+
 def form_msg(acl):
     try:
         if acl.ace == (Deny, Everyone, VOTE_ACTIONS):

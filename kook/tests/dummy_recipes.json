@@ -54,6 +54,11 @@
              "product_title": "spices",
              "amount": 5.5,
              "unit_title": null
+         },
+         {
+             "product_title": "salt",
+             "amount": 0.5,
+             "unit_title": null
          }
      ],
      "steps": [

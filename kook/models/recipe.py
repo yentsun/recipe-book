@@ -2,6 +2,7 @@
 
 from __future__ import division
 import locale
+import math
 from datetime import datetime, timedelta
 from urlparse import urlparse
 from pyramid.security import Allow, Deny
@@ -19,7 +20,7 @@ from kook.mako_filters import pretty_time, markdown
 from kook.models.schemas import RecipeSchema, CommentSchema
 from kook.models import (Entity, DBSession, UPVOTE, DOWNVOTE,
                          DOWNVOTE_COST, UPVOTE_REP_CHANGE,
-                         DOWNVOTE_REP_CHANGE)
+                         DOWNVOTE_REP_CHANGE, FRACTIONS)
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
@@ -434,18 +435,23 @@ class Ingredient(Entity):
     def dummy(cls):
         return cls(Product.dummy(), None)
 
-    @property
-    def measured(self):
+    def get_measured(self, pretty_fractions=True):
         """Return str formatted measured amount or float amount"""
         result = self.amount
-        if result:
-            if len(self.product.APUs) > 0 and self.unit:
-                for apu in self.product.APUs:
-                    if apu.unit.title == self.unit.title:
-                        result = self.amount / apu.amount
-            try:
-                result = locale.format('%g', result)
-            except TypeError:
+        if len(self.product.APUs) > 0 and self.unit:
+            for apu in self.product.APUs:
+                if apu.unit.title == self.unit.title:
+                    result = self.amount / apu.amount
+                    break
+        if pretty_fractions:
+            fraction_part, int_part = math.modf(result)
+            fraction_part = round(fraction_part, 2)
+            if fraction_part in FRACTIONS:
+                return '%s%s' % (int(int_part) or '',
+                                 FRACTIONS[fraction_part])
+        try:
+            result = locale.format('%g', result)
+        except TypeError:
                 pass
         return result
 
@@ -470,6 +476,13 @@ class Ingredient(Entity):
     def fetch_all(cls, product_title):
         return DBSession.query(Ingredient)\
                         .filter(ingredients.c.product_title==product_title)
+
+    def get_unit(self):
+        """Return ingredient's chosen unit or default unit if none"""
+        unit = Unit(u'грамм', u'г')
+        if self.unit:
+            unit = self.unit
+        return unit
 
 class AmountPerUnit(Entity):
 

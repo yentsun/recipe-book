@@ -89,15 +89,10 @@
             <ul>
                 % for ingredient in recipe.ingredients:
                 <li>${ingredient.product.title} &mdash;
-                    % if ingredient.unit:
-                        <%def name="abbr()"><span title="${ingredient.unit.title}">
-                        ${ingredient.unit.abbr}
-                        </span>
-                        </%def>
-                    % else:
-                        <%def name="abbr()"><span title="грамм">г</span></%def>
-                    % endif
-                    ${ingredient.measured}&nbsp;${self.abbr()}
+                    ${ingredient.get_measured()}&nbsp;<span
+                            title="${ingredient.get_unit().title}">
+                    ${ingredient.get_unit().abbr}
+                    </span>
                 </li>
                 % endfor
             </ul>

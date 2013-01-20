@@ -140,10 +140,10 @@ class TestRecipeViews(unittest.TestCase):
         self.assertEqual(recipe.ingredients[0].apu, 100)
         self.assertEqual(recipe.ingredients[1].apu, 1)
         assert potato_300g in recipe.ingredients
-        self.assertEqual(recipe.ingredients[0].measured, '3')
+        self.assertEqual(recipe.ingredients[0].get_measured, '3')
         for ingredient in recipe.ingredients:
             if ingredient.product.title == u'лук':
-                self.assertEqual(ingredient.measured, 1)
+                self.assertEqual(ingredient.get_measured, 1)
         assert mix in recipe.steps
         datetime_format = '%Y-%m-%d %H:%M'
         self.assertEqual(datetime.now().strftime(datetime_format),
@@ -157,7 +157,10 @@ class TestRecipeViews(unittest.TestCase):
         response = read_view(request)
         recipe = response['recipe']
         self.assertEqual(recipe.ingredients[2].amount, 5.5)
-        self.assertEqual(recipe.ingredients[2].measured, '5,5')
+        self.assertEqual(recipe.ingredients[2].get_measured(), u'5½')
+        self.assertEqual(recipe.ingredients[2].get_measured(False), u'5,5')
+        self.assertEqual(recipe.ingredients[3].amount, 0.5)
+        self.assertEqual(recipe.ingredients[3].get_measured(), u'½')
 
     def test_create_recipe(self):
         #testing post

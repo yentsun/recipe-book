@@ -116,7 +116,7 @@
                                         unit_abbr=ingredient.unit and ingredient.unit.abbr or u'г',
                                         apu=ingredient.apu,
                                         APUs=ingredient.product.APUs,
-                                        measured_amount=ingredient.measured"/>
+                                        measured_amount=ingredient.get_measured(False)"/>
                         % endfor
                     % else:
                          <%include file="_ingredient.mako"
