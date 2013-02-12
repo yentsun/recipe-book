@@ -17,6 +17,9 @@
                    value="${get(step, 'time_value')}">
             <div class="add-on" style="margin-bottom:4px">мин</div>
         </div>
+        <div class="pull-right markdown_help">
+            ?
+        </div>
     </div>
     <textarea id="initial_step" name="step_text"
               cols="30" rows="5">${get(step, 'text') or ''}</textarea>

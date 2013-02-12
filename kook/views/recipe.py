@@ -7,16 +7,21 @@ from pyramid.httpexceptions import HTTPFound, HTTPError
 from pyramid.security import has_permission, Deny
 from pyramid.i18n import get_localizer
 from beaker.cache import cache_region, region_invalidate
-from kook.models import (UPVOTE, DOWNVOTE, UPVOTE_REQUIRED_REP,
-                         DOWNVOTE_REQUIRED_REP, form_msg)
+from kook.models import UPVOTE, DOWNVOTE, form_msg
+from kook.models.recipe import Product, Recipe, Tag, Comment, Dish
 
-from kook.models.recipe import Product, Recipe, Tag, Comment, Dish, Ingredient
 
-@cache_region('long_term', 'common')
+@cache_region('long_term')
 def common():
     return {'products': Product.fetch_all(),
             'dishes': Dish.fetch_all(),
             'tags': Tag.fetch_all()}
+
+
+@cache_region('long_term')
+def cached_recipe(id_):
+    return Recipe.fetch(id_)
+
 
 def index_view(request):
     response = dict()
@@ -24,16 +29,18 @@ def index_view(request):
                                                 order_by='creation_time')
     return response
 
+
 def tag(request):
     title = request.matchdict['title']
     tag = Tag.fetch(title)
     dishes = Dish.fetch_all(tag_title=title)
-    response = {'tag':tag, 'dishes':dishes}
+    response = {'tag': tag, 'dishes': dishes}
     return response
 
+
 def read_view(request):
-    id = request.matchdict['id']
-    recipe = Recipe.fetch(id)
+    recipe_id = request.matchdict['id']
+    recipe = cached_recipe(recipe_id)
     last_vote = None
     try:
         last_vote = request.user.last_vote(recipe.id)
@@ -50,9 +57,10 @@ def read_view(request):
                 'can_downvote': has_permission('downvote', recipe, request)}
     return response
 
+
 def delete_view(request):
-    id = request.matchdict['id']
-    recipe = Recipe.fetch(id=id)
+    recipe_id = request.matchdict['id']
+    recipe = Recipe.fetch(id=recipe_id)
     recipe.attach_acl()
     if has_permission('delete', recipe, request):
         recipe.delete()
@@ -65,19 +73,20 @@ def delete_view(request):
                               u'У вас нет прав удалять этот рецепт</div>')
         return HTTPFound('/')
 
+
 def create_update(request):
-    id = request.matchdict.get('id', None)
+    recipe_id = request.matchdict.get('id', None)
     fetch_image = request.matchdict.get('fetch_image', True)
     response = common()
     localizer = get_localizer(request)
 
     try:
-        next_path = request.current_route_url(id=id)
+        next_path = request.current_route_url(id=recipe_id)
     except ValueError:
         next_path = '/'
 
-    if id:
-        recipe = Recipe.fetch(id)
+    if recipe_id:
+        recipe = Recipe.fetch(recipe_id)
         recipe.attach_acl()
         allowed = has_permission('update', recipe, request)
     else:
@@ -98,21 +107,25 @@ def create_update(request):
             response['recipe'] = recipe
         #if recipe creation/update received
         else:
-            result = Recipe.construct_from_multidict(request.POST, recipe,
-                                                 localizer=localizer,
-                                                 fetch_dish_image=fetch_image)
+            result = \
+                Recipe.construct_from_multidict(request.POST, recipe,
+                                                localizer=localizer,
+                                                fetch_dish_image=fetch_image)
             if allowed:
                 try:
-                    if id:
+                    if recipe_id:
                         recipe.delete()
                         result.update_time = datetime.now()
                     result.save()
-                    region_invalidate(common, 'long_term', 'common')
+
+                    region_invalidate(cached_recipe, 'long_term', recipe_id)
+                    region_invalidate(common, 'long_term')
+
                     request.session.flash(u'<div class="alert alert-success">'
-                                      u'Рецепт обновлен!</div>')
+                                          u'Рецепт обновлен!</div>')
                     try:
                         next_path = request.route_url('update_recipe',
-                                                   id=result.id)
+                                                      id=result.id)
                     except:
                         pass
                     return HTTPFound(next_path)
@@ -120,16 +133,18 @@ def create_update(request):
                 except AttributeError:
                     recipe.revert()
                     request.session.flash(u'<div class="alert alert-error">'
-                                        u'Ошибка при обновлении рецепта!'
-                                      u'</div>')
+                                          u'Ошибка при обновлении рецепта!'
+                                          u'</div>')
                     response['errors'] = json.dumps(result['errors'])
                     response['data'] = result['original_data']
             else:
                 request.session.flash(
                     u'<div class="alert alert-error">'
-                    u'У вас нет прав на добавление/обновление этого рецепта!</div>'
+                    u'У вас нет прав на добавление/обновление этого рецепта!'
+                    u'</div>'
                 )
     return response
+
 
 def product_units_view(request):
     product_title = request.matchdict['product_title']
@@ -144,14 +159,16 @@ def product_units_view(request):
             })
     return result
 
+
 def update_status_view(request):
-    id = request.matchdict['id']
-    recipe = Recipe.fetch(id)
+    id_ = request.matchdict['id']
+    recipe = Recipe.fetch(id_)
     if request.POST:
         new_status_id = request.POST.getone('new_status')
         recipe.status_id = int(new_status_id)
         recipe.save()
         return {'status_id': new_status_id}
+
 
 def vote_view(request):
     """
@@ -159,14 +176,14 @@ def vote_view(request):
     Ajax only.
     """
     if request.POST:
-        id = request.POST.getone('recipe_id')
+        id_ = request.POST.getone('recipe_id')
         vote_value = int(request.POST.getone('vote_value'))
         perm_required = None
         if vote_value is UPVOTE:
             perm_required = 'upvote'
         if vote_value is DOWNVOTE:
             perm_required = 'downvote'
-        recipe = Recipe.fetch(id)
+        recipe = Recipe.fetch(id_)
         last_vote_acl = get_acl_by_last_vote(request.user, recipe)
         recipe.attach_acl(prepend=last_vote_acl)
         can_do = has_permission(perm_required, recipe, request)
@@ -180,12 +197,13 @@ def vote_view(request):
             return {'status': 'error',
                     'message': msg}
 
+
 def comment_view(request):
     """
     Process recipe comment request. Return 'ok' or 'error'. Ajax only.
 
     ACL attachment for comment is skipped because comment author is enforced
-    to be the authorized user and for now he can do *whatever* to his comments.
+    to be authorized and for now he can do *whatever* to his comments.
     """
     if request.POST:
         recipe_id = request.POST.getone('recipe_id')
@@ -204,7 +222,7 @@ def comment_view(request):
 
         #otherwise create
         else:
-            comment = Comment.construct_from_dict({'text':text}, request.user)
+            comment = Comment.construct_from_dict({'text': text}, request.user)
             try:
                 recipe = Recipe.fetch(recipe_id)
                 recipe.comments.append(comment)
@@ -217,11 +235,13 @@ def comment_view(request):
         return {'comment': comment,
                 'can_edit': True}
 
+
 def delete_comment_view(request):
     recipe_id = request.matchdict['recipe_id']
     creation_time = request.matchdict['creation_time']
     Comment.delete(request.user.id, recipe_id, creation_time)
     return {'status': 'ok'}
+
 
 def get_acl_by_last_vote(user, recipe):
     acl = []

@@ -18,10 +18,12 @@ body{background:#f8f3df url('../img/papertop.jpg') repeat-x}
 .well{background:#e8e3d1}
 blockquote{border-left-color:#6B4A28}
 .time_set, .number_set{float:left}
-.step .topline{overflow:hidden}
+.step .topline{overflow:hidden; position:relative}
 td.amount{width:150px}
 td.amount .dropdown-menu{right:0; left:auto;}
 .dish_title input, .description input{width:90%}
+.markdown_help{position:absolute; top:25px; right:5px; z-index:100}
+.markItUpContainer,.markItUp{z-index:0; position:relative}
 
 /*recipe-list*/
 #recipe-list .edit{display:none}

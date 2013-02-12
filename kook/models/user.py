@@ -216,10 +216,10 @@ class RepRecord(Entity):
 from kook.models.recipe import VoteRecord, Dish
 
 mapper(User, users, properties={
-    'groups': relationship(Group, secondary=user_groups),
+    'groups': relationship(Group, secondary=user_groups, lazy='joined'),
     'favourite_dishes': relationship(Dish, secondary=user_favourites),
-    'rep_records': relationship(RepRecord),
-    'profile': relationship(Profile, uselist=False,
+    'rep_records': relationship(RepRecord, lazy='joined'),
+    'profile': relationship(Profile, uselist=False, lazy='joined',
         cascade='all, delete, delete-orphan')})
 
 mapper(Group, groups)

@@ -5,10 +5,11 @@ import locale
 import math
 from datetime import datetime, timedelta
 from urlparse import urlparse
+from beaker.cache import cache_region, region_invalidate
 from pyramid.security import Allow, Deny
 from colander import Invalid, interpolate
 from sqlalchemy import desc
-from sqlalchemy.orm import relationship, mapper
+from sqlalchemy.orm import relationship, mapper, subqueryload
 
 from kook.models.sqla_metadata import (ingredients, dishes, amount_per_unit,
                                        products, steps, recipes, dish_tags,
@@ -292,7 +293,8 @@ class Recipe(Entity):
 
     @classmethod
     def fetch(cls, id):
-        return DBSession.query(cls).get(id)
+        """Fetch a recipe by id with all children. A costly call"""
+        return DBSession.query(cls).options(subqueryload('*')).get(id)
 
     @classmethod
     def fetch_all(cls, author_id=None, dish_title=None, limit=None,
@@ -606,12 +608,12 @@ from kook.models.user import User
 mapper(Recipe, recipes, properties={
     'dish': relationship(Dish, uselist=False),
     'ingredients': relationship(Ingredient,
-        cascade='all, delete, delete-orphan',
-        order_by=ingredients.c.amount.desc()),
+                                cascade='all, delete, delete-orphan',
+                                order_by=ingredients.c.amount.desc()),
     'steps': relationship(Step, cascade='all, delete, delete-orphan',
-        lazy='subquery', order_by=steps.c.number),
+                          order_by=steps.c.number),
     'comments': relationship(Comment, cascade='all, delete, delete-orphan',
-        order_by=comments.c.creation_time),
+                             order_by=comments.c.creation_time),
     'author': relationship(User, uselist=False)})
 
 mapper(Product, products, properties={
@@ -625,7 +627,8 @@ mapper(AmountPerUnit, amount_per_unit, properties={
     'product': relationship(Product)})
 
 mapper(Unit, units, properties={
-    'APUs': relationship(AmountPerUnit, cascade='all', passive_updates=False)
+    'APUs': relationship(AmountPerUnit, cascade='all',
+                         passive_updates=False)
 })
 
 mapper(Ingredient, ingredients, properties={
@@ -634,8 +637,10 @@ mapper(Ingredient, ingredients, properties={
 
 mapper(Dish, dishes, properties={
     'recipes': relationship(Recipe, passive_updates=False),
-    'image': relationship(DishImage, uselist=False, passive_updates=False),
-    'tags': relationship(Tag, secondary=dish_tags, passive_updates=False)})
+    'image': relationship(DishImage, uselist=False, passive_updates=False,
+                          lazy='joined'),
+    'tags': relationship(Tag, secondary=dish_tags, passive_updates=False,
+                         lazy='joined')})
 
 mapper(VoteRecord, vote_records, properties={
     'user': relationship(User, uselist=False),
