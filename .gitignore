@@ -4,7 +4,6 @@ kook/*.pyc
 .coverage
 .idea/
 cache/*
-CHANGES.txt
 kook.db
 *.pid
 *.log
