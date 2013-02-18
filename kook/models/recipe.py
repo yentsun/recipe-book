@@ -3,6 +3,7 @@
 from __future__ import division
 import locale
 import math
+import codecs
 from datetime import datetime, timedelta
 from urlparse import urlparse
 from beaker.cache import cache_region, region_invalidate
@@ -581,21 +582,23 @@ class DishImage(Entity):
         file_name = pkg_resources.resource_filename(
             'kook',
             'static/txt/effective_tld_names.dat.txt')
-        with open(file_name) as tldFile:
+        with codecs.open(file_name, 'r', 'utf-8') as tldFile:
             tlds = [line.strip() for line in tldFile if line[0] not in "/\n"]
 
         urlElements = urlparse(self.url)[1].split('.')
 
-        for i in range(-len(urlElements),0):
+        for i in range(-len(urlElements), 0):
             lastIElements = urlElements[i:]
-            candidate = ".".join(lastIElements) # abcde.co.uk, co.uk, uk
-            wildcardCandidate = ".".join(["*"]+lastIElements[1:]) # *.co.uk, *.uk, *
-            exceptionCandidate = "!"+candidate
+            # abcde.co.uk, co.uk, uk
+            candidate = ".".join(lastIElements)
+            # *.co.uk, *.uk, *
+            wildcardCandidate = ".".join(["*"] + lastIElements[1:])
+            exceptionCandidate = "!" + candidate
 
             # match tlds:
-            if (exceptionCandidate in tlds):
+            if exceptionCandidate in tlds:
                 return ".".join(urlElements[i:])
-            if (candidate in tlds or wildcardCandidate in tlds):
+            if candidate in tlds or wildcardCandidate in tlds:
                 return ".".join(urlElements[i-1:])
 
         raise ValueError("Domain not in global list of TLDs")

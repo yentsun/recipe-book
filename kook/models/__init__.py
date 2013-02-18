@@ -41,6 +41,7 @@ def form_msg(acl):
     except AttributeError:
         pass
 
+
 class Entity(object):
     """
     Basic (abstract) class for all entities
@@ -74,6 +75,7 @@ class Entity(object):
     @classmethod
     def generate_id(cls):
         return str(uuid4())
+
 
 class RootFactory(object):
     __acl__ = [
