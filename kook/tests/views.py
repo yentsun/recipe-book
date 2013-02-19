@@ -4,6 +4,7 @@ import os
 import json
 import unittest
 import transaction
+import codecs
 
 from datetime import date, datetime, time
 from webob.multidict import MultiDict
@@ -34,6 +35,7 @@ from kook.views.apu import create as create_APU, update as update_APU
 from kook.views.unit import update as update_unit, create as create_unit
 from kook.views.user import register_view, update_profile_view
 
+
 def populate_test_data():
 
     #add users
@@ -48,7 +50,7 @@ def populate_test_data():
         'email': 'user2@acme.com',
         'password': u'R52RO圣ṪF特J'})
     user2.groups = [Group('upvoters'), Group('registered')]
-    user2.profile = Profile(nickname='Butters', real_name='Leopold Stotch',
+    user2.profile = Profile(nickname=u'Butters', real_name=u'Leopold Stotch',
                             rep=10)
     user2.save()
 
@@ -68,10 +70,12 @@ def populate_test_data():
 
     #add recipes
     _here = os.path.dirname(__file__)
-    json_data=open(os.path.join(_here, 'dummy_recipes.json'))
+    json_data = codecs.open(os.path.join(_here, 'dummy_recipes.json'), 'r',
+                            'utf-8')
     dummy_recipes = json.load(json_data)
     for recipe_dict in dummy_recipes:
-        recipe = Recipe.dummy(author=User.fetch(email=recipe_dict['author_email']))
+        recipe = \
+            Recipe.dummy(author=User.fetch(email=recipe_dict['author_email']))
         recipe = Recipe.construct_from_dict(recipe_dict, recipe,
                                             fetch_dish_image=False)
         try:
@@ -82,10 +86,11 @@ def populate_test_data():
     #add dishes
     potato_salad = Dish(u'potato salad')
     potato_salad.tags = [Tag(u'salad'), Tag(u'western')]
-    potato_salad.image = DishImage('http://simplyrecipes.com/photos/'
-                                   'potato-salad-new.jpg',
-                                   'simplyrecipes.com')
+    potato_salad.image = DishImage(u'http://simplyrecipes.com/photos/'
+                                   u'potato-salad-new.jpg',
+                                   u'simplyrecipes.com')
     potato_salad.save()
+
 
 class TestRecipeViews(unittest.TestCase):
 
@@ -484,7 +489,7 @@ class TestRecipeViews(unittest.TestCase):
         request.matchdict['title'] = 'potato salad'
         response = read_dish(request)
         dish = response['dish']
-        self.assertEqual('potato salad', dish.title)
+        self.assertEqual(u'potato salad', dish.title)
 
     def test_update_dish_info(self):
         POST = MultiDict((
@@ -497,8 +502,8 @@ class TestRecipeViews(unittest.TestCase):
         request = DummyRequest(POST=POST)
         request.matchdict['title'] = 'potato salad'
         update_dish(request)
-        potato_salad = Dish.fetch('potato salad')
-        self.assertEqual([Tag('salad')], potato_salad.tags)
+        potato_salad = Dish.fetch(u'potato salad')
+        self.assertEqual([Tag(u'salad')], potato_salad.tags)
         self.assertEqual(u'http://example.com/image.jpg',
                          potato_salad.image.url)
         self.assertEqual('', potato_salad.image.credit)
@@ -524,7 +529,7 @@ class TestRecipeViews(unittest.TestCase):
         request.matchdict['title'] = 'salad'
         response = tag(request)
         self.assertEqual(1, len(response['dishes']))
-        self.assertEqual('potato salad', response['dishes'][0].title)
+        self.assertEqual(u'potato salad', response['dishes'][0].title)
 
     def test_delete_product(self):
         request = DummyRequest()

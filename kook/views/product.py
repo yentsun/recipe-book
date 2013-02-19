@@ -9,7 +9,7 @@ def index(request):
 
 def update(request):
     if 'title' in request.matchdict:
-        title = request.matchdict['title']
+        title = unicode(request.matchdict['title'])
         product = Product.fetch(title) or Product(title)
     else:
         title = ''

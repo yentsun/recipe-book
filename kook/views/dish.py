@@ -3,17 +3,21 @@
 from pyramid.httpexceptions import HTTPFound
 from kook.models.recipe import Tag, Dish
 
+
 def index(request):
     return {'dishes': Dish.fetch_all(order_by='title')}
 
+
 def read(request):
-    title = request.matchdict['title']
+    """Read dish view"""
+    title = unicode(request.matchdict['title'])
     dish = Dish.fetch(title)
-    response = {'dish':dish}
+    response = {'dish': dish}
     return response
 
+
 def update(request):
-    title = request.matchdict['title']
+    title = unicode(request.matchdict['title'])
     response = {'tags': Tag.fetch_all()}
     try:
         update_path = request.current_route_url(id=id)

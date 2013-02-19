@@ -31,7 +31,7 @@ def index_view(request):
 
 
 def tag(request):
-    title = request.matchdict['title']
+    title = unicode(request.matchdict['title'])
     tag = Tag.fetch(title)
     dishes = Dish.fetch_all(tag_title=title)
     response = {'tag': tag, 'dishes': dishes}

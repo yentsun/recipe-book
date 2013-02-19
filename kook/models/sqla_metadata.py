@@ -93,9 +93,9 @@ profiles = Table(
     Column('rep', Integer),
     Column('birthday', Date()),
     Column('registration_day', Date()),
-    Column('location', String(100)),
-    Column('nickname', String(100), unique=True),
-    Column('real_name', String(200)))
+    Column('location', Unicode),
+    Column('nickname', Unicode, unique=True),
+    Column('real_name', Unicode))
 
 rep_records = Table(
     'rep_records', metadata,
