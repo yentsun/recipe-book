@@ -509,20 +509,20 @@ class TestRecipeViews(unittest.TestCase):
         self.assertEqual('', potato_salad.image.credit)
         self.assertEqual(u'example.com', potato_salad.image.get_credit())
 
-    # def test_update_dish_title(self):
-    #     POST = MultiDict((
-    #         ('title', u'batata salad'),
-    #         ('description', u'A different description for potato salad'),
-    #         ('tag', u'salad'),
-    #         ('image_credit', ''),
-    #         ('image_url', u'http://example.com/image.jpg'),
-    #     ))
-    #     request = DummyRequest(POST=POST)
-    #     request.matchdict['title'] = u'potato salad'
-    #     update_dish(request)
-    #     batata_salad = Dish.fetch(u'batata salad')
-    #     self.assertEqual([Tag(u'salad')], batata_salad.tags)
-    #     assert Dish.fetch(u'potato salad') is None
+    def test_update_dish_title(self):
+        POST = MultiDict((
+            ('title', u'batata salad'),
+            ('description', u'A different description for potato salad'),
+            ('tag', u'salad'),
+            ('image_credit', ''),
+            ('image_url', u'http://example.com/image.jpg'),
+        ))
+        request = DummyRequest(POST=POST)
+        request.matchdict['title'] = u'potato salad'
+        update_dish(request)
+        batata_salad = Dish.fetch(u'batata salad')
+        self.assertEqual([Tag(u'salad')], batata_salad.tags)
+        assert Dish.fetch(u'potato salad') is None
 
     def test_tag_view(self):
         request = DummyRequest()
@@ -543,7 +543,7 @@ class TestRecipeViews(unittest.TestCase):
     def test_update_product_new_value(self):
         POST = MultiDict((('title', 'botato'),))
         request = DummyRequest(POST=POST)
-        request.matchdict['title'] = u'potato'
+        request.matchdict['title'] = 'potato'
         update_product(request)
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         assert Product(u'potato') not in recipe.products
@@ -628,7 +628,7 @@ class TestRecipeViews(unittest.TestCase):
             ))
         request = DummyRequest(POST=POST)
         create_unit(request)
-        assert Unit.fetch('spoon') is not None
+        assert Unit.fetch(u'spoon') is not None
 
     def test_update_unit(self):
         POST = MultiDict((

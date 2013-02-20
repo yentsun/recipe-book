@@ -3,6 +3,7 @@
 from pyramid.httpexceptions import HTTPFound
 from kook.models.recipe import Unit
 
+
 def create(request):
     try:
         submit_path = request.current_route_url()
@@ -11,7 +12,7 @@ def create(request):
         submit_path = '/'
         next = '/'
     if request.POST:
-        title = request.POST.getone('title')
+        title = unicode(request.POST.getone('title'))
         new_unit = Unit(title)
         new_unit.save()
         request.session.flash(u'<div class="alert alert-success">'

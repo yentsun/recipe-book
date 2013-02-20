@@ -327,6 +327,7 @@ class Step(Entity):
     def dummy(cls):
         return cls(1, '', '')
 
+
 class Product(Entity):
     """Product model"""
 
@@ -337,8 +338,8 @@ class Product(Entity):
         return self.title
 
     def update_from_multidict(self, multidict, localizer=None):
-        dict = self.multidict_to_dict(multidict)
-        return self.update_from_dict(dict, localizer)
+        dict_ = self.multidict_to_dict(multidict)
+        return self.update_from_dict(dict_, localizer)
 
     @classmethod
     def multidict_to_dict(cls, multidict):
@@ -394,8 +395,8 @@ class Product(Entity):
 
     @classmethod
     def dummy(cls):
-        dummy = cls('')
-        dummy.APUs = [AmountPerUnit('', Unit(''))]
+        dummy = cls(u'')
+        dummy.APUs = [AmountPerUnit('', Unit(u''))]
         return dummy
 
 class Unit(Entity):
@@ -411,7 +412,8 @@ class Unit(Entity):
     
     @classmethod
     def dummy(cls):
-        return Unit('', '')
+        return Unit(u'', '')
+
 
 class Tag(Entity):
     """
@@ -422,6 +424,7 @@ class Tag(Entity):
 
     def __repr__(self):
         return self.title
+
 
 class Ingredient(Entity):
     u"""Модель ингредиента (продукт+количество)"""
