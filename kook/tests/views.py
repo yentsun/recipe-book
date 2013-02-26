@@ -496,6 +496,7 @@ class TestRecipeViews(unittest.TestCase):
             ('title', u'potato salad'),
             ('description', u'A different description for potato salad'),
             ('tag', u'salad'),
+            ('tag', u'cheap'),
             ('image_url', u'http://example.com/image.jpg'),
             ('image_credit', u''),
             ))
@@ -503,7 +504,7 @@ class TestRecipeViews(unittest.TestCase):
         request.matchdict['title'] = 'potato salad'
         update_dish(request)
         potato_salad = Dish.fetch(u'potato salad')
-        self.assertEqual([Tag(u'salad')], potato_salad.tags)
+        self.assertEqual([Tag(u'salad'), Tag(u'cheap')], potato_salad.tags)
         self.assertEqual(u'http://example.com/image.jpg',
                          potato_salad.image.url)
         self.assertEqual('', potato_salad.image.credit)
@@ -514,6 +515,7 @@ class TestRecipeViews(unittest.TestCase):
             ('title', u'batata salad'),
             ('description', u'A different description for potato salad'),
             ('tag', u'salad'),
+            ('tag', u'cheap'),
             ('image_credit', ''),
             ('image_url', u'http://example.com/image.jpg'),
         ))
@@ -521,7 +523,7 @@ class TestRecipeViews(unittest.TestCase):
         request.matchdict['title'] = u'potato salad'
         update_dish(request)
         batata_salad = Dish.fetch(u'batata salad')
-        self.assertEqual([Tag(u'salad')], batata_salad.tags)
+        self.assertEqual([Tag(u'salad'), Tag(u'cheap')], batata_salad.tags)
         assert Dish.fetch(u'potato salad') is None
 
     def test_tag_view(self):
