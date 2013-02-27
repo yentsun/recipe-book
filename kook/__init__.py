@@ -15,13 +15,16 @@ from kook.models.user import User
 
 THEME = 'bootstrap'
 
+
 def fetch_user(request):
-    id = authenticated_userid(request)
-    if id is not None:
-        return User.fetch(id)
+    user_id = authenticated_userid(request)
+    if user_id:
+        return User.fetch(user_id)
+
 
 def find_renderer(template_file, theme=THEME):
     return 'kook:templates/%s/%s' % (theme, template_file)
+
 
 def main(global_settings, **settings):
     """ This function returns a Pyramid WSGI application.
@@ -69,22 +72,22 @@ def main(global_settings, **settings):
 
     config.add_route('dishes', '/dishes')
     config.add_view('kook.views.dish.index', route_name='dishes',
-                     permission='manage_dishes',
-                     renderer=find_renderer('dish/index.mako'))
+                    permission='manage_dishes',
+                    renderer=find_renderer('dish/index.mako'))
 
     config.add_route('read_dish', '/dish/{title}')
     config.add_view('kook.views.dish.read', route_name='read_dish',
-                     renderer=find_renderer('dish/read.mako'))
+                    renderer=find_renderer('dish/read.mako'))
 
     config.add_route('create_dish', '/update_dish')
     config.add_view('kook.views.dish.update', route_name='create_dish',
-                     permission='manage_dishes',
-                     renderer=find_renderer('dish/update.mako'))
+                    permission='manage_dishes',
+                    renderer=find_renderer('dish/update.mako'))
 
     config.add_route('update_dish', '/update_dish/{title}')
     config.add_view('kook.views.dish.update', route_name='update_dish',
-                     permission='manage_dishes',
-                     renderer=find_renderer('dish/update.mako'))
+                    permission='manage_dishes',
+                    renderer=find_renderer('dish/update.mako'))
 
     #========
     # PRODUCT
@@ -92,13 +95,13 @@ def main(global_settings, **settings):
 
     config.add_route('products', '/products')
     config.add_view('kook.views.product.index', route_name='products',
-                     permission='manage_products',
-                     renderer=find_renderer('product/index.mako'))
+                    permission='manage_products',
+                    renderer=find_renderer('product/index.mako'))
 
     config.add_route('update_product', '/update_product/{title}')
     config.add_view('kook.views.product.update', route_name='update_product',
-                     permission='manage_products',
-                     renderer=find_renderer('product/update.mako'))
+                    permission='manage_products',
+                    renderer=find_renderer('product/update.mako'))
 
     #=====
     # UNIT
@@ -106,13 +109,13 @@ def main(global_settings, **settings):
 
     config.add_route('create_unit', '/create_unit')
     config.add_view('kook.views.unit.create', route_name='create_unit',
-                     permission='manage_products',
-                     renderer=find_renderer('unit/update.mako'))
+                    permission='manage_products',
+                    renderer=find_renderer('unit/update.mako'))
 
     config.add_route('update_unit', '/update_unit/{title}')
     config.add_view('kook.views.unit.update', route_name='update_unit',
-                     permission='manage_products',
-                     renderer=find_renderer('unit/update.mako'))
+                    permission='manage_products',
+                    renderer=find_renderer('unit/update.mako'))
 
     #=======
     # RECIPE
@@ -187,4 +190,5 @@ def main(global_settings, **settings):
 
     config.add_subscriber(handle_new_request, NewRequest)
     config.scan()
+
     return config.make_wsgi_app()

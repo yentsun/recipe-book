@@ -4,23 +4,26 @@ from operator import attrgetter
 from markdown import markdown as markdown_
 from datetime import datetime
 
+
 def markdown(text):
     return markdown_(text, output_format='html5', safe_mode=True)
 
-def failsafe_get(object, atrr_path):
+
+def failsafe_get(object_, atrr_path):
     #TODO maybe reverse-engineer Deform instead of using this
-    if object:
+    if object_:
         try:
             extractor = attrgetter(atrr_path)
-            result = extractor(object)
+            result = extractor(object_)
         except AttributeError:
             try:
-                result = object[atrr_path]
+                result = object_[atrr_path]
             except (KeyError, TypeError):
                 result = None
     else:
         result = None
     return result
+
 
 def pretty_time(time=False):
     """
@@ -33,6 +36,7 @@ def pretty_time(time=False):
     if not time:
         return ''
     now = datetime.now()
+    diff = 0
     if type(time) is int:
         diff = now - datetime.fromtimestamp(time)
     elif isinstance(time, datetime):

@@ -20,10 +20,10 @@ def update(request):
     title = unicode(request.matchdict['title'])
     response = {'tags': Tag.fetch_all()}
     try:
-        update_path = request.current_route_url(id=id)
-        next = request.route_path('dishes')
+        update_path = request.current_route_url()
+        next_url = request.route_path('dishes')
     except ValueError:
-        update_path = next = '/'
+        update_path = next_url = '/'
     dish = Dish.fetch(title)
     response.update({'update_dish_path': update_path,
                      'dish': dish})
@@ -38,5 +38,5 @@ def update(request):
         dish.tags = [Tag.fetch(title) or Tag(title) for title in tag_titles]
         request.session.flash(u'<div class="alert alert-success">'
                               u'Блюдо "%s" обновлено</div>' % dish.title)
-        return HTTPFound(next)
+        return HTTPFound(next_url)
     return response

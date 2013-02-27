@@ -10,6 +10,7 @@ from kook.models.sqla_metadata import metadata
 from kook.tests.views import populate_test_data
 from kook import main
 
+
 class FunctionalTests(unittest.TestCase):
 
     def setUp(self):

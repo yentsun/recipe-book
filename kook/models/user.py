@@ -20,6 +20,7 @@ PRIVGROUPS = {
     'downvoters': DOWNVOTE_REQUIRED_REP
 }
 
+
 class Group(Entity):
 
     def __init__(self, title):
@@ -28,11 +29,12 @@ class Group(Entity):
     def __repr__(self):
         return self.title
 
+
 class User(Entity):
 
-    def __init__(self, id, email, password_hash, groups=None, profile=None,
+    def __init__(self, id_, email, password_hash, groups=None, profile=None,
                  favourite_titles=None):
-        self.id = id
+        self.id = id_
         self.email = email
         self.password_hash = password_hash
         self.groups = groups or []
@@ -40,9 +42,9 @@ class User(Entity):
         self.favourite_titles = favourite_titles or []
 
     def to_json(self):
-        dict = {'id': self.id,
-                'display_name': self.display_name}
-        return json.dumps(dict)
+        dict_ = {'id': self.id,
+                 'display_name': self.display_name}
+        return json.dumps(dict_)
 
     def check_password(self, password):
         return crypt.check(self.password_hash, password)
@@ -70,22 +72,20 @@ class User(Entity):
 
     def last_vote(self, recipe_id):
         return DBSession.query(VoteRecord)\
-                        .filter(VoteRecord.recipe_id==recipe_id)\
-                        .filter(VoteRecord.user_id==self.id)\
+                        .filter(VoteRecord.recipe_id == recipe_id)\
+                        .filter(VoteRecord.user_id == self.id)\
                         .order_by(desc(VoteRecord.creation_time))\
                         .first()
 
     @property
     def display_name(self):
-        return self.profile.nickname or\
-               self.profile.real_name or\
-               self.email
+        return self.profile.nickname or self.profile.real_name or self.email
 
     def gravatar_url(self, size=20):
         default = 'identicon'
         url = 'http://www.gravatar.com/avatar/%s?%s' %\
               (md5(self.email).hexdigest(),
-               urlencode({'d':default, 's':str(size)}))
+               urlencode({'d': default, 's': str(size)}))
         return url
 
     @classmethod
@@ -93,12 +93,12 @@ class User(Entity):
         return crypt.encode(password)
 
     @classmethod
-    def fetch(cls, id=None, email=None):
+    def fetch(cls, id_=None, email=None):
         query = DBSession.query(cls)
-        if id:
-            return query.get(id)
+        if id_:
+            return query.get(id_)
         elif email:
-            return query.filter(cls.email==email).first()
+            return query.filter(cls.email == email).first()
         return None
 
     @classmethod
@@ -115,21 +115,21 @@ class User(Entity):
         except Invalid, e:
             return {'errors': e.asdict(),
                     'original_data': cstruct}
-        id = cls.generate_id()
-        hash = cls.generate_hash(appstruct['password'])
+        id_ = cls.generate_id()
+        hash_ = cls.generate_hash(appstruct['password'])
         groups = [Group('applied')]
-        user = cls(id, appstruct['email'], hash, groups)
+        user = cls(id_, appstruct['email'], hash_, groups)
         return user
 
     @classmethod
-    def group_finder(cls, id=None, request=None, user=None):
+    def group_finder(cls, id_=None, user=None):
         """
         The callback function for AuthTktAuthenticationPolicy
         """
         if user:
             user = user
-        elif id:
-            user = DBSession.query(cls).get(id)
+        elif id_:
+            user = DBSession.query(cls).get(id_)
         else:
             return None
         groups = user.groups
@@ -143,6 +143,7 @@ class User(Entity):
         users = DBSession.query(cls).limit(limit).all()
         return sorted(users, key=lambda user: user.profile.rep,
                       reverse=True)
+
 
 class Profile(Entity):
     """Profile for a user"""
@@ -159,7 +160,7 @@ class Profile(Entity):
     @classmethod
     def fetch(cls, nickname):
         query = DBSession.query(cls)
-        return query.filter(cls.nickname==nickname).first()
+        return query.filter(cls.nickname == nickname).first()
 
     @classmethod
     def construct_from_multidict(cls, multidict, **kwargs):

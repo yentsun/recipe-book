@@ -3,6 +3,7 @@
 from kook.models.recipe import Recipe, Dish, Tag
 from kook.models.user import User
 
+
 def index_view(request):
     response = dict()
     response['best_recipes'] = Recipe.fetch_all(limit=8)

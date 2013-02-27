@@ -126,7 +126,7 @@ def create_update(request):
                     try:
                         next_path = request.route_url('update_recipe',
                                                       id=result.id)
-                    except:
+                    except AttributeError:  # maybe not AttributeError
                         pass
                     return HTTPFound(next_path)
 

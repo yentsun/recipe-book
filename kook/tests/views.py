@@ -120,8 +120,8 @@ class TestRecipeViews(unittest.TestCase):
         self.assertEqual('simplyrecipes.com', potato_salad.image.credit)
 
     def test_recipe_index(self):
-        all = Recipe.fetch_all()
-        self.assertEqual(3, len(all))
+        all_recipes = Recipe.fetch_all()
+        self.assertEqual(3, len(all_recipes))
         only_two = Recipe.fetch_all(limit=2)
         self.assertEqual(2, len(only_two))
 
@@ -195,7 +195,7 @@ class TestRecipeViews(unittest.TestCase):
              u'Нарезать свеклу, морковь и картофель мелкими кубиками'),
             ('time_value', 2)
         ))
-        user=User.fetch(email='user1@acme.com')
+        user = User.fetch(email='user1@acme.com')
         request = DummyRequest(POST=POST, user=user)
         request.matchdict['fetch_image'] = False
         create_update_recipe(request)
@@ -207,7 +207,8 @@ class TestRecipeViews(unittest.TestCase):
         potato_400g = Ingredient(potato, amount=400.7)
         assert potato in recipes[0].products
         assert potato_400g in recipes[0].ingredients
-        assert Ingredient(Product(u'сельдь'), amount=200.5) in recipes[0].ingredients
+        assert Ingredient(Product(u'сельдь'),
+                          amount=200.5) in recipes[0].ingredients
         self.assertEqual(len(recipes[0].steps), 2)
         self.assertEqual(60, recipes[0].ordered_steps[1].time_value)
 
@@ -217,16 +218,14 @@ class TestRecipeViews(unittest.TestCase):
         assert potato in response['products']
 
     def test_create_invalid_recipe(self):
-        POST = MultiDict((
-            ('dish_title', u'Уникальное блюдо'),
-            ('description', u'его нигде нет!'),
-            ('product_title', u''),
-            ('amount', ''),
-            ('unit_title', u''),
-            ('step_number', ''),
-            ('step_text', u''),
-            ('time_value', 0)
-            ))
+        POST = MultiDict((('dish_title', u'Уникальное блюдо'),
+                          ('description', u'его нигде нет!'),
+                          ('product_title', u''),
+                          ('amount', ''),
+                          ('unit_title', u''),
+                          ('step_number', ''),
+                          ('step_text', u''),
+                          ('time_value', 0)))
         request = DummyRequest(POST=POST,
                                user=User.fetch(email='user1@acme.com'))
         create_update_recipe(request)
@@ -321,12 +320,14 @@ class TestRecipeViews(unittest.TestCase):
         self.assertEqual(
             '{"ingredients": [{"amount": 300.0, "unit_title": "piece", '
             '"product_title": "potato"}, {"amount": 40.0, "unit_title": "", '
-            '"product_title": "lemon juice"}, {"amount": 30.0, "unit_title": "", '
+            '"product_title": "lemon juice"}, '
+            '{"amount": 30.0, "unit_title": "", '
             '"product_title": "olive oil (extra virgin)"}], '
             '"steps": [{"text": "Place potatoes in a large saucepan or '
             'Dutch oven and cover with lightly salted water. Bring to a boil '
             'and cook until tender", '
-            '"time_value": 30, "number": 1}, {"text": "Whisk lemon juice, oil, '
+            '"time_value": 30, "number": 1}, '
+            '{"text": "Whisk lemon juice, oil, '
             'salt and pepper in a large bowl. Add the potatoes and toss to '
             'coat.", "time_value": 1, "number": 2}, '
             '{"text": "Just before serving, add scallions and mint to the '
@@ -368,7 +369,7 @@ class TestRecipeViews(unittest.TestCase):
         self.assertEqual(0, recipe.status_id)
 
     def test_author_vote(self):
-        user=User.fetch(email='user1@acme.com')
+        user = User.fetch(email='user1@acme.com')
         self.config.testing_securitypolicy(userid=user.id, permissive=False)
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         self.assertEqual(0, recipe.rating)
@@ -381,7 +382,7 @@ class TestRecipeViews(unittest.TestCase):
         self.assertEqual(0, recipe.rating)
 
     def test_upvote(self):
-        user=User.fetch(email='user2@acme.com')
+        user = User.fetch(email='user2@acme.com')
         self.config.testing_securitypolicy(userid=user.id, permissive=True)
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         post = MultiDict((
@@ -391,12 +392,12 @@ class TestRecipeViews(unittest.TestCase):
         vote_view(request)
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         self.assertEqual(1, recipe.rating)
-        self.assertEqual(120+UPVOTE_REP_CHANGE, recipe.author.profile.rep)
+        self.assertEqual(120 + UPVOTE_REP_CHANGE, recipe.author.profile.rep)
         assert u'downvoters' in User.group_finder(user=recipe.author)
         self.assertIs(user.last_vote(recipe.id).value, UPVOTE)
 
     def test_downvote(self):
-        user=User.fetch(email='user2@acme.com')
+        user = User.fetch(email='user2@acme.com')
         self.config.testing_securitypolicy(userid=user.id, permissive=True)
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         post = MultiDict((
@@ -405,12 +406,12 @@ class TestRecipeViews(unittest.TestCase):
         request = DummyRequest(POST=post, user=user)
         vote_view(request)
         self.assertEqual(-1, recipe.rating)
-        self.assertEqual(120+DOWNVOTE_REP_CHANGE, recipe.author.profile.rep)
-        self.assertEqual(10+DOWNVOTE_COST, user.profile.rep)
+        self.assertEqual(120 + DOWNVOTE_REP_CHANGE, recipe.author.profile.rep)
+        self.assertEqual(10 + DOWNVOTE_COST, user.profile.rep)
         self.assertIs(user.last_vote(recipe.id).value, DOWNVOTE)
 
     def test_vote_sequence(self):
-        user=User.fetch(email='user2@acme.com')
+        user = User.fetch(email='user2@acme.com')
         self.config.testing_securitypolicy(userid=user.id, permissive=True)
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         post_upvote = MultiDict((
@@ -427,7 +428,7 @@ class TestRecipeViews(unittest.TestCase):
         vote_view(request_downvote)
         vote_view(request_upvote)
         self.assertEqual(1, recipe.rating)
-        self.assertEqual(120+UPVOTE_REP_CHANGE+DOWNVOTE_REP_CHANGE,
+        self.assertEqual(120 + UPVOTE_REP_CHANGE + DOWNVOTE_REP_CHANGE,
                          recipe.author.profile.rep)
         self.assertIs(user.last_vote(recipe.id).value, UPVOTE)
 
@@ -492,14 +493,13 @@ class TestRecipeViews(unittest.TestCase):
         self.assertEqual(u'potato salad', dish.title)
 
     def test_update_dish_info(self):
-        POST = MultiDict((
-            ('title', u'potato salad'),
-            ('description', u'A different description for potato salad'),
-            ('tag', u'salad'),
-            ('tag', u'cheap'),
-            ('image_url', u'http://example.com/image.jpg'),
-            ('image_credit', u''),
-            ))
+        POST = MultiDict((('title', u'potato salad'),
+                          ('description',
+                           u'A different description for potato salad'),
+                          ('tag', u'salad'),
+                          ('tag', u'cheap'),
+                          ('image_url', u'http://example.com/image.jpg'),
+                          ('image_credit', u'')))
         request = DummyRequest(POST=POST)
         request.matchdict['title'] = 'potato salad'
         update_dish(request)
@@ -624,19 +624,15 @@ class TestRecipeViews(unittest.TestCase):
         assert AmountPerUnit(100, Unit(u'piece')) not in potato.APUs
 
     def test_create_unit(self):
-        POST = MultiDict((
-            ('title', u'spoon'),
-            ('abbr', u'sp.'),
-            ))
+        POST = MultiDict((('title', u'spoon'),
+                          ('abbr', u'sp.')))
         request = DummyRequest(POST=POST)
         create_unit(request)
         assert Unit.fetch(u'spoon') is not None
 
     def test_update_unit(self):
-        POST = MultiDict((
-            ('title', u'piece_'),
-            ('abbr', u'pc.'),
-            ))
+        POST = MultiDict((('title', u'piece_'),
+                          ('abbr', u'pc.')))
         request = DummyRequest(POST=POST)
         request.matchdict['title'] = u'piece'
         update_unit(request)
@@ -645,10 +641,8 @@ class TestRecipeViews(unittest.TestCase):
         assert AmountPerUnit(100, Unit(u'piece')) not in potato.APUs
 
     def test_update_unit_abbr(self):
-        POST = MultiDict((
-            ('title', u'piece'),
-            ('abbr', u'pc.'),
-            ))
+        POST = MultiDict((('title', u'piece'),
+                          ('abbr', u'pc.')))
         request = DummyRequest(POST=POST)
         request.matchdict['title'] = u'piece'
         update_unit(request)
@@ -691,10 +685,8 @@ class TestUserViews(unittest.TestCase):
 #        assert type(user.profile.registration_day) is date
 
     def test_deny_invalid_password(self):
-        POST = MultiDict((
-            ('email', 'invalid@acme.com'),
-            ('password', u'8ZO'),
-            ))
+        POST = MultiDict((('email', 'invalid@acme.com'),
+                          ('password', u'8ZO')))
         request = DummyRequest(POST=POST)
         request.matchdict['next_path'] = '/dashboard'
         register_view(request)
@@ -702,10 +694,8 @@ class TestUserViews(unittest.TestCase):
         assert user is None
 
     def test_register_existent_user(self):
-        POST = MultiDict((
-            ('email', 'user1@acme.com'),
-            ('password', u'8765432'),
-            ))
+        POST = MultiDict((('email', 'user1@acme.com'),
+                          ('password', u'8765432')))
         request = DummyRequest(POST=POST)
         request.matchdict['next_path'] = '/dashboard'
         register_view(request)
@@ -742,7 +732,7 @@ class TestUserViews(unittest.TestCase):
         assert potato_salad in user.favourite_dishes
 
     def test_user_rep(self):
-        user1=User.fetch(email='user1@acme.com')
+        user1 = User.fetch(email='user1@acme.com')
         self.assertEqual(120, user1.profile.rep)
         user1.add_rep(20, 'test 1')
         user1.add_rep(-10, 'test 2')
