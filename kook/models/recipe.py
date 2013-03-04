@@ -6,7 +6,6 @@ import math
 import codecs
 from datetime import datetime, timedelta
 from urlparse import urlparse
-from beaker.cache import cache_region, region_invalidate
 from pyramid.security import Allow, Deny
 from colander import Invalid, interpolate
 from sqlalchemy import desc
@@ -26,6 +25,7 @@ from kook.models import (Entity, DBSession, UPVOTE, DOWNVOTE,
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
+
 def to_localized_decimal(input_):
     output_ = input_
     try:
@@ -34,10 +34,9 @@ def to_localized_decimal(input_):
         pass
     return output_
 
+
 class Dish(Entity):
-    """
-    Dish model
-    """
+    """Dish model"""
     def __init__(self, title=None, description=None, tags=None, image=None):
         self.title = title
         self.tags = tags or []
@@ -48,19 +47,15 @@ class Dish(Entity):
         return self.title
 
     def fetch_image(self):
-        """
-        Fetch image from Google
-        """
+        """Fetch image from Google"""
         import urllib
         import urllib2
         import json
 
-        query = {'q': self.title.encode('utf-8'),
-                 'v': '1.0',
-                 'imgsz': 'large',
+        query = {'q': self.title.encode('utf-8'), 'v': '1.0', 'imgsz': 'large',
                  'rsz': 1}
-        url = 'https://ajax.googleapis.com/ajax/services/search/images?%s'\
-        % urllib.urlencode(query)
+        url = ('https://ajax.googleapis.com/ajax/services/search/images?%s'
+               % urllib.urlencode(query))
         request = urllib2.Request(url, None, {'Referer': 'kook.loc'})
         response = urllib2.urlopen(request)
         print '------------making request...-----------------'
@@ -71,7 +66,7 @@ class Dish(Entity):
     def fetch_all(cls, limit=None, tag_title=None, order_by='recipe_count'):
         query = DBSession.query(cls).limit(limit)
         if tag_title:
-            query = query.filter(cls.tags.any(tags.c.title==tag_title))
+            query = query.filter(cls.tags.any(tags.c.title == tag_title))
         if order_by is not 'recipe_count':
             if order_by is 'title':
                 dishes = query.order_by(cls.title).all()
@@ -79,17 +74,16 @@ class Dish(Entity):
                 dishes = query.order_by(desc(getattr(cls, order_by))).all()
         else:
             dishes = sorted(query.all(), key=lambda dish: len(dish.recipes),
-                                           reverse=True)
+                            reverse=True)
         return dishes
 
+
 class Recipe(Entity):
-    """
-    Recipe model
-    """
-    def __init__(self, dish, author, id=None, description=None,
+    """Recipe model"""
+    def __init__(self, dish, author, id_=None, description=None,
                  status_id=1, creation_time=None, rating=0, update_time=None):
         self.dish = dish
-        self.id = id or self.generate_id()
+        self.id = id_ or self.generate_id()
         self.description = description
         self.author = author
         self.status_id = status_id
@@ -127,18 +121,18 @@ class Recipe(Entity):
     def dummy(cls, author, dict_=None):
         if dict_:
             dummy = Recipe(Dish(dict_['dish_title']), author)
-            dummy.ingredients = list(Ingredient(Product(ingredient.get('product_title')),
-                                                ingredient.get('amount', 0)) \
-                                     for ingredient in dict_['ingredients'])
-            dummy.steps = list(Step(step['no'], step['text']) \
-                                    for step in dict_['steps'])
+            dummy.ingredients = list(
+                Ingredient(Product(ingredient.get('product_title')),
+                           ingredient.get('amount', 0))
+                for ingredient in dict_['ingredients'])
+            dummy.steps = list(Step(step['no'], step['text'])
+                               for step in dict_['steps'])
         else:
             dummy = Recipe(Dish(), author)
             dummy.ingredients = [Ingredient.dummy()]
             dummy.steps = [Step.dummy()]
 
         return dummy
-
 
     @classmethod
     def multidict_to_dict(cls, multidict):
@@ -149,8 +143,8 @@ class Recipe(Entity):
         product_titles = multidict.getall('product_title')
         amounts = multidict.getall('amount')
         unit_titles = multidict.getall('unit_title')
-        for product_title, amount, unit_title\
-        in zip(product_titles, amounts, unit_titles):
+        for product_title, amount, unit_title in zip(product_titles,
+                                                     amounts, unit_titles):
             dictionary['ingredients'].append({
                 'product_title': product_title,
                 'amount': to_localized_decimal(amount),
@@ -159,17 +153,11 @@ class Recipe(Entity):
         steps_numbers = multidict.getall('step_number')
         time_values = multidict.getall('time_value')
         steps_texts = multidict.getall('step_text')
-        for number,\
-            text,\
-            time_value,\
-        in zip(steps_numbers,
-            steps_texts,
-            time_values):
-            dictionary['steps'].append({
-            'number': number,
-            'text': text,
-            'time_value': time_value
-            })
+        for number, text, time_value, in zip(steps_numbers,
+                                             steps_texts, time_values):
+            dictionary['steps'].append({'number': number,
+                                        'text': text,
+                                        'time_value': time_value})
 
         return dictionary
 
@@ -198,8 +186,8 @@ class Recipe(Entity):
                     'original_data': cstruct}
 
         #create the dish first
-        dish = Dish.fetch(appstruct['dish_title']) or\
-               Dish(appstruct['dish_title'])
+        dish = Dish.fetch(appstruct['dish_title']) or \
+            Dish(appstruct['dish_title'])
         if not dish.image and fetch_dish_image:
             dish.fetch_image()
 
@@ -214,8 +202,8 @@ class Recipe(Entity):
             if ingredient_entry['unit_title'] is None:
                 unit = None
             else:
-                unit = Unit.fetch(ingredient_entry['unit_title']) \
-                       or Unit(ingredient_entry['unit_title'])
+                unit = Unit.fetch(ingredient_entry['unit_title']) or \
+                    Unit(ingredient_entry['unit_title'])
             recipe.ingredients.append(Ingredient(
                 Product(ingredient_entry['product_title']),
                 ingredient_entry['amount'],
@@ -293,9 +281,9 @@ class Recipe(Entity):
         return ordered_steps
 
     @classmethod
-    def fetch(cls, id):
+    def fetch(cls, id_):
         """Fetch a recipe by id with all children. A costly call"""
-        return DBSession.query(cls).options(subqueryload('*')).get(id)
+        return DBSession.query(cls).options(subqueryload('*')).get(id_)
 
     @classmethod
     def fetch_all(cls, author_id=None, dish_title=None, limit=None,
@@ -304,12 +292,13 @@ class Recipe(Entity):
         from kook.models.sqla_metadata import recipes
         query = DBSession.query(cls).order_by(desc(getattr(cls, order_by)))
         if author_id:
-            query = query.filter(recipes.c.user_id==author_id)
+            query = query.filter(recipes.c.user_id == author_id)
         if dish_title:
-            query = query.filter(recipes.c.dish_title==dish_title)
+            query = query.filter(recipes.c.dish_title == dish_title)
         if limit:
             query = query.limit(limit)
         return query.all()
+
 
 class Step(Entity):
     u"""Модель шага приготовления"""
@@ -320,8 +309,9 @@ class Step(Entity):
         self.time_value = time_value
         self.note = note
 
-    def __repr__(self) :
-        return u'Шаг %s: %s (%s мин)' % (self.number, self.text, self.time_value)
+    def __repr__(self):
+        return u'Шаг %s: %s (%s мин)' \
+               % (self.number, self.text, self.time_value)
 
     @classmethod
     def dummy(cls):
@@ -334,7 +324,7 @@ class Product(Entity):
     def __init__(self, title):
         self.title = title
 
-    def __repr__(self) :
+    def __repr__(self):
         return self.title
 
     def update_from_multidict(self, multidict, localizer=None):
@@ -381,23 +371,24 @@ class Product(Entity):
 
         #populate APU list
         for APU_entry in appstruct['APUs']:
-            unit = Unit.fetch(APU_entry['unit_title']) or\
-                   Unit(APU_entry['unit_title'])
+            unit = Unit.fetch(APU_entry['unit_title']) or \
+                Unit(APU_entry['unit_title'])
             amount = APU_entry['amount']
             apu = AmountPerUnit.fetch((self.title, unit.title)) or\
-                  AmountPerUnit(amount, unit)
+                AmountPerUnit(amount, unit)
             apu.amount = amount
             self.APUs.append(apu)
 
     @classmethod
     def fetch(cls, title):
-        return DBSession.query(Product).filter(Product.title==title).first()
+        return DBSession.query(Product).filter(Product.title == title).first()
 
     @classmethod
     def dummy(cls):
         dummy = cls(u'')
         dummy.APUs = [AmountPerUnit('', Unit(u''))]
         return dummy
+
 
 class Unit(Entity):
     """Measure unit"""
@@ -408,7 +399,7 @@ class Unit(Entity):
 
     @classmethod
     def fetch(cls, title):
-        return DBSession.query(cls).filter(cls.title==title).first()
+        return DBSession.query(cls).filter(cls.title == title).first()
     
     @classmethod
     def dummy(cls):
@@ -434,7 +425,7 @@ class Ingredient(Entity):
         self.amount = amount
         self.unit = unit
 
-    def __repr__(self) :
+    def __repr__(self):
         return u'%s %d г' % (self.product.title, self.amount)
 
     @classmethod
@@ -481,7 +472,7 @@ class Ingredient(Entity):
     @classmethod
     def fetch_all(cls, product_title):
         return DBSession.query(Ingredient)\
-                        .filter(ingredients.c.product_title==product_title)
+                        .filter(ingredients.c.product_title == product_title)
 
     def get_unit(self):
         """Return ingredient's chosen unit or default unit if none"""
@@ -490,13 +481,14 @@ class Ingredient(Entity):
             unit = self.unit
         return unit
 
+
 class AmountPerUnit(Entity):
 
     def __init__(self, amount, unit):
         self.amount = amount
         self.unit = unit
 
-    def __repr__(self) :
+    def __repr__(self):
         return '%s %s' % (self.unit.title, '{:g}'.format(self.amount))
 
     def measure(self, amount):
@@ -508,6 +500,7 @@ class AmountPerUnit(Entity):
     @classmethod
     def dummy(cls):
         return cls('', Unit(''))
+
 
 class VoteRecord(Entity):
     """
@@ -523,10 +516,12 @@ class VoteRecord(Entity):
     def fetch(cls, user_id, latest=True):
         query = DBSession.query(cls)
         if latest:
-            return query.filter(cls.user.id==user_id)\
-            .order_by(desc(cls.creation_time))\
-            .first()
+            return query\
+                .filter(cls.user.id == user_id)\
+                .order_by(desc(cls.creation_time))\
+                .first()
         return None
+
 
 class Comment(Entity):
     """
@@ -543,7 +538,6 @@ class Comment(Entity):
         acl.extend(COMMENT_BASE_ACL)
         self.__acl__ = acl
 
-
     @property
     def markdown_text(self):
         return markdown(self.text)
@@ -553,11 +547,12 @@ class Comment(Entity):
         return pretty_time(self.creation_time)
 
     @classmethod
-    def delete(cls, author_id, recipe_id, creation_time):
-        DBSession.query(cls).filter(
-            cls.user_id==author_id,
-            cls.recipe_id==recipe_id,
-            cls.creation_time==creation_time).delete()
+    def delete_by_id(cls, author_id, recipe_id, creation_time):
+        DBSession.query(cls)\
+            .filter(cls.user_id == author_id,
+                    cls.recipe_id == recipe_id,
+                    cls.creation_time == creation_time)\
+            .delete_by_id()
 
     @classmethod
     def construct_from_dict(cls, cstruct, author):
@@ -568,10 +563,9 @@ class Comment(Entity):
             return {'errors': e.asdict()}
         return cls(author, appstruct['text'])
 
+
 class DishImage(Entity):
-    """
-    Image for a dish
-    """
+    """Image for a dish"""
     def __init__(self, url, credit=None):
         self.url = url
         self.credit = credit
@@ -602,7 +596,7 @@ class DishImage(Entity):
             if exceptionCandidate in tlds:
                 return ".".join(urlElements[i:])
             if candidate in tlds or wildcardCandidate in tlds:
-                return ".".join(urlElements[i-1:])
+                return ".".join(urlElements[i - 1:])
 
         raise ValueError("Domain not in global list of TLDs")
 

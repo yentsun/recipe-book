@@ -60,10 +60,10 @@ def read_view(request):
 
 def delete_view(request):
     recipe_id = request.matchdict['id']
-    recipe = Recipe.fetch(id=recipe_id)
+    recipe = Recipe.fetch(id_=recipe_id)
     recipe.attach_acl()
     if has_permission('delete', recipe, request):
-        recipe.delete()
+        recipe.delete_by_id()
         request.session.flash(u'<div class="alert">Рецепт "%s" удален!</div>'
                               % recipe.dish.title)
         region_invalidate(common, 'long_term', 'common')
@@ -114,7 +114,7 @@ def create_update(request):
             if allowed:
                 try:
                     if recipe_id:
-                        recipe.delete()
+                        recipe.delete_by_id()
                         result.update_time = datetime.now()
                     result.save()
 
@@ -239,7 +239,7 @@ def comment_view(request):
 def delete_comment_view(request):
     recipe_id = request.matchdict['recipe_id']
     creation_time = request.matchdict['creation_time']
-    Comment.delete(request.user.id, recipe_id, creation_time)
+    Comment.delete_by_id(request.user.id, recipe_id, creation_time)
     return {'status': 'ok'}
 
 

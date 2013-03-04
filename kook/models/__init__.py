@@ -56,13 +56,13 @@ class Entity(object):
         DBSession.add(self)
 
     def delete(self):
-        DBSession.delete(self)
+        DBSession.delete_by_id(self)
 
     def revert(self):
         DBSession.rollback()
 
     @classmethod
-    def fetch(cls, primary, **kwargs):
+    def fetch(cls, primary):
         return DBSession.query(cls).get(primary)
 
     @classmethod

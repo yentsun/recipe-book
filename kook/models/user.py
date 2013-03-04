@@ -164,12 +164,12 @@ class Profile(Entity):
 
     @classmethod
     def construct_from_multidict(cls, multidict, **kwargs):
-        current_profile=kwargs.get('current_profile')
+        current_profile = kwargs.get('current_profile')
         skip_nickname = False
         if current_profile.nickname == multidict.getone('nickname'):
             skip_nickname = True
         schema = ProfileSchema(after_bind=dont_check_current_nickname)\
-        .bind(skip_nickname=skip_nickname)
+            .bind(skip_nickname=skip_nickname)
         try:
             appstruct = schema.deserialize(multidict)
         except Invalid, e:
@@ -180,13 +180,12 @@ class Profile(Entity):
         else:
             nickname = current_profile.nickname
         profile = cls(nickname, appstruct['real_name'],
-            appstruct['birthday'], appstruct['location'])
+                      appstruct['birthday'], appstruct['location'])
         return profile
 
+
 class RepRecord(Entity):
-    """
-    A reputation record for a user
-    """
+    """A reputation record for a user"""
     def __init__(self, user_id, rep_value, subject, obj=None):
         self.user_id = user_id
         self.rep_value = rep_value
@@ -201,11 +200,11 @@ class RepRecord(Entity):
     def fetch(cls, user_id, subject=None, obj=None, latest=True):
         query = DBSession.query(cls)
         if subject:
-            query = query.filter(cls.subject==subject)
+            query = query.filter(cls.subject == subject)
         if obj:
-            query = query.filter(cls.object_id==obj.id)
+            query = query.filter(cls.object_id == obj.id)
         if latest:
-            return query.filter(cls.user_id==user_id)\
+            return query.filter(cls.user_id == user_id)\
                         .order_by(desc(cls.creation_time))\
                         .first()
         return None
@@ -216,12 +215,13 @@ class RepRecord(Entity):
 
 from kook.models.recipe import VoteRecord, Dish
 
-mapper(User, users, properties={
-    'groups': relationship(Group, secondary=user_groups, lazy='joined'),
-    'favourite_dishes': relationship(Dish, secondary=user_favourites),
-    'rep_records': relationship(RepRecord, lazy='joined'),
-    'profile': relationship(Profile, uselist=False, lazy='joined',
-        cascade='all, delete, delete-orphan')})
+mapper(User, users,
+       properties={
+           'groups': relationship(Group, secondary=user_groups, lazy='joined'),
+           'favourite_dishes': relationship(Dish, secondary=user_favourites),
+           'rep_records': relationship(RepRecord, lazy='joined'),
+           'profile': relationship(Profile, uselist=False, lazy='joined',
+                                   cascade='all, delete, delete-orphan')})
 
 mapper(Group, groups)
 mapper(Profile, profiles)
