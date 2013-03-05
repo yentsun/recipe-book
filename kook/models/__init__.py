@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from uuid import uuid4
+import cryptacular.bcrypt
 from sqlalchemy.orm import scoped_session, sessionmaker
 from zope.sqlalchemy import ZopeTransactionExtension
 from pyramid.security import Everyone, Allow, ALL_PERMISSIONS, Deny
@@ -23,6 +24,16 @@ FRACTIONS = {
     0.25: u'¼',
     0.2: u'⅕'
 }
+crypt = cryptacular.bcrypt.BCRYPTPasswordManager()
+
+
+def generate_id():
+    return str(uuid4())
+
+
+def generate_hash(password):
+    return crypt.encode(password)
+
 
 def form_msg(acl):
     try:
@@ -56,7 +67,7 @@ class Entity(object):
         DBSession.add(self)
 
     def delete(self):
-        DBSession.delete_by_id(self)
+        DBSession.delete(self)
 
     def revert(self):
         DBSession.rollback()
@@ -71,10 +82,6 @@ class Entity(object):
         if 'order' in kwargs:
             query = query.order_by(getattr(cls, kwargs['order']))
         return query.all()
-
-    @classmethod
-    def generate_id(cls):
-        return str(uuid4())
 
 
 class RootFactory(object):

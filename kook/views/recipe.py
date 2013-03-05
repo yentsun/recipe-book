@@ -43,7 +43,7 @@ def read_view(request):
     recipe = cached_recipe(recipe_id)
     last_vote = None
     try:
-        last_vote = request.user.last_vote(recipe.id)
+        last_vote = request.user.last_vote(recipe.ID)
         recipe.attach_acl(get_acl_by_last_vote(request.user, recipe))
     except AttributeError:
         recipe.attach_acl()
@@ -63,7 +63,7 @@ def delete_view(request):
     recipe = Recipe.fetch(id_=recipe_id)
     recipe.attach_acl()
     if has_permission('delete', recipe, request):
-        recipe.delete_by_id()
+        recipe.delete()
         request.session.flash(u'<div class="alert">Рецепт "%s" удален!</div>'
                               % recipe.dish.title)
         region_invalidate(common, 'long_term', 'common')
@@ -125,7 +125,7 @@ def create_update(request):
                                           u'Рецепт обновлен!</div>')
                     try:
                         next_path = request.route_url('update_recipe',
-                                                      id=result.id)
+                                                      id=result.ID)
                     except AttributeError:  # maybe not AttributeError
                         pass
                     return HTTPFound(next_path)
@@ -247,7 +247,7 @@ def get_acl_by_last_vote(user, recipe):
     acl = []
     last_vote = None
     try:
-        last_vote = user.last_vote(recipe.id).value
+        last_vote = user.last_vote(recipe.ID).value
     except AttributeError:
         pass
     if last_vote is UPVOTE:

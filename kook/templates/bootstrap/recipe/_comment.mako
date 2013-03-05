@@ -11,7 +11,7 @@
         % if can_edit:
         <a title="редактировать" class="icon icon-pencil" href=""></a>
         <a title="удалить" class="icon icon-remove"
-           onclick="delete_comment(this, '${comment.recipe.id}',
+           onclick="delete_comment(this, '${comment.recipe.ID}',
                                    '${comment.creation_time}')"></a>
         % endif
     </span>

@@ -50,7 +50,7 @@
                         <a class="description"
                            title="открыть рецепт"
                            href="${request.route_path('read_recipe',
-                                                      id=recipe.id)}">
+                                                      id=recipe.ID)}">
                         ${recipe.description}
                         </a>
                     </td>

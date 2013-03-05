@@ -70,7 +70,7 @@
                 <td>
                     <a title="обновить рецепт" class="btn btn-mini edit"
                            href="${request.route_path('update_recipe',
-                           id=recipe.id)}">
+                           id=recipe.ID)}">
                             <i class="icon-pencil"></i>
                     </a>
                 </td>

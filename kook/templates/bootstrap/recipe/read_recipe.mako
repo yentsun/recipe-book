@@ -37,7 +37,7 @@
             <button class="btn" type="button"
                     data-toggle="button"
                 % if can_upvote:
-                    onclick="vote(${UPVOTE}, '${recipe.id}', this)"
+                    onclick="vote(${UPVOTE}, '${recipe.ID}', this)"
                 % else:
                     data-original-title="${form_msg(can_upvote)}"
                 % endif

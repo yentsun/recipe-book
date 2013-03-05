@@ -10,7 +10,7 @@ dishes = Table(
 
 recipes = Table(
     'recipes', metadata,
-    Column('id', CHAR(36), primary_key=True),
+    Column('ID', CHAR(36), primary_key=True),
     Column('dish_title', Unicode, ForeignKey('dishes.title')),
     Column('description', Unicode),
     Column('creation_time', DateTime()),
@@ -38,7 +38,7 @@ amount_per_unit = Table(
 
 ingredients = Table(
     'ingredients', metadata,
-    Column('recipe_id', CHAR(36), ForeignKey('recipes.id'),
+    Column('recipe_id', CHAR(36), ForeignKey('recipes.ID'),
            primary_key=True),
     Column('product_title', Unicode, ForeignKey('products.title'),
            primary_key=True),
@@ -47,7 +47,7 @@ ingredients = Table(
 
 steps = Table(
     'steps', metadata,
-    Column('recipe_id', CHAR(36), ForeignKey('recipes.id'),
+    Column('recipe_id', CHAR(36), ForeignKey('recipes.ID'),
            primary_key=True, nullable=False),
     Column('number', Integer, nullable=False, primary_key=True),
     Column('time_value', Integer),
@@ -108,14 +108,14 @@ rep_records = Table(
 vote_records = Table(
     'vote_records', metadata,
     Column('user_id', CHAR(36), ForeignKey('users.id'), primary_key=True),
-    Column('recipe_id', CHAR(36), ForeignKey('recipes.id'), primary_key=True),
+    Column('recipe_id', CHAR(36), ForeignKey('recipes.ID'), primary_key=True),
     Column('value', Integer),
     Column('creation_time', DateTime(), primary_key=True))
 
 comments = Table(
     'comments', metadata,
     Column('user_id', CHAR(36), ForeignKey('users.id'), primary_key=True),
-    Column('recipe_id', CHAR(36), ForeignKey('recipes.id'), primary_key=True),
+    Column('recipe_id', CHAR(36), ForeignKey('recipes.ID'), primary_key=True),
     Column('text', Unicode, nullable=False),
     Column('creation_time', DateTime(), primary_key=True))
 

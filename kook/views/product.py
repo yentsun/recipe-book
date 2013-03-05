@@ -29,7 +29,7 @@ def update(request):
             if existing_product:
                 for ingredient in Ingredient.fetch_all(product_title=title):
                     ingredient.product = existing_product
-                product.delete_by_id()
+                product.delete()
                 request.session.flash(u'<div class="alert alert-success">'
                                       u'Продукт "%s" заменен продуктом "%s"'
                                       u'</div>' % (title, new_title))
@@ -47,4 +47,4 @@ def delete(request):
     """Fetch and delete a product"""
     title = unicode(request.matchdict['title'])
     victim = Product.fetch(title)
-    victim.delete_by_id()
+    victim.delete()

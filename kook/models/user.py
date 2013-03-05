@@ -8,12 +8,10 @@ from sqlalchemy import desc
 from sqlalchemy.orm import mapper, relationship
 
 from kook.models import (Entity, DBSession, UPVOTE_REQUIRED_REP,
-                         DOWNVOTE_REQUIRED_REP)
+                         DOWNVOTE_REQUIRED_REP, generate_id, generate_hash)
 from kook.models.sqla_metadata import (profiles, rep_records, groups,
                                        user_favourites, user_groups, users)
 from schemas import UserSchema, ProfileSchema, dont_check_current_nickname
-
-crypt = cryptacular.bcrypt.BCRYPTPasswordManager()
 
 PRIVGROUPS = {
     'upvoters': UPVOTE_REQUIRED_REP,
@@ -47,6 +45,7 @@ class User(Entity):
         return json.dumps(dict_)
 
     def check_password(self, password):
+        from kook.models import crypt
         return crypt.check(self.password_hash, password)
 
     def generate_password(self):
@@ -55,6 +54,7 @@ class User(Entity):
         return '000000'
 
     def add_rep(self, rep_value, subject, obj=None):
+        """Add rep record for a reason if there is no record for it"""
         got_rep = RepRecord.fetch(user_id=self.id, subject=subject, obj=obj)
         if not got_rep:
             new_rep = self.profile.rep + rep_value
@@ -89,10 +89,6 @@ class User(Entity):
         return url
 
     @classmethod
-    def generate_hash(cls, password):
-        return crypt.encode(password)
-
-    @classmethod
     def fetch(cls, id_=None, email=None):
         query = DBSession.query(cls)
         if id_:
@@ -115,8 +111,8 @@ class User(Entity):
         except Invalid, e:
             return {'errors': e.asdict(),
                     'original_data': cstruct}
-        id_ = cls.generate_id()
-        hash_ = cls.generate_hash(appstruct['password'])
+        id_ = generate_id()
+        hash_ = generate_hash(appstruct['password'])
         groups = [Group('applied')]
         user = cls(id_, appstruct['email'], hash_, groups)
         return user
@@ -192,7 +188,7 @@ class RepRecord(Entity):
         self.subject = subject
         self.creation_time = datetime.now()
         try:
-            self.object_id = obj.id
+            self.object_id = obj.ID
         except AttributeError:
             self.object_id = None
 
@@ -202,7 +198,7 @@ class RepRecord(Entity):
         if subject:
             query = query.filter(cls.subject == subject)
         if obj:
-            query = query.filter(cls.object_id == obj.id)
+            query = query.filter(cls.object_id == obj.ID)
         if latest:
             return query.filter(cls.user_id == user_id)\
                         .order_by(desc(cls.creation_time))\

@@ -21,7 +21,7 @@ from kook.mako_filters import pretty_time, markdown
 from kook.models.schemas import RecipeSchema, CommentSchema
 from kook.models import (Entity, DBSession, UPVOTE, DOWNVOTE,
                          DOWNVOTE_COST, UPVOTE_REP_CHANGE,
-                         DOWNVOTE_REP_CHANGE, FRACTIONS)
+                         DOWNVOTE_REP_CHANGE, FRACTIONS, generate_id)
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
@@ -83,7 +83,7 @@ class Recipe(Entity):
     def __init__(self, dish, author, id_=None, description=None,
                  status_id=1, creation_time=None, rating=0, update_time=None):
         self.dish = dish
-        self.id = id_ or self.generate_id()
+        self.ID = id_ or generate_id()
         self.description = description
         self.author = author
         self.status_id = status_id
@@ -192,7 +192,7 @@ class Recipe(Entity):
             dish.fetch_image()
 
         #create the recipe
-        recipe = cls(dish=dish, id=recipe.id, author=recipe.author,
+        recipe = cls(dish=dish, id_=recipe.ID, author=recipe.author,
                      description=appstruct['description'],
                      creation_time=recipe.creation_time,
                      update_time=recipe.update_time)
@@ -219,8 +219,8 @@ class Recipe(Entity):
 
     @classmethod
     def construct_from_multidict(cls, multidict, recipe=None, **kwargs):
-        dict = cls.multidict_to_dict(multidict)
-        return cls.construct_from_dict(dict, recipe,
+        dict_ = cls.multidict_to_dict(multidict)
+        return cls.construct_from_dict(dict_, recipe,
                                        kwargs.get('localizer'),
                                        kwargs.get('fetch_dish_image'))
 
@@ -552,7 +552,7 @@ class Comment(Entity):
             .filter(cls.user_id == author_id,
                     cls.recipe_id == recipe_id,
                     cls.creation_time == creation_time)\
-            .delete_by_id()
+            .delete()
 
     @classmethod
     def construct_from_dict(cls, cstruct, author):

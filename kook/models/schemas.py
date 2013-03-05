@@ -62,9 +62,9 @@ class Steps(SequenceSchema):
 
 
 class RecipeSchema(MappingSchema):
-    id_ = SchemaNode(String(), validator=Regex('[a-f0-9]{8}-[a-f0-9]{4}-'
-                                               '[a-f0-9]{4}-[a-f0-9]{4}-'
-                                               '[a-f0-9]{12}'), missing=None)
+    ID = SchemaNode(String(), validator=Regex('[a-f0-9]{8}-[a-f0-9]{4}-'
+                                              '[a-f0-9]{4}-[a-f0-9]{4}-'
+                                              '[a-f0-9]{12}'), missing=None)
     dish_title = SchemaNode(String(), validator=Length(3),
                             preparer=normalize_string,
                             msg=u'Неверное название')
