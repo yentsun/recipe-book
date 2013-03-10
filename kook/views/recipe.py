@@ -129,9 +129,10 @@ def create_update(request):
                                                       id=result.ID)
                         return HTTPFound(next_path)
                     except ComponentLookupError:
+                        # this is for tests only
                         pass
 
-                except AttributeError as error:
+                except AttributeError:
                     recipe.revert()
                     request.session.flash(u'<div class="alert alert-error">'
                                           u'Ошибка при обновлении рецепта!'

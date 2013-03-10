@@ -24,7 +24,8 @@
     % endfor
 </div>
 <div class="span6">
-    <input disabled placeholder="искать рецепт..." type="text" id="search-query">
+    <input disabled placeholder="искать рецепт..." type="text"
+           id="search-query">
     <div class="page-header"><h3>Лучшие рецепты</h3></div>
     <table id="best-recipes" class="table table-striped">
         <tbody>
@@ -42,7 +43,7 @@
                 <td>
                     <a title="открыть рецепт"
                        href="${request.route_path('read_recipe',
-                       id=recipe.id)}">
+                       id=recipe.ID)}">
                     ${recipe.dish.title}
                     </a>
                 </td>

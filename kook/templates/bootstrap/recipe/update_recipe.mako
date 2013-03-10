@@ -19,7 +19,7 @@
     </h1>
     <div class="btn-group pull-right">
         <a class="btn"
-           href="${request.route_path('read_recipe', id=recipe.id,
+           href="${request.route_path('read_recipe', id=recipe.ID,
            author_id=request.user.id)}">
             <i class="icon-eye-open"></i> посмотреть на сайте
         </a>
@@ -135,7 +135,7 @@
             % if has_permission('delete', recipe, request):
             <button type="button" class="btn btn-danger"
                     id="delete_recipe"
-                    onclick="deleteRecipe('${recipe.id}');">
+                    onclick="deleteRecipe('${recipe.ID}');">
                 <i class="icon-remove icon-white"></i> удалить
             </button>
             % endif
@@ -170,7 +170,7 @@
           href="/static/bootstrap/js/markitup/sets/markdown/style.css" />
 </%def>
 <script type="text/javascript">
-    var recipe_id = '${recipe.id}';
+    var recipe_id = '${recipe.ID}';
     var products = [
         % for product in products:
                 '${product.title}',

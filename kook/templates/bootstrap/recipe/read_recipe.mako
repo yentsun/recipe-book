@@ -55,7 +55,7 @@
             % else:
             <button class="btn" type="button" data-toggle="button"
                 % if can_downvote:
-                    onclick="vote(${DOWNVOTE}, '${recipe.id}', this)"
+                    onclick="vote(${DOWNVOTE}, '${recipe.ID}', this)"
                 % else:
                     data-original-title="${form_msg(can_downvote)}"
                 % endif
@@ -68,7 +68,7 @@
         <div id="edit">
             <a title="обновить рецепт" class="btn edit"
                href="${request.route_path('update_recipe',
-                                          id=recipe.id)}">
+                                          id=recipe.ID)}">
                 <i class="icon-pencil"></i>
             </a>
         </div>
@@ -148,7 +148,7 @@
                       placeholder="Ваш комментарий (не менее 15 символов)"
                       cols="60" rows="10"></textarea>
             <button class="btn"
-                    onclick="post_comment('${recipe.id}')">
+                    onclick="post_comment('${recipe.ID}')">
                 отправить
             </button>
             </div>
