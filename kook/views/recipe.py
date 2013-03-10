@@ -7,21 +7,10 @@ from zope.interface.interfaces import ComponentLookupError
 from pyramid.httpexceptions import HTTPFound, HTTPError
 from pyramid.security import has_permission, Deny
 from pyramid.i18n import get_localizer
-from beaker.cache import cache_region, region_invalidate
+
 from kook.models import UPVOTE, DOWNVOTE, form_msg
 from kook.models.recipe import Product, Recipe, Tag, Comment, Dish
-
-
-@cache_region('long_term')
-def common():
-    return {'products': Product.fetch_all(),
-            'dishes': Dish.fetch_all(),
-            'tags': Tag.fetch_all()}
-
-
-@cache_region('long_term')
-def cached_recipe(id_):
-    return Recipe.fetch(id_)
+from kook import caching
 
 
 def index_view(request):
@@ -41,7 +30,7 @@ def tag(request):
 
 def read_view(request):
     recipe_id = request.matchdict['id']
-    recipe = cached_recipe(recipe_id)
+    recipe = caching.get_recipe(recipe_id)
     last_vote = None
     try:
         last_vote = request.user.last_vote(recipe.ID)
@@ -78,7 +67,7 @@ def delete_view(request):
 def create_update(request):
     recipe_id = request.matchdict.get('id', None)
     fetch_image = request.matchdict.get('fetch_image', True)
-    response = common()
+    response = caching.get_bundle()
     localizer = get_localizer(request)
 
     try:
@@ -118,10 +107,7 @@ def create_update(request):
                         recipe.delete()
                         result.update_time = datetime.now()
                     result.save()
-
-                    region_invalidate(cached_recipe, 'long_term', recipe_id)
-                    region_invalidate(common, 'long_term')
-
+                    caching.clear_recipe(recipe_id)
                     request.session.flash(u'<div class="alert alert-success">'
                                           u'Рецепт обновлен!</div>')
                     try:
