@@ -118,21 +118,17 @@ class User(Entity):
         return user
 
     @classmethod
-    def group_finder(cls, id_=None, user=None):
+    def user_groups(cls, user_id, request):
         """
         The callback function for AuthTktAuthenticationPolicy
         """
+        group_titles = None
+        user = DBSession.query(cls).get(user_id)
         if user:
-            user = user
-        elif id_:
-            user = DBSession.query(cls).get(id_)
-        else:
-            return None
-        groups = user.groups
-        strings = []
-        for instance in groups:
-            strings.append(instance.title)
-        return strings
+            group_titles = []
+            for group in user.groups:
+                group_titles.append(group.title)
+        return group_titles
 
     @classmethod
     def fetch_all(cls, limit=10):

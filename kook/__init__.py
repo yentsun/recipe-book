@@ -31,7 +31,7 @@ def main(global_settings, **settings):
     """
     authentication_policy = \
         AuthTktAuthenticationPolicy('0J/#.JD6;LGNR-',
-                                    callback=User.group_finder)
+                                    callback=User.user_groups)
     authorization_policy = ACLAuthorizationPolicy()
     engine = engine_from_config(settings)
     DBSession.configure(bind=engine)
