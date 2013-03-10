@@ -3,6 +3,7 @@
 import json
 
 from datetime import datetime
+from zope.interface.interfaces import ComponentLookupError
 from pyramid.httpexceptions import HTTPFound, HTTPError
 from pyramid.security import has_permission, Deny
 from pyramid.i18n import get_localizer
@@ -114,7 +115,7 @@ def create_update(request):
             if allowed:
                 try:
                     if recipe_id:
-                        recipe.delete_by_id()
+                        recipe.delete()
                         result.update_time = datetime.now()
                     result.save()
 
@@ -126,11 +127,11 @@ def create_update(request):
                     try:
                         next_path = request.route_url('update_recipe',
                                                       id=result.ID)
-                    except AttributeError:  # maybe not AttributeError
+                        return HTTPFound(next_path)
+                    except ComponentLookupError:
                         pass
-                    return HTTPFound(next_path)
 
-                except AttributeError:
+                except AttributeError as error:
                     recipe.revert()
                     request.session.flash(u'<div class="alert alert-error">'
                                           u'Ошибка при обновлении рецепта!'
