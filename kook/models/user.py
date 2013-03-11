@@ -1,5 +1,4 @@
 import json
-import cryptacular.bcrypt
 from hashlib import md5
 from urllib import urlencode
 from datetime import date, datetime
@@ -29,6 +28,7 @@ class Group(Entity):
 
 
 class User(Entity):
+    """The user class"""
 
     def __init__(self, id_, email, password_hash, groups=None, profile=None,
                  favourite_titles=None):
@@ -123,7 +123,8 @@ class User(Entity):
         The callback function for AuthTktAuthenticationPolicy
         """
         group_titles = None
-        user = DBSession.query(cls).get(user_id)
+        from kook import caching
+        user = caching.get_user(user_id)
         if user:
             group_titles = []
             for group in user.groups:
@@ -150,9 +151,9 @@ class Profile(Entity):
         self.rep = rep or 1
 
     @classmethod
-    def fetch(cls, nickname):
-        query = DBSession.query(cls)
-        return query.filter(cls.nickname == nickname).first()
+    def fetch(cls, user_id):
+        """Fetch profile by user id"""
+        return DBSession.query(cls).get(user_id)
 
     @classmethod
     def construct_from_multidict(cls, multidict, **kwargs):
