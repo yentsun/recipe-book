@@ -56,7 +56,7 @@ def delete_view(request):
         recipe.delete()
         request.session.flash(u'<div class="alert">Рецепт "%s" удален!</div>'
                               % recipe.dish.title)
-        region_invalidate(common, 'long_term', 'common')
+        caching.clear_recipe(recipe_id)
         return HTTPFound('/dashboard?invalidate_cache=true')
     else:
         request.session.flash(u'<div class="alert alert-error">'
@@ -67,7 +67,7 @@ def delete_view(request):
 def create_update(request):
     recipe_id = request.matchdict.get('id', None)
     fetch_image = request.matchdict.get('fetch_image', True)
-    response = caching.get_bundle()
+    response = caching.get_recipe_bundle()
     localizer = get_localizer(request)
 
     try:

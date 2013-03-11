@@ -4,6 +4,7 @@ import json
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember, forget
 from kook.models.user import User, Profile
+from kook import caching
 
 
 def check_matchdict(param, request):
@@ -71,6 +72,7 @@ def update_profile_view(request):
             user = request.user
             user.profile = result
             user.save()
+            caching.clear_user(user.id)
             response['profile'] = user.profile
             request.session.flash(u'<div class="alert alert-success">'
                                   u'Профиль обновлен!</div>')

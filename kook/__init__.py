@@ -12,6 +12,7 @@ from subscibers import handle_new_request
 
 from kook.models import DBSession
 from kook.models.user import User
+from kook import caching
 
 THEME = 'bootstrap'
 
@@ -19,7 +20,7 @@ THEME = 'bootstrap'
 def fetch_user(request):
     user_id = authenticated_userid(request)
     if user_id:
-        return User.fetch(user_id)
+        return caching.get_user(user_id)
 
 
 def find_renderer(template_file, theme=THEME):
