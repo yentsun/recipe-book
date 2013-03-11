@@ -37,7 +37,7 @@ def to_localized_decimal(input_):
 
 class Dish(Entity):
     """Dish model"""
-    def __init__(self, title=None, description=None, tags=None, image=None):
+    def __init__(self, title='Dummy dish', description=None, tags=None, image=None):
         self.title = title
         self.tags = tags or []
         self.description = description
