@@ -393,7 +393,7 @@ class TestRecipeViews(unittest.TestCase):
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         self.assertEqual(1, recipe.rating)
         self.assertEqual(120 + UPVOTE_REP_CHANGE, recipe.author.profile.rep)
-        assert u'downvoters' in recipe.author.groups
+        assert Group(u'downvoters') in recipe.author.groups
         self.assertIs(user.last_vote(recipe.ID).value, UPVOTE)
 
     def test_downvote(self):
@@ -721,14 +721,13 @@ class TestUserViews(unittest.TestCase):
         user2 = User.fetch(email='user2@acme.com')
         self.assertEqual(3, len(user.groups))
         self.assertEqual(2, len(user2.groups))
-        group_strings = user.groups
-        assert u'admins' in group_strings
-        assert u'upvoters' in User.user_groups(user=user2)
-        assert u'registered' in User.user_groups(user=user2)
+        assert Group(u'admins') in user.groups
+        assert Group(u'upvoters') in user2.groups
+        assert Group(u'registered') in user2.groups
 
     def test_user_fav_dishes(self):
         potato_salad = Dish(u'potato salad')
-        user=User.fetch(email='user1@acme.com')
+        user = User.fetch(email='user1@acme.com')
         assert potato_salad in user.favourite_dishes
 
     def test_user_rep(self):
