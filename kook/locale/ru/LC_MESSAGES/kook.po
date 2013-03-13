@@ -122,3 +122,6 @@ msgstr "\"${val}\" не является объектом datetime"
 #: colander/__init__.py:988
 msgid "\"${val}\" is not a date object"
 msgstr "\"${val}\" не является объектом date"
+
+msgid "Invalid date"
+msgstr "Неверная дата"

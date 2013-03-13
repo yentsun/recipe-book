@@ -27,16 +27,55 @@ class Group(Entity):
         return self.title
 
 
+class Profile(Entity):
+    """Profile for a user"""
+
+    def __init__(self, nickname=None, real_name=None, birthday=None,
+                 location=None, registration_day=None, rep=None):
+        self.nickname = nickname
+        self.real_name = real_name
+        self.birthday = birthday
+        self.location = location
+        self.registration_day = registration_day or date.today()
+        self.rep = rep or 1
+
+    @classmethod
+    def fetch(cls, user_id):
+        """Fetch profile by user id"""
+        return DBSession.query(cls).get(user_id)
+
+    @classmethod
+    def construct_from_multidict(cls, multidict, **kwargs):
+        current_profile = kwargs.get('current_profile')
+        skip_nickname = False
+        if current_profile.nickname == multidict.getone('nickname'):
+            skip_nickname = True
+        schema = ProfileSchema(after_bind=dont_check_current_nickname) \
+            .bind(skip_nickname=skip_nickname)
+        try:
+            appstruct = schema.deserialize(multidict)
+        except Invalid, e:
+            return {'errors': e.asdict(),
+                    'original_data': multidict.mixed()}
+        if 'nickname' in appstruct:
+            nickname = appstruct['nickname']
+        else:
+            nickname = current_profile.nickname
+        profile = cls(nickname, appstruct['real_name'],
+                      appstruct['birthday'], appstruct['location'])
+        return profile
+
+
 class User(Entity):
     """The user class"""
 
-    def __init__(self, id_, email, password_hash, groups=None, profile=None,
-                 favourite_titles=None):
+    def __init__(self, id_, email, password_hash, groups=None,
+                 profile=Profile(), favourite_titles=None):
         self.id = id_
         self.email = email
         self.password_hash = password_hash
         self.groups = groups or []
-        self.profile = profile or Profile()
+        self.profile = profile
         self.favourite_titles = favourite_titles or []
 
     def to_json(self):
@@ -136,45 +175,6 @@ class User(Entity):
         users = DBSession.query(cls).limit(limit).all()
         return sorted(users, key=lambda user: user.profile.rep,
                       reverse=True)
-
-
-class Profile(Entity):
-    """Profile for a user"""
-
-    def __init__(self, nickname=None, real_name=None, birthday=None,
-                 location=None, registration_day=None, rep=None):
-        self.nickname = nickname
-        self.real_name = real_name
-        self.birthday = birthday
-        self.location = location
-        self.registration_day = registration_day or date.today()
-        self.rep = rep or 1
-
-    @classmethod
-    def fetch(cls, user_id):
-        """Fetch profile by user id"""
-        return DBSession.query(cls).get(user_id)
-
-    @classmethod
-    def construct_from_multidict(cls, multidict, **kwargs):
-        current_profile = kwargs.get('current_profile')
-        skip_nickname = False
-        if current_profile.nickname == multidict.getone('nickname'):
-            skip_nickname = True
-        schema = ProfileSchema(after_bind=dont_check_current_nickname)\
-            .bind(skip_nickname=skip_nickname)
-        try:
-            appstruct = schema.deserialize(multidict)
-        except Invalid, e:
-            return {'errors': e.asdict(),
-                    'original_data': multidict.mixed()}
-        if 'nickname' in appstruct:
-            nickname = appstruct['nickname']
-        else:
-            nickname = current_profile.nickname
-        profile = cls(nickname, appstruct['real_name'],
-                      appstruct['birthday'], appstruct['location'])
-        return profile
 
 
 class RepRecord(Entity):

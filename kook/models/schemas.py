@@ -74,16 +74,6 @@ class RecipeSchema(MappingSchema):
     ingredients = Ingredients()
 
 
-class UserSchema(MappingSchema):
-    email = SchemaNode(
-        String(), preparer=normalize_string,
-        validator=All(Email(msg=u'Неверный адрес email'),
-                      Function(is_new_email, message=u'Пользователь ${val} '
-                                                     u'уже зарегистрирован')))
-    password = SchemaNode(
-        String(), validator=Length(6))
-
-
 class ProfileSchema(MappingSchema):
     nickname = SchemaNode(String(), missing=None,
                           validator=Function(check_nickname,
@@ -92,6 +82,16 @@ class ProfileSchema(MappingSchema):
     real_name = SchemaNode(String(), missing='')
     birthday = SchemaNode(Date(), missing=None)
     location = SchemaNode(String(), missing='')
+
+
+class UserSchema(MappingSchema):
+    email = SchemaNode(
+        String(), preparer=normalize_string,
+        validator=All(Email(msg=u'Неверный адрес email'),
+                      Function(is_new_email, message=u'Пользователь ${val} '
+                                                     u'уже зарегистрирован')))
+    password = SchemaNode(String(), validator=Length(6))
+    profile = ProfileSchema()
 
 
 class CommentSchema(MappingSchema):

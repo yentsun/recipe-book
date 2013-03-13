@@ -68,15 +68,15 @@ def update_profile_view(request):
     if request.POST:
         result = Profile.construct_from_multidict(
             request.POST, current_profile=response['profile'])
-        if isinstance(result, Profile):
-            user = request.user
+        user = request.user
+        try:
             user.profile = result
             user.save()
             caching.clear_user(user.id)
             response['profile'] = user.profile
             request.session.flash(u'<div class="alert alert-success">'
                                   u'Профиль обновлен!</div>')
-        else:
+        except AttributeError:
             request.session.flash(u'<div class="alert alert-error">'
                                   u'Ошибка при обновлении профиля!</div>')
             response['error_data'] = json.dumps(result)
