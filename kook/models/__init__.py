@@ -12,11 +12,13 @@ DBSession = scoped_session(sessionmaker(
 
 UPVOTE = 1
 DOWNVOTE = -1
-UPVOTE_REP_CHANGE = 10
-DOWNVOTE_REP_CHANGE = -2
-DOWNVOTE_COST = -1
-UPVOTE_REQUIRED_REP = 15
-DOWNVOTE_REQUIRED_REP = 125
+
+# tuple explained: ({author rep change}, {voter required rep},
+#                   {voter rep change})
+VOTE_REP_MAP = {
+    UPVOTE: (10, 15, 0),
+    DOWNVOTE: (-2, 125, -1)
+}
 
 FRACTIONS = {
     0.5: u'½',
@@ -43,10 +45,10 @@ def form_msg(acl):
             return u'Нельзя голосовать за свои рецепты'
         if acl.ace == (Deny, 'registered', 'upvote'):
             return u'У вас недостаточно репутации, необходимо %s'\
-                   % UPVOTE_REQUIRED_REP
+                   % VOTE_REP_MAP[UPVOTE][1]
         if acl.ace == (Deny, 'registered', 'downvote'):
             return u'У вас недостаточно репутации, необходимо %s'\
-                   % DOWNVOTE_REQUIRED_REP
+                   % VOTE_REP_MAP[DOWNVOTE][1]
         else:
             return u'действие: %s; кому %s; привилегия: %s' % acl.ace
     except AttributeError:

@@ -19,9 +19,8 @@ from kook.security import (RECIPE_BASE_ACL, AUTHOR_ACTIONS, VOTE_ACTIONS,
                            COMMENT_BASE_ACL)
 from kook.mako_filters import pretty_time, markdown
 from kook.models.schemas import RecipeSchema, CommentSchema
-from kook.models import (Entity, DBSession, UPVOTE, DOWNVOTE,
-                         DOWNVOTE_COST, UPVOTE_REP_CHANGE,
-                         DOWNVOTE_REP_CHANGE, FRACTIONS, generate_id)
+from kook.models import (Entity, DBSession, UPVOTE, DOWNVOTE, VOTE_REP_MAP,
+                         FRACTIONS, generate_id)
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
@@ -37,7 +36,8 @@ def to_localized_decimal(input_):
 
 class Dish(Entity):
     """Dish model"""
-    def __init__(self, title='Dummy dish', description=None, tags=None, image=None):
+    def __init__(self, title='Dummy dish', description=None, tags=None,
+                 image=None):
         self.title = title
         self.tags = tags or []
         self.description = description
@@ -106,15 +106,15 @@ class Recipe(Entity):
         acl.extend(RECIPE_BASE_ACL)
         self.__acl__ = acl
 
-    def add_vote(self, user, vote_value):
-        new_rating = self.rating + vote_value
-        self.rating = new_rating
-        if vote_value is UPVOTE:
-            self.author.add_rep(UPVOTE_REP_CHANGE, 'upvote', self)
-        if vote_value is DOWNVOTE:
-            self.author.add_rep(DOWNVOTE_REP_CHANGE, 'downvote', self)
-            user.add_rep(DOWNVOTE_COST, 'downvote', self)
-        record = VoteRecord(user, self, vote_value)
+    def add_vote(self, voter_user, vote_value):
+        """
+        Register a vote for the recipe. Update author's and voter's
+        reps accordingly.
+        """
+        self.rating += vote_value
+        self.author.add_rep(VOTE_REP_MAP[vote_value][0], 'vote', self)
+        voter_user.add_rep(VOTE_REP_MAP[vote_value][2], 'vote', self)
+        record = VoteRecord(voter_user, self, vote_value)
         record.save()
 
     @classmethod
