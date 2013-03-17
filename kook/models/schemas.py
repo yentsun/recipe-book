@@ -91,7 +91,7 @@ class UserSchema(MappingSchema):
                       Function(is_new_email, message=u'Пользователь ${val} '
                                                      u'уже зарегистрирован')))
     password = SchemaNode(String(), validator=Length(6))
-    profile = ProfileSchema()
+    profile = ProfileSchema(missing=None)
 
 
 class CommentSchema(MappingSchema):

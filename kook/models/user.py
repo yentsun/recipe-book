@@ -6,15 +6,15 @@ from colander import Invalid
 from sqlalchemy import desc
 from sqlalchemy.orm import mapper, relationship
 
-from kook.models import (Entity, DBSession, UPVOTE_REQUIRED_REP,
-                         DOWNVOTE_REQUIRED_REP, generate_id, generate_hash)
+from kook.models import (Entity, DBSession, VOTE_REP_MAP, generate_id,
+                         generate_hash, UPVOTE, DOWNVOTE)
 from kook.models.sqla_metadata import (profiles, rep_records, groups,
                                        user_favourites, user_groups, users)
 from schemas import UserSchema, ProfileSchema, dont_check_current_nickname
 
 PRIVGROUPS = {
-    'upvoters': UPVOTE_REQUIRED_REP,
-    'downvoters': DOWNVOTE_REQUIRED_REP
+    'upvoters': VOTE_REP_MAP[UPVOTE][1],
+    'downvoters': VOTE_REP_MAP[DOWNVOTE][1]
 }
 
 
@@ -70,7 +70,7 @@ class User(Entity):
     """The user class"""
 
     def __init__(self, id_, email, password_hash, groups=None,
-                 profile=Profile(), favourite_titles=None):
+                 profile=None, favourite_titles=None):
         self.id = id_
         self.email = email
         self.password_hash = password_hash
@@ -92,17 +92,16 @@ class User(Entity):
         #TODO complete function
         return '000000'
 
-    def add_rep(self, rep_value, subject, obj=None):
-        """Add rep record for a reason if there is no record for it"""
-        got_rep = RepRecord.fetch(user_id=self.id, subject=subject, obj=obj)
-        if not got_rep:
-            new_rep = self.profile.rep + rep_value
-            self.profile.rep = new_rep
-            for group_title, rep_required in PRIVGROUPS.iteritems():
-                if new_rep >= rep_required:
-                    self.add_to_group(group_title)
-            record = RepRecord(self.id, rep_value, subject, obj)
-            record.save()
+    def add_rep(self, rep_value, subject, ref_object=None):
+        """Add rep record with a subject and optional referenced object"""
+        record = RepRecord(self.id, rep_value, subject, ref_object)
+        record.save()
+
+    def get_rep(self):
+        """Fetch rep records and calculate (sum) rep for the user"""
+        rep_records = RepRecord.fetch_all(self.id)
+        sum_ = sum([record.rep_value for record in rep_records])
+        return sum_
 
     def add_to_group(self, group_title):
         group = Group(group_title)
@@ -201,6 +200,13 @@ class RepRecord(Entity):
                         .order_by(desc(cls.creation_time))\
                         .first()
         return None
+
+    @classmethod
+    def fetch_all(cls, user_id):
+        """Fetch all rep records for a user"""
+        query = DBSession.query(cls).filter(cls.user_id == user_id).all()
+        return query
+
 
 #========
 # MAPPERS
