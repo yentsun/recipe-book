@@ -48,7 +48,8 @@ class Profile(Entity):
     def construct_from_multidict(cls, multidict, **kwargs):
         current_profile = kwargs.get('current_profile')
         skip_nickname = False
-        if current_profile.nickname == multidict.getone('nickname'):
+        if current_profile and current_profile.nickname ==\
+                multidict.getone('nickname'):
             skip_nickname = True
         schema = ProfileSchema(after_bind=dont_check_current_nickname) \
             .bind(skip_nickname=skip_nickname)

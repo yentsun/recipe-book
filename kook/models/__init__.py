@@ -12,13 +12,17 @@ DBSession = scoped_session(sessionmaker(
 
 UPVOTE = 1
 DOWNVOTE = -1
+UNDO_VOTE = 0
 
-# tuple explained: ({author rep change}, {voter required rep},
-#                   {voter rep change})
+# tuple explained: ({author rep change}, {voter rep change},
+#                   {required rep})
 VOTE_REP_MAP = {
-    UPVOTE: (10, 15, 0),
-    DOWNVOTE: (-2, 125, -1)
+    UPVOTE: (10, 0, 15),
+    DOWNVOTE: (-2, -1, 125)
 }
+UPVOTE_REWARD = VOTE_REP_MAP[UPVOTE][0]
+DOWNVOTE_PENALTY = VOTE_REP_MAP[UPVOTE][0]
+DOWNVOTE_COST = VOTE_REP_MAP[UPVOTE][2]
 
 FRACTIONS = {
     0.5: u'½',

@@ -19,7 +19,7 @@ from kook.security import (RECIPE_BASE_ACL, AUTHOR_ACTIONS, VOTE_ACTIONS,
                            COMMENT_BASE_ACL)
 from kook.mako_filters import pretty_time, markdown
 from kook.models.schemas import RecipeSchema, CommentSchema
-from kook.models import (Entity, DBSession, UPVOTE, DOWNVOTE, VOTE_REP_MAP,
+from kook.models import (Entity, DBSession, VOTE_REP_MAP,
                          FRACTIONS, generate_id)
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
@@ -113,7 +113,7 @@ class Recipe(Entity):
         """
         self.rating += vote_value
         self.author.add_rep(VOTE_REP_MAP[vote_value][0], 'vote', self)
-        voter_user.add_rep(VOTE_REP_MAP[vote_value][2], 'vote', self)
+        voter_user.add_rep(VOTE_REP_MAP[vote_value][1], 'vote', self)
         record = VoteRecord(voter_user, self, vote_value)
         record.save()
 

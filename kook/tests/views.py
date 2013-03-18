@@ -16,7 +16,7 @@ from pyramid_beaker import set_cache_regions_from_settings
 from paste.deploy.loadwsgi import appconfig
 from kook.mako_filters import failsafe_get
 
-from kook.models import (DBSession, UPVOTE, VOTE_REP_MAP, DOWNVOTE)
+from kook.models import (DBSession, UPVOTE, VOTE_REP_MAP, DOWNVOTE, UNDO_VOTE)
 from kook.models.recipe import (Recipe, Step, Product, Ingredient,
                                 Unit, AmountPerUnit, Dish, Tag, DishImage)
 from kook.models.user import User, Group, Profile, RepRecord
@@ -416,26 +416,20 @@ class TestRecipeViews(unittest.TestCase):
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         post_upvote = MultiDict((
             ('recipe_id', recipe.ID),
-            ('vote_value', '1')))
-        post_downvote = MultiDict((
+            ('vote_value', UPVOTE)))
+        post_undo_vote = MultiDict((
             ('recipe_id', recipe.ID),
-            ('vote_value', '-1')))
+            ('vote_value', UNDO_VOTE)))
         request_upvote = DummyRequest(POST=post_upvote, user=user)
-        request_downvote = DummyRequest(POST=post_downvote, user=user)
+        request_undo_vote = DummyRequest(POST=post_undo_vote, user=user)
         vote_view(request_upvote)
-        vote_view(request_downvote)
-        vote_view(request_upvote)
-        vote_view(request_downvote)
-        vote_view(request_upvote)
+        vote_view(request_undo_vote)
         self.assertEqual(1, recipe.rating)
         self.assertEqual(120 + UPVOTE_REP_CHANGE + DOWNVOTE_REP_CHANGE,
                          recipe.author.profile.rep)
         self.assertIs(user.last_vote(recipe.ID).value, UPVOTE)
 
     def test_comment_view(self):
-        """
-
-        """
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         author = User.fetch(email='user2@acme.com')
         post = MultiDict((
@@ -732,12 +726,12 @@ class TestUserViews(unittest.TestCase):
 
     def test_user_rep(self):
         user1 = User.fetch(email='user1@acme.com')
-        self.assertEqual(120, user1.profile.rep)
+        self.assertEqual(120, user1.get_rep())
         user1.add_rep(20, 'test 1')
         user1.add_rep(-10, 'test 2')
         record = RepRecord.fetch(user_id=user1.id)
         self.assertEqual(-10, record.rep_value,)
-        self.assertEqual(130, user1.profile.rep)
+        self.assertEqual(130, user1.get_rep())
         datetime_format = '%Y-%m-%d %H:%M'
         self.assertEqual(datetime.now().strftime(datetime_format),
                          record.creation_time.strftime(datetime_format))

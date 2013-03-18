@@ -24,13 +24,6 @@ def is_new_email(email):
         return True
 
 
-def check_nickname(nickname):
-    from kook.models.user import Profile
-    if Profile.fetch(nickname=nickname):
-        return False
-    return True
-
-
 def dont_check_current_nickname(node, kw):
     if kw.get('skip_nickname'):
         del node['nickname']
@@ -75,10 +68,7 @@ class RecipeSchema(MappingSchema):
 
 
 class ProfileSchema(MappingSchema):
-    nickname = SchemaNode(String(), missing=None,
-                          validator=Function(check_nickname,
-                                             message=u'Псевдоним ${val} '
-                                                     u'уже зарегистрирован'))
+    nickname = SchemaNode(String(), missing='')
     real_name = SchemaNode(String(), missing='')
     birthday = SchemaNode(Date(), missing=None)
     location = SchemaNode(String(), missing='')
