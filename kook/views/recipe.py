@@ -8,14 +8,14 @@ from pyramid.httpexceptions import HTTPFound, HTTPError
 from pyramid.security import has_permission, Deny
 from pyramid.i18n import get_localizer
 
-from kook.models import UPVOTE, DOWNVOTE, form_msg
+from kook.models import UPVOTE, DOWNVOTE, form_msg, UNDO_VOTE
 from kook.models.recipe import Product, Recipe, Tag, Comment, Dish
 from kook import caching
 
 
 def index_view(request):
     response = dict()
-    response['user_recipes'] = Recipe.fetch_all(author_id=request.user.id,
+    response['user_recipes'] = Recipe.fetch_all(user_id=request.user.id,
                                                 order_by='creation_time')
     return response
 
@@ -165,25 +165,30 @@ def vote_view(request):
     """
     if request.POST:
         id_ = request.POST.getone('recipe_id')
-        vote_value = int(request.POST.getone('vote_value'))
-        perm_required = None
-        if vote_value is UPVOTE:
-            perm_required = 'upvote'
-        if vote_value is DOWNVOTE:
-            perm_required = 'downvote'
         recipe = Recipe.fetch(id_)
-        last_vote_acl = get_acl_by_last_vote(request.user, recipe)
-        recipe.attach_acl(prepend=last_vote_acl)
-        can_do = has_permission(perm_required, recipe, request)
-        if can_do:
-            recipe.add_vote(request.user, vote_value)
-            recipe.save()
-            return {'new_rating': recipe.rating,
-                    'status': 'ok'}
+        vote_value = int(request.POST.getone('vote_value'))
+        if vote_value is not UNDO_VOTE:
+            perm_required = None
+            if vote_value is UPVOTE:
+                perm_required = 'upvote'
+            if vote_value is DOWNVOTE:
+                perm_required = 'downvote'
+            last_vote_acl = get_acl_by_last_vote(request.user, recipe)
+            recipe.attach_acl(prepend=last_vote_acl)
+            can_do = has_permission(perm_required, recipe, request)
+            if can_do:
+                recipe.add_vote(request.user, vote_value)
+                recipe.save()
+                return {'new_rating': recipe.fetch_rating(),
+                        'status': 'ok'}
+            else:
+                msg = form_msg(can_do)
+                return {'status': 'error',
+                        'message': msg}
         else:
-            msg = form_msg(can_do)
-            return {'status': 'error',
-                    'message': msg}
+            recipe.undo_vote(request.user)
+            return {'new_rating': recipe.fetch_rating(),
+                    'status': 'ok'}
 
 
 def comment_view(request):

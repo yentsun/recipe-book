@@ -74,25 +74,32 @@ class Entity(object):
 
     def delete(self):
         DBSession.delete(self)
+        DBSession.flush()
 
     def revert(self):
         DBSession.rollback()
 
     @classmethod
-    def fetch(cls, primary):
-        return DBSession.query(cls).get(primary)
+    def fetch(cls, primary_key):
+        """Fetch an instance by primary key"""
+        return DBSession.query(cls).get(primary_key)
 
     @classmethod
-    def fetch_all(cls, **kwargs):
+    def fetch_all(cls, order_by=None, limit=None, **filters):
+        """Fetch all instances filtered by **filters"""
         query = DBSession.query(cls)
-        if 'order' in kwargs:
-            query = query.order_by(getattr(cls, kwargs['order']))
+        if order_by:
+            query = query.order_by(getattr(cls, order_by))
+        if limit:
+            query = query.limit(limit)
+        for name, value in filters.items():
+            query = query.filter(getattr(cls, name) == value)
         return query.all()
 
 
 class RootFactory(object):
     __acl__ = [
-        (Allow, Everyone, ('read')),
+        (Allow, Everyone, ('read',)),
         (Allow, 'registered', ('create', 'update', 'delete',
                                'vote', 'comment', 'dashboard')),
         (Allow, 'admins', ALL_PERMISSIONS),

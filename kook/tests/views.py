@@ -18,7 +18,8 @@ from kook.mako_filters import failsafe_get
 
 from kook.models import (DBSession, UPVOTE, VOTE_REP_MAP, DOWNVOTE, UNDO_VOTE)
 from kook.models.recipe import (Recipe, Step, Product, Ingredient,
-                                Unit, AmountPerUnit, Dish, Tag, DishImage)
+                                Unit, AmountPerUnit, Dish, Tag, DishImage,
+                                VoteRecord)
 from kook.models.user import User, Group, Profile, RepRecord
 from kook.models.sqla_metadata import metadata
 from kook.security import VOTE_ACTIONS
@@ -272,13 +273,13 @@ class TestRecipeViews(unittest.TestCase):
     def test_delete_recipe_view(self):
         user = User.fetch(email='user1@acme.com')
         recipe_to_delete = Recipe.fetch_all(dish_title=u'potato salad',
-                                            author_id=user.id)[0]
+                                            user_id=user.id)[0]
         request = DummyRequest(user=user)
         request.matchdict['id'] = recipe_to_delete.ID
         delete_view(request)
         self.assertEqual(len(Recipe.fetch_all()), 2)
         assert len(Recipe.fetch_all(dish_title=u'винегрет',
-                                    author_id=user.id)) is 0
+                                    user_id=user.id)) is 0
 
     def test_user_recipe_index_view(self):
         request = DummyRequest(user=User.fetch(email='user1@acme.com'))
@@ -311,7 +312,7 @@ class TestRecipeViews(unittest.TestCase):
         request = DummyRequest(user=user)
         recipe_to_test = Recipe.fetch_all(
             dish_title=u'potato salad',
-            author_id=User.fetch(email='user1@acme.com').id)[0]
+            user_id=User.fetch(email='user1@acme.com').id)[0]
         request.matchdict['id'] = recipe_to_test.ID
         response = read_view(request)
         recipe = response['recipe']
@@ -371,14 +372,14 @@ class TestRecipeViews(unittest.TestCase):
         user = User.fetch(email='user1@acme.com')
         self.config.testing_securitypolicy(userid=user.id, permissive=False)
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
-        self.assertEqual(0, recipe.rating)
+        self.assertEqual(0, recipe.fetch_rating())
         post = MultiDict((
             ('recipe_id', recipe.ID),
             ('vote_value', '-1')))
         request = DummyRequest(POST=post, user=user)
         vote_view(request)
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
-        self.assertEqual(0, recipe.rating)
+        self.assertEqual(0, recipe.fetch_rating())
 
     def test_upvote(self):
         user = User.fetch(email='user2@acme.com')
@@ -389,11 +390,11 @@ class TestRecipeViews(unittest.TestCase):
             ('vote_value', '1')))
         request = DummyRequest(POST=post, user=user)
         vote_view(request)
-        self.assertEqual(1, recipe.rating)
+        self.assertEqual(1, recipe.fetch_rating())
         self.assertEqual(120 + VOTE_REP_MAP[UPVOTE][0],
-                         recipe.author.get_rep())
+                         recipe.author.fetch_rep())
         self.assertIs(user.last_vote(recipe.ID).value, UPVOTE)
-        self.assertEqual(10 + VOTE_REP_MAP[UPVOTE][2], user.get_rep())
+        self.assertEqual(10 + VOTE_REP_MAP[UPVOTE][1], user.fetch_rep())
 
     def test_downvote(self):
         user = User.fetch(email='user2@acme.com')
@@ -404,13 +405,13 @@ class TestRecipeViews(unittest.TestCase):
             ('vote_value', DOWNVOTE)))
         request = DummyRequest(POST=post, user=user)
         vote_view(request)
-        self.assertEqual(-1, recipe.rating)
+        self.assertEqual(-1, recipe.fetch_rating())
         expected_author_rep = 120 + VOTE_REP_MAP[DOWNVOTE][0]
-        actual_author_rep = recipe.author.get_rep()
+        actual_author_rep = recipe.author.fetch_rep()
         self.assertEqual(expected_author_rep, actual_author_rep)
-        self.assertEqual(10 + VOTE_REP_MAP[DOWNVOTE][2], user.get_rep())
+        self.assertEqual(10 + VOTE_REP_MAP[DOWNVOTE][1], user.fetch_rep())
 
-    def test_vote_sequence(self):
+    def test_vote_undo(self):
         user = User.fetch(email='user2@acme.com')
         self.config.testing_securitypolicy(userid=user.id, permissive=True)
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
@@ -424,10 +425,9 @@ class TestRecipeViews(unittest.TestCase):
         request_undo_vote = DummyRequest(POST=post_undo_vote, user=user)
         vote_view(request_upvote)
         vote_view(request_undo_vote)
-        self.assertEqual(1, recipe.rating)
-        self.assertEqual(120 + UPVOTE_REP_CHANGE + DOWNVOTE_REP_CHANGE,
-                         recipe.author.profile.rep)
-        self.assertIs(user.last_vote(recipe.ID).value, UPVOTE)
+        deleted_record = VoteRecord.fetch((user.id, recipe.ID))
+        self.assertIsNone(deleted_record)
+        self.assertEqual(0, recipe.fetch_rating())
 
     def test_comment_view(self):
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
@@ -726,12 +726,12 @@ class TestUserViews(unittest.TestCase):
 
     def test_user_rep(self):
         user1 = User.fetch(email='user1@acme.com')
-        self.assertEqual(120, user1.get_rep())
+        self.assertEqual(120, user1.fetch_rep())
         user1.add_rep(20, 'test 1')
         user1.add_rep(-10, 'test 2')
         record = RepRecord.fetch(user_id=user1.id)
         self.assertEqual(-10, record.rep_value,)
-        self.assertEqual(130, user1.get_rep())
+        self.assertEqual(130, user1.fetch_rep())
         datetime_format = '%Y-%m-%d %H:%M'
         self.assertEqual(datetime.now().strftime(datetime_format),
                          record.creation_time.strftime(datetime_format))

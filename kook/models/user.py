@@ -98,7 +98,7 @@ class User(Entity):
         record = RepRecord(self.id, rep_value, subject, ref_object)
         record.save()
 
-    def get_rep(self):
+    def fetch_rep(self):
         """Fetch rep records and calculate (sum) rep for the user"""
         rep_records = RepRecord.fetch_all(self.id)
         sum_ = sum([record.rep_value for record in rep_records])

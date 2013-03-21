@@ -16,7 +16,6 @@ recipes = Table(
     Column('creation_time', DateTime()),
     Column('update_time', DateTime()),
     Column('status_id', Integer, nullable=False),
-    Column('rating', Integer, nullable=False),
     Column('user_id', CHAR(36), ForeignKey('users.id'), nullable=False))
 
 products = Table(
@@ -110,7 +109,7 @@ vote_records = Table(
     Column('user_id', CHAR(36), ForeignKey('users.id'), primary_key=True),
     Column('recipe_id', CHAR(36), ForeignKey('recipes.ID'), primary_key=True),
     Column('value', Integer),
-    Column('creation_time', DateTime(), primary_key=True))
+    Column('creation_time', DateTime()))
 
 comments = Table(
     'comments', metadata,

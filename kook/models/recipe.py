@@ -81,13 +81,12 @@ class Dish(Entity):
 class Recipe(Entity):
     """Recipe model"""
     def __init__(self, dish, author, id_=None, description=None,
-                 status_id=1, creation_time=None, rating=0, update_time=None):
+                 status_id=1, creation_time=None, update_time=None):
         self.dish = dish
         self.ID = id_ or generate_id()
         self.description = description
         self.author = author
         self.status_id = status_id
-        self.rating = rating
         self.steps = []
         self.ingredients = []
         self.comments = []
@@ -96,6 +95,12 @@ class Recipe(Entity):
 
     def __repr__(self):
         return u'%s from %s' % (self.dish.title, self.author.email)
+
+    def fetch_rating(self):
+        """Fetch vote records and calculate rating"""
+        records = VoteRecord.fetch_all(recipe_id=self.ID)
+        sum_ = sum([record.value for record in records])
+        return sum_
 
     def attach_acl(self, prepend=None):
         acl = prepend or []
@@ -106,16 +111,20 @@ class Recipe(Entity):
         acl.extend(RECIPE_BASE_ACL)
         self.__acl__ = acl
 
-    def add_vote(self, voter_user, vote_value):
+    def add_vote(self, voter, vote_value):
         """
         Register a vote for the recipe. Update author's and voter's
         reps accordingly.
         """
-        self.rating += vote_value
         self.author.add_rep(VOTE_REP_MAP[vote_value][0], 'vote', self)
-        voter_user.add_rep(VOTE_REP_MAP[vote_value][1], 'vote', self)
-        record = VoteRecord(voter_user, self, vote_value)
+        voter.add_rep(VOTE_REP_MAP[vote_value][1], 'vote', self)
+        record = VoteRecord(voter, self, vote_value)
         record.save()
+
+    def undo_vote(self, voter):
+        """Withdraw a vote for the recipe, left earlier by `voter`"""
+        VoteRecord.fetch((voter.id, self.ID)).delete()
+        #TODO decide on wether rep record should also be deleted
 
     @classmethod
     def dummy(cls, author, dict_=None):
@@ -153,7 +162,7 @@ class Recipe(Entity):
         steps_numbers = multidict.getall('step_number')
         time_values = multidict.getall('time_value')
         steps_texts = multidict.getall('step_text')
-        for number, text, time_value, in zip(steps_numbers,
+        for number, text, time_value in zip(steps_numbers,
                                              steps_texts, time_values):
             dictionary['steps'].append({'number': number,
                                         'text': text,
@@ -285,23 +294,9 @@ class Recipe(Entity):
         """Fetch a recipe by id with all children. A costly call"""
         return DBSession.query(cls).options(subqueryload('*')).get(id_)
 
-    @classmethod
-    def fetch_all(cls, author_id=None, dish_title=None, limit=None,
-                  order_by='rating'):
-#        TODO index all relevant tables
-        from kook.models.sqla_metadata import recipes
-        query = DBSession.query(cls).order_by(desc(getattr(cls, order_by)))
-        if author_id:
-            query = query.filter(recipes.c.user_id == author_id)
-        if dish_title:
-            query = query.filter(recipes.c.dish_title == dish_title)
-        if limit:
-            query = query.limit(limit)
-        return query.all()
-
 
 class Step(Entity):
-    u"""Модель шага приготовления"""
+    """Cooking step model"""
 
     def __init__(self, number, text, time_value=None, note=None):
         self.number = number
@@ -511,16 +506,6 @@ class VoteRecord(Entity):
         self.recipe = recipe
         self.value = value
         self.creation_time = datetime.now()
-
-    @classmethod
-    def fetch(cls, user_id, latest=True):
-        query = DBSession.query(cls)
-        if latest:
-            return query\
-                .filter(cls.user.id == user_id)\
-                .order_by(desc(cls.creation_time))\
-                .first()
-        return None
 
 
 class Comment(Entity):
