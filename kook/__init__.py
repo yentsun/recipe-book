@@ -131,7 +131,7 @@ def main(global_settings, **settings):
                     route_name='index',
                     renderer=find_renderer('main/index.mako'))
 
-    config.add_view('kook.views.recipe.index_view',
+    config.add_view('kook.views.recipe.index',
                     route_name='dashboard', permission='dashboard',
                     renderer=find_renderer('user/dashboard.mako'))
 
@@ -139,7 +139,7 @@ def main(global_settings, **settings):
                     route_name='tag',
                     renderer=find_renderer('recipe/tag.mako'))
 
-    config.add_view('kook.views.recipe.read_view',
+    config.add_view('kook.views.recipe.read',
                     route_name='read_recipe',
                     renderer=find_renderer('recipe/read_recipe.mako'))
 
@@ -151,23 +151,23 @@ def main(global_settings, **settings):
                     route_name='create_recipe', permission='create',
                     renderer=find_renderer('recipe/update_recipe.mako'))
 
-    config.add_view('kook.views.recipe.delete_view',
+    config.add_view('kook.views.recipe.delete',
                     route_name='delete_recipe')
 
-    config.add_view('kook.views.recipe.product_units_view',
+    config.add_view('kook.views.recipe.product_units',
                     route_name='product_units', renderer='json')
 
-    config.add_view('kook.views.recipe.vote_view', permission='vote',
+    config.add_view('kook.views.recipe.vote', permission='vote',
                     route_name='recipe_vote', renderer='json')
 
-    config.add_view('kook.views.recipe.comment_view', permission='comment',
+    config.add_view('kook.views.recipe.comment', permission='comment',
                     route_name='post_comment',
                     renderer=find_renderer('recipe/comment.mako'))
 
-    config.add_view('kook.views.recipe.delete_comment_view',
+    config.add_view('kook.views.recipe.delete_comment',
                     route_name='delete_comment', renderer='json')
 
-    config.add_view('kook.views.recipe.update_status_view',
+    config.add_view('kook.views.recipe.update_status',
                     route_name='update_recipe_status', renderer='json')
 
     #=====

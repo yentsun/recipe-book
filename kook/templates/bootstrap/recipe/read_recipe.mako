@@ -16,7 +16,7 @@
             <span id="author" class="well pull-right" title="Рецепт от...">
                 <img src="${recipe.author.gravatar_url(23)}" alt="юзерпик">
                 ${recipe.author.display_name}
-                <strong>${recipe.author.profile.rep}</strong>
+                <strong>${recipe.author.fetch_rep()}</strong>
             </span>
         </small>
     </h1>
@@ -45,7 +45,7 @@
                 <i class="icon-chevron-up"></i>
             </button>
             % endif
-            <div id="rating_value" class="well">${recipe.rating}</div>
+            <div id="rating_value" class="well">${recipe.fetch_rating()}</div>
             % if last_vote and last_vote.value is DOWNVOTE:
             <button class="btn btn-warning active" type="button"
                     data-original-title="Вы уже проголосовали: -1"

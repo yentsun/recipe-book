@@ -118,7 +118,14 @@ class User(Entity):
 
     @property
     def display_name(self):
-        return self.profile.nickname or self.profile.real_name or self.email
+        """
+        Return a display name.
+        Fallback to email if the user has no profile
+        """
+        display_name = self.email
+        if self.profile:
+            display_name = self.profile.nickname or self.profile.real_name
+        return display_name
 
     def gravatar_url(self, size=20):
         default = 'identicon'

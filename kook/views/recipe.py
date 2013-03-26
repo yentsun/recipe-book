@@ -13,7 +13,7 @@ from kook.models.recipe import Product, Recipe, Tag, Comment, Dish
 from kook import caching
 
 
-def index_view(request):
+def index(request):
     response = dict()
     response['user_recipes'] = Recipe.fetch_all(user_id=request.user.id,
                                                 order_by='creation_time')
@@ -28,7 +28,7 @@ def tag(request):
     return response
 
 
-def read_view(request):
+def read(request):
     recipe_id = request.matchdict['id']
     recipe = caching.get_recipe(recipe_id)
     last_vote = None
@@ -48,7 +48,7 @@ def read_view(request):
     return response
 
 
-def delete_view(request):
+def delete(request):
     recipe_id = request.matchdict['id']
     recipe = Recipe.fetch(id_=recipe_id)
     recipe.attach_acl()
@@ -134,7 +134,7 @@ def create_update(request):
     return response
 
 
-def product_units_view(request):
+def product_units(request):
     product_title = request.matchdict['product_title']
     product = Product.fetch(product_title)
     result = []
@@ -148,7 +148,7 @@ def product_units_view(request):
     return result
 
 
-def update_status_view(request):
+def update_status(request):
     id_ = request.matchdict['id']
     recipe = Recipe.fetch(id_)
     if request.POST:
@@ -158,7 +158,7 @@ def update_status_view(request):
         return {'status_id': new_status_id}
 
 
-def vote_view(request):
+def vote(request):
     """
     Process voting from recipe request. Return new recipe rating.
     Ajax only.
@@ -191,7 +191,7 @@ def vote_view(request):
                     'status': 'ok'}
 
 
-def comment_view(request):
+def comment(request):
     """
     Process recipe comment request. Return 'ok' or 'error'. Ajax only.
 
@@ -229,7 +229,7 @@ def comment_view(request):
                 'can_edit': True}
 
 
-def delete_comment_view(request):
+def delete_comment(request):
     recipe_id = request.matchdict['recipe_id']
     creation_time = request.matchdict['creation_time']
     Comment.delete_by_id(request.user.id, recipe_id, creation_time)

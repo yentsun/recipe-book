@@ -24,9 +24,9 @@ from kook.models.user import User, Group, Profile, RepRecord
 from kook.models.sqla_metadata import metadata
 from kook.security import VOTE_ACTIONS
 from kook.views.recipe import (create_update as create_update_recipe,
-                               delete_view, index_view, read_view,
-                               product_units_view, update_status_view,
-                               vote_view, comment_view, delete_comment_view,
+                               delete, index, read,
+                               product_units, update_status,
+                               vote, comment, delete_comment,
                                tag)
 from kook.views.dish import (read as read_dish, update as update_dish)
 from kook.views.product import (delete as delete_product,
@@ -130,7 +130,7 @@ class TestRecipeViews(unittest.TestCase):
         recipe_to_test = Recipe.fetch_all(
             dish_title=u'potato salad')[0]
         request.matchdict['id'] = recipe_to_test.ID
-        response = read_view(request)
+        response = read(request)
         recipe = response['recipe']
         potato = Product(title=u'potato')
         mix = Step(3, u'Just before serving, add scallions and mint to the '
@@ -157,7 +157,7 @@ class TestRecipeViews(unittest.TestCase):
         request = DummyRequest()
         recipe_to_test = Recipe.fetch_all(dish_title=u'spicy chick pea')[0]
         request.matchdict['id'] = recipe_to_test.ID
-        response = read_view(request)
+        response = read(request)
         recipe = response['recipe']
         self.assertEqual(recipe.ingredients[2].amount, 5.5)
         self.assertEqual(recipe.ingredients[2].get_measured(), u'5½')
@@ -276,34 +276,34 @@ class TestRecipeViews(unittest.TestCase):
                                             user_id=user.id)[0]
         request = DummyRequest(user=user)
         request.matchdict['id'] = recipe_to_delete.ID
-        delete_view(request)
+        delete(request)
         self.assertEqual(len(Recipe.fetch_all()), 2)
         assert len(Recipe.fetch_all(dish_title=u'винегрет',
                                     user_id=user.id)) is 0
 
     def test_user_recipe_index_view(self):
         request = DummyRequest(user=User.fetch(email='user1@acme.com'))
-        response = index_view(request)
+        response = index(request)
         recipes = response['user_recipes']
         self.assertEqual(len(recipes), 2)
 
     def test_alt_user_recipe_index_view(self):
         request = DummyRequest(user=User.fetch(email='user2@acme.com'))
-        response = index_view(request)
+        response = index(request)
         recipes = response['user_recipes']
         self.assertEqual(len(recipes), 1)
 
     def test_product_units_view(self):
         request = DummyRequest()
         request.matchdict['product_title'] = u'potato'
-        response = product_units_view(request)
+        response = product_units(request)
         response = json.dumps(response)
         self.assertEqual(
             '[{"amount": 8000.0, "abbr": "bkt.", "title": "bucket"}, '
             '{"amount": 100.0, "abbr": "pcs.", "title": "piece"}]', response)
 
         request.matchdict['product_title'] = u'batato'
-        response = product_units_view(request)
+        response = product_units(request)
         response = json.dumps(response)
         self.assertEqual('[]', response)
 
@@ -314,7 +314,7 @@ class TestRecipeViews(unittest.TestCase):
             dish_title=u'potato salad',
             user_id=User.fetch(email='user1@acme.com').id)[0]
         request.matchdict['id'] = recipe_to_test.ID
-        response = read_view(request)
+        response = read(request)
         recipe = response['recipe']
         recipe_json = json.dumps(recipe.to_dict())
         self.assertEqual(
@@ -364,7 +364,7 @@ class TestRecipeViews(unittest.TestCase):
         request = DummyRequest(POST=POST,
                                user=User.fetch(email='user1@acme.com'))
         request.matchdict['id'] = recipe.ID
-        update_status_view(request)
+        update_status(request)
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         self.assertEqual(0, recipe.status_id)
 
@@ -377,7 +377,7 @@ class TestRecipeViews(unittest.TestCase):
             ('recipe_id', recipe.ID),
             ('vote_value', '-1')))
         request = DummyRequest(POST=post, user=user)
-        vote_view(request)
+        vote(request)
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         self.assertEqual(0, recipe.fetch_rating())
 
@@ -389,7 +389,7 @@ class TestRecipeViews(unittest.TestCase):
             ('recipe_id', recipe.ID),
             ('vote_value', '1')))
         request = DummyRequest(POST=post, user=user)
-        vote_view(request)
+        vote(request)
         self.assertEqual(1, recipe.fetch_rating())
         self.assertEqual(120 + VOTE_REP_MAP[UPVOTE][0],
                          recipe.author.fetch_rep())
@@ -404,7 +404,7 @@ class TestRecipeViews(unittest.TestCase):
             ('recipe_id', recipe.ID),
             ('vote_value', DOWNVOTE)))
         request = DummyRequest(POST=post, user=user)
-        vote_view(request)
+        vote(request)
         self.assertEqual(-1, recipe.fetch_rating())
         expected_author_rep = 120 + VOTE_REP_MAP[DOWNVOTE][0]
         actual_author_rep = recipe.author.fetch_rep()
@@ -423,8 +423,8 @@ class TestRecipeViews(unittest.TestCase):
             ('vote_value', UNDO_VOTE)))
         request_upvote = DummyRequest(POST=post_upvote, user=user)
         request_undo_vote = DummyRequest(POST=post_undo_vote, user=user)
-        vote_view(request_upvote)
-        vote_view(request_undo_vote)
+        vote(request_upvote)
+        vote(request_undo_vote)
         deleted_record = VoteRecord.fetch((user.id, recipe.ID))
         self.assertIsNone(deleted_record)
         self.assertEqual(0, recipe.fetch_rating())
@@ -436,7 +436,7 @@ class TestRecipeViews(unittest.TestCase):
             ('recipe_id', recipe.ID),
             ('comment_text', u'Какой интересный рецепт!')))
         request = DummyRequest(POST=post, user=author)
-        comment_view(request)
+        comment(request)
         self.assertEqual(1, len(recipe.comments))
         comment = recipe.comments[0]
         self.assertEqual(u'Какой интересный рецепт!', comment.text)
@@ -447,7 +447,7 @@ class TestRecipeViews(unittest.TestCase):
             ('recipe_id', recipe.ID),
             ('comment_text', u'т прнс?')))
         request = DummyRequest(POST=post, user=author)
-        self.assertRaises(HTTPError, comment_view, request)
+        self.assertRaises(HTTPError, comment, request)
         self.assertEqual(1, len(recipe.comments))
 
         #test update comment
@@ -456,7 +456,7 @@ class TestRecipeViews(unittest.TestCase):
             ('creation_time', comment.creation_time),
             ('comment_text', u'Какой неинтересный рецепт!')))
         request = DummyRequest(POST=post, user=author)
-        comment_view(request)
+        comment(request)
         self.assertEqual(1, len(recipe.comments))
         comment = recipe.comments[0]
         self.assertEqual(u'Какой неинтересный рецепт!', comment.text)
@@ -468,13 +468,13 @@ class TestRecipeViews(unittest.TestCase):
             ('recipe_id', recipe.ID),
             ('comment_text', u'Какой интересный рецепт!')))
         request = DummyRequest(POST=post, user=author)
-        comment_view(request)
+        comment(request)
         assert len(recipe.comments) is 1
         comment = recipe.comments[0]
         request = DummyRequest(user=author)
         request.matchdict['recipe_id'] = recipe.ID
         request.matchdict['creation_time'] = comment.creation_time
-        delete_comment_view(request)
+        delete_comment(request)
         transaction.commit()
         recipe = Recipe.fetch_all(dish_title=u'potato salad')[0]
         self.assertEqual(0, len(recipe.comments))
