@@ -26,7 +26,8 @@ from kook.security import VOTE_ACTIONS
 from kook.views.recipe import (create_update as create_update_recipe,
                                delete, index, read,
                                product_units, update_status,
-                               vote, comment, delete_comment,
+                               vote, comment as comment_view,
+                               delete_comment,
                                tag)
 from kook.views.dish import (read as read_dish, update as update_dish)
 from kook.views.product import (delete as delete_product,
@@ -436,7 +437,7 @@ class TestRecipeViews(unittest.TestCase):
             ('recipe_id', recipe.ID),
             ('comment_text', u'Какой интересный рецепт!')))
         request = DummyRequest(POST=post, user=author)
-        comment(request)
+        comment_view(request)
         self.assertEqual(1, len(recipe.comments))
         comment = recipe.comments[0]
         self.assertEqual(u'Какой интересный рецепт!', comment.text)
@@ -468,7 +469,7 @@ class TestRecipeViews(unittest.TestCase):
             ('recipe_id', recipe.ID),
             ('comment_text', u'Какой интересный рецепт!')))
         request = DummyRequest(POST=post, user=author)
-        comment(request)
+        comment_view(request)
         assert len(recipe.comments) is 1
         comment = recipe.comments[0]
         request = DummyRequest(user=author)
