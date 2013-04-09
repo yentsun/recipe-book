@@ -26,7 +26,7 @@ from kook.security import VOTE_ACTIONS
 from kook.views.recipe import (create_update as create_update_recipe,
                                delete, index, read,
                                product_units, update_status,
-                               vote, comment, delete_comment,
+                               vote, comment as comment_view, delete_comment,
                                tag)
 from kook.views.dish import (read as read_dish, update as update_dish)
 from kook.views.product import (delete as delete_product,
@@ -333,7 +333,7 @@ class TestRecipeViews(unittest.TestCase):
             '{"text": "Just before serving, add scallions and mint to the '
             'salad and toss gently.", "time_value": 5, "number": 3}], '
             '"dish_title": "potato salad", '
-            '"description": "The **fastest** way to cook potato salad"}',
+            '"description": "the fastest way"}',
             recipe_json)
 
     def test_recipe_acl(self):
@@ -436,7 +436,7 @@ class TestRecipeViews(unittest.TestCase):
             ('recipe_id', recipe.ID),
             ('comment_text', u'Какой интересный рецепт!')))
         request = DummyRequest(POST=post, user=author)
-        comment(request)
+        comment_view(request)
         self.assertEqual(1, len(recipe.comments))
         comment = recipe.comments[0]
         self.assertEqual(u'Какой интересный рецепт!', comment.text)
@@ -447,7 +447,7 @@ class TestRecipeViews(unittest.TestCase):
             ('recipe_id', recipe.ID),
             ('comment_text', u'т прнс?')))
         request = DummyRequest(POST=post, user=author)
-        self.assertRaises(HTTPError, comment, request)
+        self.assertRaises(HTTPError, comment_view, request)
         self.assertEqual(1, len(recipe.comments))
 
         #test update comment
@@ -456,7 +456,7 @@ class TestRecipeViews(unittest.TestCase):
             ('creation_time', comment.creation_time),
             ('comment_text', u'Какой неинтересный рецепт!')))
         request = DummyRequest(POST=post, user=author)
-        comment(request)
+        comment_view(request)
         self.assertEqual(1, len(recipe.comments))
         comment = recipe.comments[0]
         self.assertEqual(u'Какой неинтересный рецепт!', comment.text)
@@ -468,7 +468,7 @@ class TestRecipeViews(unittest.TestCase):
             ('recipe_id', recipe.ID),
             ('comment_text', u'Какой интересный рецепт!')))
         request = DummyRequest(POST=post, user=author)
-        comment(request)
+        comment_view(request)
         assert len(recipe.comments) is 1
         comment = recipe.comments[0]
         request = DummyRequest(user=author)
