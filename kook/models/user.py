@@ -180,7 +180,7 @@ class User(Entity):
     @classmethod
     def fetch_all(cls, limit=10):
         users = DBSession.query(cls).limit(limit).all()
-        return sorted(users, key=lambda user: user.profile.rep,
+        return sorted(users, key=lambda user: user.fetch_rep(),
                       reverse=True)
 
 

@@ -34,8 +34,8 @@ def main(global_settings, **settings):
         AuthTktAuthenticationPolicy('0J/#.JD6;LGNR-',
                                     callback=User.user_groups)
     authorization_policy = ACLAuthorizationPolicy()
-    engine = engine_from_config(settings)
-    DBSession.configure(bind=engine)
+    # engine = engine_from_config(settings)
+    # DBSession.configure(bind=engine)
     set_cache_regions_from_settings(settings)
     session_factory = UnencryptedCookieSessionFactoryConfig('5I73F3gRoYmj')
     config = Configurator(settings=settings, session_factory=session_factory,
