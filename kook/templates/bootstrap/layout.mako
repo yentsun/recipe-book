@@ -19,6 +19,8 @@
         ${self.css()}
     % endif
     <link rel="shortcut icon" href="/static/img/favicon.png">
+    <meta name="google-site-verification"
+          content="PR3r5tN0wrf2I5XMNQRe-zWz7nIzTMllhVclofp0g38" />
 </head>
 
 <body

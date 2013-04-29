@@ -12,7 +12,10 @@
 <div id="dish_slides" class="span6">
     % for dish in popular_dishes:
         <div class="item"
-             style="background-image:url(${dish.image.url})">
+             % if dish.image:
+             style="background-image:url(${dish.image.url})"
+             % endif
+                >
             <div class="caption">
                 <h3>${dish.title}
                     <span class="badge badge-inverse">
@@ -30,6 +33,7 @@
     <table id="best-recipes" class="table table-striped">
         <tbody>
             % for recipe in best_recipes:
+            % if recipe.dish.image:
             <tr>
                 <td>
                     <div class="icon">
@@ -38,7 +42,7 @@
                     </div>
                 </td>
                 <td>
-                    <strong>${recipe.rating}</strong>
+                    <strong>${recipe.fetch_rating()}</strong>
                 </td>
                 <td>
                     <a title="открыть рецепт"
@@ -50,9 +54,10 @@
                 <td>
                     <img src="${recipe.author.gravatar_url()}" alt="">
                     ${recipe.author.display_name}
-                    <strong>${recipe.author.profile.rep}</strong>
+                    <strong>${recipe.author.fetch_rep()}</strong>
                 </td>
             </tr>
+            % endif
             % endfor
         </tbody>
     </table>
@@ -169,7 +174,7 @@
                     <td>
                         <img src="${user.gravatar_url()}" alt="">
                         ${user.display_name}
-                        <strong>${user.profile.rep}</strong>
+                        <strong>${user.fetch_rep()}</strong>
                     </td>
                 </tr>
                 % endfor

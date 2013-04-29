@@ -43,7 +43,7 @@
                 <tr>
                     <td title="Рейтинг рецепта">
                         <strong class="label">
-                            ${recipe.rating}
+                            ${recipe.fetch_rating()}
                         </strong>
                     </td>
                     <td>
@@ -72,7 +72,7 @@
                     <td title="автор">
                         <img src="${recipe.author.gravatar_url()}" alt="">
                     ${recipe.author.display_name}
-                        <strong>${recipe.author.profile.rep}</strong>
+                        <strong>${recipe.author.fetch_rep()}</strong>
                     </td>
                     <td title="дата создания / обновления">
                         ${pretty_time(recipe.update_time) or\

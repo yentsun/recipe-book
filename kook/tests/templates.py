@@ -5,7 +5,6 @@ from paste.deploy.loadwsgi import appconfig
 from pyramid.testing import tearDown
 from kook.models import DBSession
 from kook.models.recipe import Recipe
-from kook.models.sqla_metadata import metadata
 from kook.tests.views import populate_test_data
 from kook import main
 
@@ -26,11 +25,33 @@ class FunctionalTests(unittest.TestCase):
         DBSession.remove()
         tearDown()
 
-    def test_read_recipe(self):
-        recipe_to_test = Recipe.fetch_all(dish_title=u'potato salad')[0]
-        res = self.testapp.get('/recipe/%s' % recipe_to_test.ID, status=200)
-        assert 'potato salad' in res.body
-        assert 'the fastest way' in res.body
-
     def test_index(self):
         self.testapp.get('/', status=200)
+
+    def test_login_form(self):
+        self.testapp.get('/login', status=200)
+
+    def test_read_recipe(self):
+        recipe_to_test = Recipe.fetch_all(dish_title=u'potato salad')[0]
+        res = self.testapp.get('/recipe/{id}'.format(id=recipe_to_test.ID),
+                               status=200)
+        assert 'potato salad' in res.body
+        assert 'the fastest way' in res.body
+        assert 'potato' in res.body
+        assert 'lemon juice' in res.body
+        assert 'Whisk lemon juice, oil, salt and pepper in a' in res.body
+
+    def test_tag(self):
+        tag_title = 'salad'
+        res = self.testapp.get('/tag/{title}'.format(title=tag_title),
+                               status=200)
+        assert 'potato salad' in res.body
+
+    def test_dish(self):
+        dish_title = u'potato salad'
+        recipe = Recipe.fetch_all(dish_title=dish_title)[0]
+        res = self.testapp.get('/dish/{title}'.format(title=dish_title),
+                               status=200)
+        assert 'potato salad' in res.body
+        assert 'the fastest way' in res.body
+        assert '/recipe/{id}'.format(id=recipe.ID) in res.body
