@@ -29,4 +29,4 @@ def main(argv=sys.argv):
     DBSession.configure(bind=engine)
     metadata.create_all(engine)
     with transaction.manager:
-        populate_test_data()
+        populate_test_data(engine)
