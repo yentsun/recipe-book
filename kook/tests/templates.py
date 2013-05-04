@@ -2,9 +2,11 @@ import unittest
 from sqlalchemy.engine import engine_from_config
 from webtest import TestApp
 from paste.deploy.loadwsgi import appconfig
+from pyramid import testing
 from pyramid.testing import tearDown
 from kook.models import DBSession
 from kook.models.recipe import Recipe
+from kook.models.user import User
 from kook.tests.views import populate_test_data
 from kook import main
 
@@ -17,6 +19,7 @@ class FunctionalTests(unittest.TestCase):
                              relative_to='../..')
         app = main({}, **settings)
         self.testapp = TestApp(app)
+        self.config = testing.setUp()
         engine = engine_from_config(settings)
         DBSession.configure(bind=engine)
         populate_test_data(engine)
@@ -55,3 +58,6 @@ class FunctionalTests(unittest.TestCase):
         assert 'potato salad' in res.body
         assert 'the fastest way' in res.body
         assert '/recipe/{id}'.format(id=recipe.ID) in res.body
+
+    def test_dashboard_forbidden(self):
+        self.testapp.get('/dashboard', status=403)

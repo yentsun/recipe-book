@@ -8,3 +8,4 @@ kook.db
 *.pid
 *.log
 *.sock
+dist/*
