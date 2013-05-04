@@ -9,3 +9,4 @@ kook.db
 *.log
 *.sock
 dist/*
+fabfile.py
