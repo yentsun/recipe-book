@@ -56,13 +56,15 @@
             <tr>
                 <td>
                     <strong class="label">
-                    ${recipe.rating}
+                    ${recipe.fetch_rating()}
                     </strong>
                 </td>
                 <td>
-                        <img width="25" src="${recipe.dish.image.url}"
+                    % if recipe.dish.image:
+                    <img width="25" src="${recipe.dish.image.url}"
                              alt="">
                         ${recipe.dish.title}: ${recipe.description}
+                    % endif
                 </td>
                 <td>
                     ${pretty_time(recipe.creation_time)}
@@ -80,7 +82,6 @@
     </table>
 </div>
 <div class="span5">
-
 </div>
 <%def name="js()">
     <script type="text/javascript"

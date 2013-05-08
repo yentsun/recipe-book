@@ -68,15 +68,14 @@
                         <li><a href="${request.route_path('update_profile')}">
                             <img width=20 src="${request.user.gravatar_url()}"
                                  alt="gravatar" height="20">
-                            % if request.user.profile.nickname:
-                            ${request.user.profile.nickname}
-                            % elif request.user.profile.real_name:
-                            ${request.user.profile.real_name}
+                            % if request.user.profile:
+                                ${request.user.profile.nickname or\
+                                  request.user.profile.real_name}
                             % else:
-                            ${request.user.email}
+                                ${request.user.email}
                             % endif
                             <strong>
-                                ${request.user.profile.rep}
+                                ${request.user.fetch_rep()}
                             </strong>
                         </a></li>
                         <li><a href="${request.route_path('logout')}">
