@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import unittest
 from sqlalchemy.engine import engine_from_config
 from webtest import TestApp
@@ -32,7 +34,12 @@ class FunctionalTests(unittest.TestCase):
         self.testapp.get('/', status=200)
 
     def test_login_form(self):
-        self.testapp.get('/login', status=200)
+        response = self.testapp.post('/login', ('email=user1@acme.com&'
+                                                'password=%E9%A2%98GZG%E4%BE'
+                                                '%8B%E6%B2%A1%2507Z'))
+        self.assertEqual(response.status_code, 302)
+        final_response = response.follow()
+        self.failUnless('alert-success' in final_response)
 
     def test_read_recipe(self):
         recipe_to_test = Recipe.fetch_all(dish_title=u'potato salad')[0]
