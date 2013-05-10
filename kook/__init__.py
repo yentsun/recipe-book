@@ -14,7 +14,6 @@ from kook.models import DBSession
 from kook.models.user import User
 from kook import caching
 
-__version__ = '0.7.5-tests'
 THEME = 'bootstrap'
 
 

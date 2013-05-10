@@ -2,7 +2,6 @@ import os
 import sys
 
 from setuptools import setup, find_packages
-from kook import __version__
 
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.rst')).read()
@@ -29,7 +28,7 @@ if sys.version_info[:3] < (2, 5, 0):
     requires.append('pysqlite')
 
 setup(name='kook',
-      version=__version__,
+      version='0.7.5-tests',
       description='a robust recipe inventory storing and sharing',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=["Programming Language :: Python",
