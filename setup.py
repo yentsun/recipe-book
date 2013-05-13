@@ -21,7 +21,8 @@ requires = [
     'markdown',
     'webtest',
     'Babel',
-    'paste'
+    'paste',
+    'nose'
 ]
 
 if sys.version_info[:3] < (2, 5, 0):

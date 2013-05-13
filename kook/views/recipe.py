@@ -71,7 +71,7 @@ def create_update(request):
     localizer = get_localizer(request)
 
     try:
-        next_path = request.current_route_url(id=recipe_id)
+        next_path = request.current_route_path(id=recipe_id)
     except ValueError:
         next_path = '/'
 

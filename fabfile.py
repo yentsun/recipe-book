@@ -1,7 +1,7 @@
 from fabric.api import *
 
 APP_NAME = 'kook'
-env.hosts = ['ubuntu@ec2-54-217-246-51.eu-west-1.compute.amazonaws.com']
+env.hosts = ['ubuntu@ec2-alpha']
 env.key_filename = ['/home/yentsun/.ssh/yentsunkey.pem']
 
 
@@ -17,6 +17,9 @@ def deploy():
     run('rm -f {dist}.tar.gz'.format(dist=dist))
     with cd('{dist}'.format(dist=dist)):
         run('~/env/bin/python setup.py install')
+    with cd('{dist}/kook/tests'.format(dist=dist)):
+        run('~/env/bin/nosetests views.py')
+        run('~/env/bin/nosetests templates.py')
     with cd(APP_NAME):
         run('supervisorctl shutdown')
     run('rm -rf {appname}'.format(appname=APP_NAME))
