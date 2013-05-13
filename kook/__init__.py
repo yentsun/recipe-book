@@ -67,9 +67,9 @@ def main(global_settings, **settings):
     config.add_route('update_profile', '/update_profile')
     config.add_route('logout', '/logout')
 
-    #=====
+    #======
     # DISH
-    #=====
+    #======
 
     config.add_route('dishes', '/dishes')
     config.add_view('kook.views.dish.index', route_name='dishes',
@@ -90,9 +90,9 @@ def main(global_settings, **settings):
                     permission='manage_dishes',
                     renderer=find_renderer('dish/update.mako'))
 
-    #========
+    #=========
     # PRODUCT
-    #========
+    #=========
 
     config.add_route('products', '/products')
     config.add_view('kook.views.product.index', route_name='products',
@@ -104,9 +104,9 @@ def main(global_settings, **settings):
                     permission='manage_products',
                     renderer=find_renderer('product/update.mako'))
 
-    #=====
+    #======
     # UNIT
-    #=====
+    #======
 
     config.add_route('create_unit', '/create_unit')
     config.add_view('kook.views.unit.create', route_name='create_unit',
@@ -118,9 +118,9 @@ def main(global_settings, **settings):
                     permission='manage_products',
                     renderer=find_renderer('unit/update.mako'))
 
-    #=======
+    #========
     # RECIPE
-    #=======
+    #========
 
     config.add_route('read_recipe', '/recipe/{id}')
     config.add_route('create_recipe', '/update_recipe')
@@ -170,9 +170,9 @@ def main(global_settings, **settings):
     config.add_view('kook.views.recipe.update_status',
                     route_name='update_recipe_status', renderer='json')
 
-    #=====
+    #======
     # USER
-    #=====
+    #======
 
     config.add_view('kook.views.user.register_view',
                     route_name='register_user',

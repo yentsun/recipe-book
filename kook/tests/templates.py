@@ -117,8 +117,25 @@ class FunctionalTests(unittest.TestCase):
         post_login_request(self)
         response = self.testapp.get('/update_recipe')
         form = response.form
-        form['dish_title'] = u'Ачма'
+        form['dish_title'] = u'potato salad'
+        form['description'] = u'une variante rapide'
+        form.set('product_title', u'café', index=0)
+        form.set('amount', '250', index=0)
+        form.set('step_text', u'verser de l\'eau dans la tasse', index=0)
+        created_response = form.submit()
+        self.assertEqual(created_response.status_code, 302)
+        created_response = created_response.follow()
+        created_form = created_response.form
+        self.assertEqual(u'verser de l\'eau dans la tasse',
+                         created_form.fields['step_text'][0].value)
 
+    def test_create_recipe_fail(self):
+        post_login_request(self)
+        response = self.testapp.get('/update_recipe')
+        form = response.form
+        created_response = form.submit()
+        self.assertEqual(created_response.status_code, 200)
+        self.assertTrue('error_data' in created_response)
 
     def test_read_recipe(self):
         recipe_to_test = Recipe.fetch_all(dish_title=u'potato salad')[0]
