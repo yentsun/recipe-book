@@ -1,0 +1,33 @@
+{"steps": [
+    {
+        "text": "test of tep one",
+        "time_value": 0,
+        "no": 1
+    },
+    {
+        "text": "test of step two",
+        "time_value": 0,
+        "no": 2
+    },
+    {
+        "text": "text of step three",
+        "time_value": 0,
+        "no": 3
+    }
+],
+    "dish_title": "Dummy dish one",
+    "description": "dummy dish recipe description",
+    "ingredients": [
+    {
+        "amount": "1,5",
+        "product_title": "product one"
+    },
+    {
+        "amount": "750",
+        "product_title": "product two"
+    },
+    {
+        "amount": "400",
+        "product_title": "product three"
+    }
+]}
