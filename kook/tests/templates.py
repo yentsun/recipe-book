@@ -164,3 +164,13 @@ class FunctionalTests(unittest.TestCase):
 
     def test_dashboard_forbidden(self):
         self.testapp.get('/dashboard', status=403)
+
+    def test_dashboard_products(self):
+        post_login_request(self)
+        response = self.testapp.get('/products', status=200)
+        self.assertTrue('potato' in response)
+        self.assertTrue('olive oil (extra virgin)' in response)
+        self.assertTrue('lemon (juice)' in response)
+        self.assertTrue('chickpeas' in response)
+        self.assertTrue('spices' in response)
+        self.assertTrue('salt' in response)

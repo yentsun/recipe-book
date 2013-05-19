@@ -4,8 +4,8 @@ from pyramid.httpexceptions import HTTPFound
 from kook.models.recipe import Product, Unit, Ingredient
 
 
-def index():
-    return {'products': Product.fetch_all(order='title'),
+def index(request):
+    return {'products': Product.fetch_all(order_by='title'),
             'units': Unit.fetch_all()}
 
 
