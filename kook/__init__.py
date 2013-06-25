@@ -127,9 +127,9 @@ def main(global_settings, **settings):
     config.add_route('update_recipe', '/update_recipe/{id}')
     config.add_route('delete_recipe', '/delete_recipe/{id}')
 
-    config.add_view('kook.views.main.index_view',
+    config.add_view('kook.views.main.index',
                     route_name='index',
-                    renderer=find_renderer('main/index.mako'))
+                    renderer='kook:templates/white/index.mako')
 
     config.add_view('kook.views.recipe.index',
                     route_name='dashboard', permission='dashboard',

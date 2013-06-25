@@ -1,0 +1,26 @@
+#wrapper{width:770px; margin:0 auto}
+header{margin-top:1em}
+header nav{margin-top:25px;font-size:120%}
+header nav a{margin:0 1em}
+
+#recently_added{margin:3em 0}
+#recently_added .thumbnails>li{margin-bottom:35px}
+#recently_added .thumbnail{height:210px; background:#fff; color:#333;
+                           font-family:"courier new"; font-size:12px;
+                           position:relative; overflow:hidden}
+#recently_added .img{height:100px; display:block;
+                                background-size:170px auto;
+                                background-position:center}
+#recently_added .title{font-weight:bold; margin-top:.3em;
+                       border-bottom:1px solid #333; display:block;
+                       padding-bottom:.5em; height: 10px; width:1000px;
+                       overflow:hidden; position:absolute;}
+#recently_added .title span{font-weight:normal}
+#recently_added .ingredients{width:100%; margin-top:25px}
+#recently_added .ingredients td{border-bottom:1px dotted #ccc; height:10px;
+                                overflow:hidden}
+
+#categories div{float:left; width:31%; font-size:130%; padding-left:1em;
+                font-family: Georgia, serif}
+#categories div li{list-style:none; line-height:1.5em}
+hr{border:0; border-bottom:1px solid #6b4a28; margin:-1.4em 0 3em 0}

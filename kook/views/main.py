@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from kook.models.recipe import Recipe, Dish, Tag
-from kook.models.user import User
+from kook.models.recipe import Recipe
 
 
-def index_view(request):
+def index(request):
     response = dict()
-    response['best_recipes'] = Recipe.fetch_all(limit=8)
-    response['best_users'] = User.fetch_all()
-    response['popular_dishes'] = Dish.fetch_all()
-    response['tags'] = Tag.fetch_all()
+    response['recent'] = Recipe.fetch_all(limit=12, order_by='creation_time')
     return response
