@@ -6,6 +6,8 @@
             src="/static/bootstrap/js/index.js"></script>
 </%def>
 <section id="recently_added">
+    <hr>
+    <h2>Новые рецепты</h2>
     <ul class="thumbnails">
     % for recipe in recent:
     <li class="span2">
@@ -33,8 +35,8 @@
     </ul>
 </section>
 <section id="categories">
-    <h2>Категории блюд</h2>
     <hr>
+    <h2>Категории блюд</h2>
     <div>
         <ul>
             <li><a href="${request.route_path('tag', title=u'салаты')}">

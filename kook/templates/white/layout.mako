@@ -36,6 +36,15 @@
     ${next.body()}
     </div>
     <footer>
+        <div id="email">
+            email:
+            <a href="mailto:general@recipe-book.info">
+                general@recipe-book.info
+            </a>
+        </div>
+        <div id="info">
+            Все права защищены &copy; 2013
+        </div>
 
     </footer>
 </div>
