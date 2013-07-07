@@ -137,7 +137,7 @@ def main(global_settings, **settings):
 
     config.add_view('kook.views.recipe.tag',
                     route_name='tag',
-                    renderer=find_renderer('recipe/tag.mako'))
+                    renderer='kook:templates/white/tag.mako')
 
     config.add_view('kook.views.recipe.read',
                     route_name='read_recipe',

@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 <%inherit file="layout.mako"/>
 <%def name="title()">Главная</%def>
-<%def name="js()">
-    <script type="text/javascript"
-            src="/static/bootstrap/js/index.js"></script>
-</%def>
+<%def name="js()"></%def>
 <section id="recently_added">
     <hr>
     <h2>Новые рецепты</h2>
@@ -15,9 +12,14 @@
             <span class="img"
                   style="background-image:url(${recipe.dish.image.url})">
             </span>
+            <h3>
             <span class="title">
                 ${recipe.dish.title}
+            </span><br>
+            <span class="description">
+                ${recipe.description}
             </span>
+            </h3>
             <table class="ingredients">
                 <tbody>
                 %for ingredient in recipe.ingredients:

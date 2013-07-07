@@ -3,32 +3,29 @@ header{margin-top:1em}
 header nav{margin-top:25px;font-size:120%}
 header nav a{margin:0 1em}
 
-#recently_added{margin:3em 0}
-#recently_added .thumbnails>li{margin-bottom:35px}
-#recently_added .thumbnail{height:210px; background:#fff; color:#333;
-                           font-family:"courier new", monospace;
-                           font-size:12px;
-                           position:relative; overflow:hidden}
-#recently_added .img{height:100px; display:block;
+section{margin:3em 0}
+.thumbnails>li{margin-bottom:35px}
+.thumbnail{height:222px; background:#fff; color:#333;
+           font-family:"courier new", monospace; font-size:12px;
+           position:relative; overflow:hidden}
+.thumbnails .img{height:100px; display:block;
                                 background-size:170px auto;
                                 background-position:center}
-#recently_added .title{font-weight:bold; margin-top:.3em;
-                       border-bottom:1px solid #333; display:block;
-                       padding-bottom:.5em; height: 10px; width:1000px;
-                       overflow:hidden; position:absolute;}
-#recently_added .title span{font-weight:normal}
-#recently_added .ingredients{width:100%; margin-top:25px}
-#recently_added .ingredients td{border-bottom:1px dotted #ccc; height:10px;
-                                overflow:hidden}
+.thumbnails h3{font-size:12px; border-bottom:1px solid #333; margin-top:.3em;
+               padding-bottom:.3em; height:24px; width:1000px;
+               overflow:hidden; position:absolute; line-height:12px}
+.thumbnails h3 .title{font-weight:bold;}
+.thumbnails h3 .description{font-weight:normal}
+.thumbnails table{width:100%; margin-top:3em}
+.thumbnails td{border-bottom:1px dotted #ccc; height:10px; overflow:hidden}
 
 #categories{overflow:hidden; margin-bottom:5em}
 #categories div{float:left; width:31%; font-size:130%; padding-left:1em;
                 font-family:Georgia,serif}
 #categories div li{list-style:none; line-height:1.5em}
-#categories h2, #recently_added h2{font-family:Georgia,serif; color:#6b4a28;
-                                   width:30%; margin: -1.6em auto 1em auto;
-                                   text-align:center; background:#F8F3DF}
+section h2{font-family:Georgia,serif; color:#6b4a28; width:30%;
+           margin: -1.6em auto 1em auto; text-align:center; background:#F8F3DF}
 hr{border:0; border-bottom:1px solid #6b4a28}
 
-footer{background:#d18d52;padding:1em; color:#F8F3DF}
+footer{background:#d18d52; padding:1em; color:#F8F3DF}
 #email{float:right}
