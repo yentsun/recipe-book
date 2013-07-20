@@ -31,20 +31,7 @@ def tag(request):
 def read(request):
     recipe_id = request.matchdict['id']
     recipe = caching.get_recipe(recipe_id)
-    last_vote = None
-    try:
-        last_vote = request.user.last_vote(recipe.ID)
-        recipe.attach_acl(get_acl_by_last_vote(request.user, recipe))
-    except AttributeError:
-        recipe.attach_acl()
-    response = {'recipe': recipe,
-                'UPVOTE': UPVOTE,
-                'DOWNVOTE': DOWNVOTE,
-                'last_vote': last_vote,
-                'can_comment': has_permission('comment', recipe, request),
-                'can_update': has_permission('update', recipe, request),
-                'can_upvote': has_permission('upvote', recipe, request),
-                'can_downvote': has_permission('downvote', recipe, request)}
+    response = {'recipe': recipe}
     return response
 
 
