@@ -1,4 +1,7 @@
 <%inherit file="layout.mako"/>
+<%!
+    from kook.mako_filters import markdown, pretty_time
+%>
 <%def name="title()">
     ${recipe.dish.title} ${recipe.description} - от
     ${recipe.author.display_name}
@@ -16,7 +19,40 @@
             </div>
         </div>
         <div id="ingredients">
-
+            <h3>Ингредиенты</h3>
+            <ul>
+                % for ingredient in recipe.ingredients:
+                <li>${ingredient.product.title}&nbsp;&mdash;&nbsp;${ingredient.get_measured()}&nbsp;<span
+                            title="${ingredient.get_unit().title}">${ingredient.get_unit().abbr}
+                    </span>
+                </li>
+                % endfor
+            </ul>
+        </div>
+    </div>
+    <div id="steps">
+            <h3>Приготовление:</h3><br>
+            <table class="table" cellpadding="0" cellspacing="0">
+                % for step in recipe.steps:
+                <tr>
+                    <td class="no">
+                        ${step.number}
+                    </td>
+                    <td class="text">
+                        ${step.text | markdown, n}
+                    </td>
+                    <td>
+                    % if step.time_value:
+                        ${step.time_value}&nbsp;мин
+                    % endif
+                    </td>
+                </tr>
+                %endfor
+            </table>
+    </div>
+    <div id="bottomline">
+        <div id="uuid" title="идентификатор рецепта" class="pull-right">
+            ${recipe.ID}
         </div>
     </div>
 </section>
