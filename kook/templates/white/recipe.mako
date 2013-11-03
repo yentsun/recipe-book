@@ -32,10 +32,10 @@
     <div id="steps">
             <h3>Приготовление:</h3><br>
             <table class="table" cellpadding="0" cellspacing="0">
-                % for step in recipe.steps:
+                % for num, step in enumerate(recipe.steps, start=1):
                 <tr>
                     <td class="no">
-                        ${step.number}
+                        ${num}
                     </td>
                     <td class="text">
                         ${step.text | markdown, n}
