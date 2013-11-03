@@ -7,32 +7,7 @@
     <h2>Новые рецепты</h2>
     <ul class="thumbnails">
     % for recipe in recent:
-    <li class="span2">
-        <div class="thumbnail">
-            <span class="img"
-                  style="background-image:url(${recipe.dish.image.url})">
-            </span>
-            <h3>
-            <span class="title">
-                ${recipe.dish.title}
-            </span><br>
-            <span class="description">
-                ${recipe.description}
-            </span>
-            </h3>
-            <table class="ingredients">
-                <tbody>
-                %for ingredient in recipe.ingredients:
-                <tr>
-                    <td>${ingredient.product.title}</td>
-                    <td>${ingredient.get_measured()}&nbsp;${ingredient.get_unit().abbr}
-                    </td>
-                %endfor
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </li>
+     <%include file="_recipe_preview.mako" args="recipe=recipe" />
     % endfor
     </ul>
 </section>

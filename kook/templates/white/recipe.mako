@@ -3,8 +3,7 @@
     from kook.mako_filters import markdown, pretty_time
 %>
 <%def name="title()">
-    ${recipe.dish.title} ${recipe.description} - от
-    ${recipe.author.display_name}
+    ${recipe.dish.title} ${recipe.description}
 </%def>
 <%def name="js()"></%def>
 <section id="recipe">
