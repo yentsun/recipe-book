@@ -14,7 +14,7 @@ from kook.models import DBSession
 from kook.models.user import User
 from kook import caching
 
-THEME = 'white'
+THEME = 'bootstrap'
 
 
 def fetch_user(request):
