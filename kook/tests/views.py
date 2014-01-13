@@ -257,7 +257,7 @@ class TestRecipeViews(unittest.TestCase):
         self.assertEqual(
             '{"ingredients": [{"amount": 300.0, "unit_title": "piece", '
             '"product_title": "potato"}, {"amount": 40.0, "unit_title": "", '
-            '"product_title": "lemon juice"}, '
+            '"product_title": "lemon (juice)"}, '
             '{"amount": 30.0, "unit_title": "", '
             '"product_title": "olive oil (extra virgin)"}], '
             '"steps": [{"text": "Place potatoes in a large saucepan or '
@@ -532,12 +532,12 @@ class TestRecipeViews(unittest.TestCase):
     def test_create_APU(self):
         POST = MultiDict((
             ('unit_title', u'spoon'),
-            ('product_title', u'lemon juice'),
+            ('product_title', u'lemon (juice)'),
             ('amount', u'30.5')
         ))
         request = DummyRequest(POST=POST)
         create_APU(request)
-        lemon_juice = Product.fetch(u'lemon juice')
+        lemon_juice = Product.fetch(u'lemon (juice)')
         assert AmountPerUnit(30.5, Unit(u'spoon')) in lemon_juice.APUs
 
     def test_update_APU(self):

@@ -27,3 +27,8 @@ def deploy():
     with cd(APP_NAME):
         run('supervisord')
         run('supervisorctl status')
+
+
+def backup(target='database'):
+    if target == 'database':
+        get('DB/kook.db', 'kook.db')
