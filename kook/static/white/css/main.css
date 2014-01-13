@@ -6,7 +6,8 @@ header nav a{margin:0 1em}
 #recently_added{margin:3em 0}
 #recently_added .thumbnails>li{margin-bottom:35px}
 #recently_added .thumbnail{height:210px; background:#fff; color:#333;
-                           font-family:"courier new"; font-size:12px;
+                           font-family:"courier new", "nimbus mono L",
+                                        monospace; font-size:12px;
                            position:relative; overflow:hidden}
 #recently_added .img{height:100px; display:block;
                                 background-size:170px auto;
