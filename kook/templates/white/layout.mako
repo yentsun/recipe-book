@@ -51,7 +51,7 @@
 <script type="text/javascript"
         src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-<script src="/static/white/js/main.js"></script>
+##<script src="/static/white/js/main.js"></script>
     % if hasattr(self,'js'):
         ${self.js()}
     % endif
